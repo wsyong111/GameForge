@@ -1,25 +1,36 @@
 package io.github.wsyong11.gameforge.dependencies
 
 import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.gradle.kotlin.dsl.add
+import org.gradle.kotlin.dsl.exclude
+import org.gradle.api.artifacts.Dependency as MavenDependency
 
-fun DependencyHandler.`implementation`(id: Dependency) =
-	add("implementation", dependence(id))
+private fun DependencyHandler.addDependency(configuration: String, dependency: Dependency): MavenDependency? {
+	return add(configuration, dependency.toString()) {
+		dependency.exclude.forEach {
+			exclude(it.group, it.artifact)
+		}
+	}
+}
+
+fun DependencyHandler.`implementation`(id: Dependency)=
+	addDependency("implementation", id)
 
 fun DependencyHandler.`compileOnly`(id: Dependency) =
-	add("compileOnly", dependence(id))
+	addDependency("compileOnly", id)
 
 fun DependencyHandler.`runtimeOnly`(id: Dependency) =
-	add("runtimeOnly", dependence(id))
+	addDependency("runtimeOnly", id)
 
 fun DependencyHandler.`annotationProcessor`(id: Dependency) =
-	add("annotationProcessor", dependence(id))
+	addDependency("annotationProcessor", id)
 
 
 fun DependencyHandler.`testImplementation`(id: Dependency) =
-	add("testImplementation", dependence(id))
+	addDependency("testImplementation", id)
 
 fun DependencyHandler.`testCompileOnly`(id: Dependency) =
-	add("testCompileOnly", dependence(id))
+	addDependency("testCompileOnly", id)
 
 fun DependencyHandler.`testAnnotationProcessor`(id: Dependency) =
-	add("testAnnotationProcessor", dependence(id))
+	addDependency("testAnnotationProcessor", id)

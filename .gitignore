@@ -1,3 +1,7 @@
+### Project ###
+run/
+
+### Build System ###
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar

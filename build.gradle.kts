@@ -1,13 +1,14 @@
+import io.github.wsyong11.gameforge.project.includeDebug
+import io.github.wsyong11.gameforge.project.includeRelease
+
 //language=jvm-class-name
 val mainClassName: String = "io.github.wsyong11.gameforge.Main"
 
 plugins {
-	id("java")
+	java
+	application
 	id("com.gradleup.shadow")
 }
-
-group = "io.github.wsyong11.gameforge"
-version = "0.0.0-beta"
 
 allprojects {
 	group = "io.github.wsyong11.gameforge"
@@ -27,6 +28,7 @@ dependencies {
 	implementation(project(":Framework:System:Log"))
 }
 
+
 tasks.jar {
 	manifest {
 		attributes(
@@ -37,15 +39,32 @@ tasks.jar {
 	}
 }
 
-tasks.shadowJar {
-    mergeServiceFiles()
 
-    exclude("META-INF/DEPENDENCIES")
-    exclude("META-INF/LICENSE*")
-    exclude("META-INF/NOTICE*")
-    exclude("META-INF/README*")
+tasks.shadowJar {
+	mergeServiceFiles()
+
+	exclude("META-INF/DEPENDENCIES")
+	exclude("META-INF/*LICENSE*")
+	exclude("META-INF/*NOTICE*")
+	exclude("META-INF/*README*")
+
+	if (!includeDebug) exclude(
+		"META-INF/maven/**",
+		"META-INF/gradle/**",
+		"META-INF/proguard/**"
+	)
 }
 
+
 tasks.register("cleanAll") {
-	dependsOn(subprojects.map { it.tasks }.mapNotNull { it.findByName("clean") })
+	dependsOn(subprojects
+		.map { it.tasks }
+		.mapNotNull { it.findByName("clean") })
+}
+
+
+afterEvaluate {
+	println("Run configuration:")
+	println("| Include Debug: ${includeDebug}")
+	println("| Include Release: ${includeRelease}")
 }

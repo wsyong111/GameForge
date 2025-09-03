@@ -7,9 +7,10 @@ import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.Set;
 
+// TODO: 2025/9/3 Add getInfo method
 public interface ResourcePack {
-	@NotNull
-	ResourcePackInfo getInfo();
+//	@NotNull
+//	ResourcePackInfo getInfo();
 
 	@NotNull
 	String getId();

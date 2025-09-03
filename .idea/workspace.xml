@@ -4,7 +4,24 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a72e7484-598a-40d2-8080-c72fd6c580c8" name="更改" comment="" />
+    <list default="true" id="a72e7484-598a-40d2-8080-c72fd6c580c8" name="更改" comment="Removed gradle.properties in .gitignore">
+      <change afterPath="$PROJECT_DIR$/Framework/RichText/src/main/java/io/github/wsyong11/gameforge/framework/text/rich/TextComponents.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/ResourcePath.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/pack/ZipResourcePack.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/DataFlow/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/DataFlow/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/FileIO.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/FileIO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Resource/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Resource/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/pack/AbstractResourcePack.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/pack/AbstractResourcePack.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/pack/FileResourcePack.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/pack/ResourcePack.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/pack/ResourcePack.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/collection/ArrayUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/collection/ArrayUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/buildSrc/src/main/kotlin/io/github/wsyong11/gameforge/InternalUtil.kt" beforeDir="false" afterPath="$PROJECT_DIR$/buildSrc/src/main/kotlin/io/github/wsyong11/gameforge/util/InternalUtil.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/buildSrc/src/main/kotlin/io/github/wsyong11/gameforge/dependencies/DependenciesUtil.kt" beforeDir="false" afterPath="$PROJECT_DIR$/buildSrc/src/main/kotlin/io/github/wsyong11/gameforge/dependencies/DependenciesUtil.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/buildSrc/src/main/kotlin/io/github/wsyong11/gameforge/dependencies/DependenciesVersionRegistry.kt" beforeDir="false" afterPath="$PROJECT_DIR$/buildSrc/src/main/kotlin/io/github/wsyong11/gameforge/dependencies/DependenciesVersionRegistry.kt" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -53,6 +70,9 @@
       </list>
     </option>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/Framework/Listener/src/main/java/com/gameforge/framework/listener/ListenerList.java" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/buildSrc/src/main/kotlin/com/gameforge/plugin/codegen/dsl/CodeDSL.kt" root0="SKIP_INSPECTION" />
@@ -68,53 +88,55 @@
   <component name="ProjectId" id="30arvh5XyaeEcLBUAxwmijyP4JS" />
   <component name="ProjectViewState">
     <option name="flattenModules" value="true" />
+    <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showExcludedFiles" value="false" />
     <option name="showLibraryContents" value="true" />
     <option name="showMembers" value="true" />
     <option name="showVisibilityIcons" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Gradle.GameForge [:Game:Core:Common:dependencies].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.GameForge [:Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.GameForge [:build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.GameForge [:cleanAll].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.GameForge [:clean].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.GameForge [:shadowJar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.GameForge:Framework:DataFlow [:Framework:DataFlow:MimeType.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.GameForge:Framework:Lang [:Framework:Lang:Tokenizer.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.MultiTreeTest.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.SimpleEventBusTest.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.构建 GameForge.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_directory_selection&quot;: &quot;D:/Projects/Java/GameForge/Framework/System/Log/src/main/java/com/gameforge/framework/system/log/core/adapter&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/Projects/Java/GameForge/Framework/DataFlow&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;onboarding.tips.debug.path&quot;: &quot;D:/Projects/Java/GameForge/Util/src/main/java/com/gameforge/util/Main.java&quot;,
-    &quot;org.rust.cargo.project.model.impl.CargoExternalSystemProjectAware.subscribe.first.balloon&quot;: &quot;&quot;,
-    &quot;org.rust.first.attach.projects&quot;: &quot;true&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;模块&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.sourceCode.Java&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;,
-    &quot;应用程序.Main.executor&quot;: &quot;Profiler#1&quot;,
-    &quot;远程 JVM 调试.RemoteDebug.executor&quot;: &quot;Debug&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Gradle.GameForge [:Game:Core:Common:dependencies].executor": "Run",
+    "Gradle.GameForge [:Main.main()].executor": "Run",
+    "Gradle.GameForge [:build].executor": "Run",
+    "Gradle.GameForge [:cleanAll].executor": "Run",
+    "Gradle.GameForge [:clean].executor": "Run",
+    "Gradle.GameForge [:shadowJar].executor": "Run",
+    "Gradle.GameForge:Framework:DataFlow [:Framework:DataFlow:MimeType.main()].executor": "Run",
+    "Gradle.GameForge:Framework:Lang [:Framework:Lang:Tokenizer.main()].executor": "Run",
+    "Gradle.GameForge:Framework:System:Resource [:Framework:System:Resource:ResourcePath.main()].executor": "Run",
+    "Gradle.MultiTreeTest.executor": "Run",
+    "Gradle.SimpleEventBusTest.executor": "Run",
+    "Gradle.构建 GameForge.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "kotlin-language-version-configured": "true",
+    "last_directory_selection": "D:/Projects/Java/GameForge/Framework/System/Log/src/main/java/com/gameforge/framework/system/log/core/adapter",
+    "last_opened_file_path": "D:/Projects/Java/GameForge/Framework/DataFlow",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "onboarding.tips.debug.path": "D:/Projects/Java/GameForge/Util/src/main/java/com/gameforge/util/Main.java",
+    "org.rust.cargo.project.model.impl.CargoExternalSystemProjectAware.subscribe.first.balloon": "",
+    "org.rust.first.attach.projects": "true",
+    "project.structure.last.edited": "模块",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
+    "settings.editor.selected.configurable": "preferences.sourceCode.Java",
+    "vue.rearranger.settings.migration": "true",
+    "应用程序.Main.executor": "Profiler#1",
+    "远程 JVM 调试.RemoteDebug.executor": "Debug"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File&quot;: [
-      &quot;TEXT&quot;
+  "keyToStringList": {
+    "com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File": [
+      "TEXT"
     ],
-    &quot;kotlin-gradle-user-dirs&quot;: [
-      &quot;D:\\Projects\\.IntellijIdea\\Gradle&quot;
+    "kotlin-gradle-user-dirs": [
+      "D:\\Projects\\.IntellijIdea\\Gradle"
     ]
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CreateClassDialog.RecentsKey">
       <recent name="com.gameforge.framework.lang.token" />
@@ -131,11 +153,11 @@
       <recent name="D:\Projects\Java\GameForge\Framework\System\Log\src\main\java\com\gameforge\framework\system\log\core" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Projects\Java\GameForge\buildSrc\src\main\kotlin\io\github\wsyong11\gameforge\util" />
       <recent name="D:\Projects\Java\GameForge\Game\Core\Server\src\main\java\com\gameforge\game\core" />
       <recent name="D:\Projects\Java\GameForge\Framework" />
       <recent name="D:\Projects\Java\GameForge\Framework\System\Log\src\main\java\com\gameforge\framework\system\log\core\formatter\pattern" />
       <recent name="D:\Projects\Java\GameForge\buildSrc\src\main\kotlin\com\gameforge\plugin\codegen\dsl" />
-      <recent name="D:\Projects\Java\GameForge\Game\Core" />
     </key>
     <key name="MoveMembersDialog.RECENTS_KEY">
       <recent name="com.gameforge.framework.system.log.adapter.log4j2.LogLevelConvertor" />
@@ -194,14 +216,15 @@
       <visibility group="运行配置" flag="true" />
     </myKeys>
     <option name="myCommands">
-      <command value="gradle :shadowJar" />
       <command value="gradle :Game:Core:Common:dependencies --scan" />
       <command value="gradle :clean" />
       <command value="gradle :build" />
       <command value="gradle :cleanAll" />
+      <command value="gradle :shadowJar" />
+      <command value="gradle :shadowJar -PbuildType=RELEASE" />
     </option>
   </component>
-  <component name="RunManager" selected="应用程序.Main">
+  <component name="RunManager" selected="应用程序.ResourcePath">
     <configuration name="Main" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="io.github.wsyong11.gameforge.Main" />
       <module name="GameForge.main" />
@@ -212,12 +235,12 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Tokenizer" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="com.gameforge.framework.lang.token.Tokenizer" />
-      <module name="GameForge.Framework.Lang.main" />
+    <configuration name="ResourcePath" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="io.github.wsyong11.gameforge.framework.system.resource.ResourcePath" />
+      <module name="GameForge.Framework.System.Resource.main" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="com.gameforge.framework.lang.token.*" />
+          <option name="PATTERN" value="io.github.wsyong11.gameforge.framework.system.resource.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
@@ -335,14 +358,15 @@
       <item itemvalue="Gradle.GameForge [:clean]" />
       <item itemvalue="Gradle.GameForge [:shadowJar]" />
       <item itemvalue="应用程序.Main" />
-      <item itemvalue="应用程序.Tokenizer" />
+      <item itemvalue="应用程序.ResourcePath" />
       <item itemvalue="远程 JVM 调试.RemoteDebug" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="应用程序.ResourcePath" />
+        <item itemvalue="Gradle.GameForge [:shadowJar]" />
         <item itemvalue="Gradle.GameForge [:cleanAll]" />
         <item itemvalue="Gradle.SimpleEventBusTest" />
-        <item itemvalue="Gradle.GameForge [:shadowJar]" />
         <item itemvalue="Gradle.GameForge [:clean]" />
       </list>
     </recent_temporary>
@@ -397,11 +421,25 @@
       <workItem from="1756793810039" duration="12288000" />
       <workItem from="1756816665242" duration="1559000" />
       <workItem from="1756878713209" duration="1043000" />
+      <workItem from="1756885965115" duration="18604000" />
     </task>
+    <task id="LOCAL-00001" summary="Removed gradle.properties in .gitignore">
+      <option name="closed" value="true" />
+      <created>1756886018863</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1756886018863</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Removed gradle.properties in .gitignore" />
+    <option name="LAST_COMMIT_MESSAGE" value="Removed gradle.properties in .gitignore" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

@@ -1,12 +1,10 @@
-import io.github.wsyong11.gameforge.dependencies.JACKSON
-import io.github.wsyong11.gameforge.dependencies.JACKSON_TOML
-import io.github.wsyong11.gameforge.dependencies.JACKSON_YAML
-import io.github.wsyong11.gameforge.dependencies.implementation
+import io.github.wsyong11.gameforge.dependencies.*
 
-dependencies{
+dependencies {
 	implementation(JACKSON)
 	implementation(JACKSON_TOML)
 	implementation(JACKSON_YAML)
+	implementation(JSON_PATH)
 
 	implementation(project(":Framework:Common"))
 	implementation(project(":Framework:Listener"))
