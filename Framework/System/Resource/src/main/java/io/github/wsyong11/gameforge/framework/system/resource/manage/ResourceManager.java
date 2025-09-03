@@ -1,0 +1,30 @@
+package io.github.wsyong11.gameforge.framework.system.resource.manage;
+
+import io.github.wsyong11.gameforge.framework.system.resource.ResourceConflictHandler;
+import io.github.wsyong11.gameforge.framework.system.resource.ResourceProvider;
+import io.github.wsyong11.gameforge.framework.system.resource.listener.ReloadListener;
+import io.github.wsyong11.gameforge.framework.system.resource.pack.ResourcePack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnmodifiableView;
+
+import java.util.List;
+
+public interface ResourceManager extends ResourceProvider {
+	void registerReloadListener(@NotNull ReloadListener listener);
+
+	void unregisterReloadListener(@NotNull ReloadListener listener);
+
+	void reload();
+
+	@NotNull
+	@UnmodifiableView
+	List<ResourcePack> getResourcePacks();
+
+	void addPack(int index, @NotNull ResourcePack pack);
+
+	void removePack(@NotNull ResourcePack pack);
+
+	void registerConflictHandler(@NotNull String path, @NotNull ResourceConflictHandler handler);
+
+	void unregisterConflictHandler(@NotNull String path);
+}

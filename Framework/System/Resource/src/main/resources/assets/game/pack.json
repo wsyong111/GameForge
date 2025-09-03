@@ -1,0 +1,9 @@
+{
+	"_version": 1,
+
+	"pack": {
+		"description": "This is a default resource pack!",
+		"authors": ["gameforge"],
+		"version": "1.0.0"
+	}
+}

@@ -1,0 +1,72 @@
+package io.github.wsyong11.gameforge.game.common.core;
+
+import io.github.wsyong11.gameforge.framework.event.EventBus;
+import io.github.wsyong11.gameforge.framework.event.bus.DebugEventBus;
+import io.github.wsyong11.gameforge.framework.lifecycle.ILifecycle;
+import io.github.wsyong11.gameforge.framework.lifecycle.LifecycleInstance;
+import io.github.wsyong11.gameforge.framework.system.resource.manage.ResourceManager;
+import io.github.wsyong11.gameforge.game.common.Game;
+import io.github.wsyong11.gameforge.game.common.GameContext;
+import io.github.wsyong11.gameforge.game.common.GameSide;
+import io.github.wsyong11.gameforge.game.common.registry.RegistryManager;
+import io.github.wsyong11.gameforge.game.common.tick.TickManager;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
+
+public abstract class AbstractGameContext extends LifecycleInstance implements GameContext {
+	private final GameSide side;
+	private final Game game;
+
+//	private final ResourceManager resourceManager;
+
+	private final EventBus globalEventBus;
+
+	public AbstractGameContext(@NotNull GameSide side, @NotNull Game game) {
+		Objects.requireNonNull(side, "side is null");
+		Objects.requireNonNull(game, "game is null");
+
+		this.side = side;
+		this.game = game;
+
+//		this.resourceManager
+
+		this.globalEventBus = DebugEventBus.wrap(EventBus.simple(), "game");
+	}
+
+	@NotNull
+	@Override
+	public GameSide getSide() {
+		return this.side;
+	}
+
+	@NotNull
+	@Override
+	public RegistryManager getRegistry() {
+		return null;
+	}
+
+	@NotNull
+	@Override
+	public EventBus getEventBus() {
+		return this.globalEventBus;
+	}
+
+	@NotNull
+	@Override
+	public TickManager getTickManager() {
+		return null;
+	}
+
+	@NotNull
+	@Override
+	public ResourceManager getResourceManager() {
+		return null;
+	}
+
+	@NotNull
+	@Override
+	public ILifecycle getLifecycle() {
+		return this.game.getLifecycle();
+	}
+}

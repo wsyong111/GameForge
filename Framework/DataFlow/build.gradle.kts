@@ -1,0 +1,14 @@
+import io.github.wsyong11.gameforge.dependencies.JACKSON
+import io.github.wsyong11.gameforge.dependencies.JACKSON_TOML
+import io.github.wsyong11.gameforge.dependencies.JACKSON_YAML
+import io.github.wsyong11.gameforge.dependencies.implementation
+
+dependencies {
+	implementation(JACKSON)
+	implementation(JACKSON_TOML)
+	implementation(JACKSON_YAML)
+	implementation(project(":Framework:System:Log"))
+	implementation(project(":Framework:Annotation"))
+	implementation(project(":Util"))
+	implementation(project(":Framework:Common"))
+}
