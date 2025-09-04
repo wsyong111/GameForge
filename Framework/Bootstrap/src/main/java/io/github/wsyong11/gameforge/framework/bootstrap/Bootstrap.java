@@ -39,6 +39,7 @@ public class Bootstrap<T> implements AutoCloseable {
 		LogManager logManager = LogManager.getInstance(Bootstrap.class.getClassLoader());
 		LoggerConfig rootLoggerConfig = logManager.getRootLoggerConfig();
 		rootLoggerConfig.setLevel(this.config.getLogLevel());
+		rootLoggerConfig.update();
 	}
 
 	@NotNull

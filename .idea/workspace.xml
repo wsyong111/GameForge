@@ -4,23 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a72e7484-598a-40d2-8080-c72fd6c580c8" name="更改" comment="Removed gradle.properties in .gitignore">
-      <change afterPath="$PROJECT_DIR$/Framework/RichText/src/main/java/io/github/wsyong11/gameforge/framework/text/rich/TextComponents.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/ResourcePath.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/pack/ZipResourcePack.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    <list default="true" id="a72e7484-598a-40d2-8080-c72fd6c580c8" name="更改" comment="Updated code">
+      <change afterPath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/ex/FileClosedException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/pack/DirResourcePack.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/DataFlow/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/DataFlow/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/FileIO.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/FileIO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Resource/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Resource/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/pack/AbstractResourcePack.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/pack/AbstractResourcePack.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/pack/FileResourcePack.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Bootstrap/src/main/java/io/github/wsyong11/gameforge/framework/bootstrap/Bootstrap.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Bootstrap/src/main/java/io/github/wsyong11/gameforge/framework/bootstrap/Bootstrap.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/Resource.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/Resource.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/ResourceConflictHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/ResourceConflictHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/ResourcePath.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/ResourcePath.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/manage/DefaultResourceManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/manage/DefaultResourceManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/manage/ResourceManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/manage/ResourceManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/pack/AbstractResourcePack.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/pack/ResourcePack.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/pack/ResourcePack.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/collection/ArrayUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/collection/ArrayUtils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/buildSrc/src/main/kotlin/io/github/wsyong11/gameforge/InternalUtil.kt" beforeDir="false" afterPath="$PROJECT_DIR$/buildSrc/src/main/kotlin/io/github/wsyong11/gameforge/util/InternalUtil.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/buildSrc/src/main/kotlin/io/github/wsyong11/gameforge/dependencies/DependenciesUtil.kt" beforeDir="false" afterPath="$PROJECT_DIR$/buildSrc/src/main/kotlin/io/github/wsyong11/gameforge/dependencies/DependenciesUtil.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/buildSrc/src/main/kotlin/io/github/wsyong11/gameforge/dependencies/DependenciesVersionRegistry.kt" beforeDir="false" afterPath="$PROJECT_DIR$/buildSrc/src/main/kotlin/io/github/wsyong11/gameforge/dependencies/DependenciesVersionRegistry.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/pack/ZipResourcePack.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/pack/ZipResourcePack.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -104,14 +100,17 @@
     "Gradle.GameForge [:shadowJar].executor": "Run",
     "Gradle.GameForge:Framework:DataFlow [:Framework:DataFlow:MimeType.main()].executor": "Run",
     "Gradle.GameForge:Framework:Lang [:Framework:Lang:Tokenizer.main()].executor": "Run",
+    "Gradle.GameForge:Framework:System:Resource [:Framework:System:Resource:DefaultResourceManager.main()].executor": "Run",
+    "Gradle.GameForge:Framework:System:Resource [:Framework:System:Resource:DirResourcePack.main()].executor": "Run",
     "Gradle.GameForge:Framework:System:Resource [:Framework:System:Resource:ResourcePath.main()].executor": "Run",
+    "Gradle.GameForge:Framework:System:Resource [:Framework:System:Resource:ZipResourcePack.main()].executor": "Run",
     "Gradle.MultiTreeTest.executor": "Run",
     "Gradle.SimpleEventBusTest.executor": "Run",
     "Gradle.构建 GameForge.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "kotlin-language-version-configured": "true",
     "last_directory_selection": "D:/Projects/Java/GameForge/Framework/System/Log/src/main/java/com/gameforge/framework/system/log/core/adapter",
-    "last_opened_file_path": "D:/Projects/Java/GameForge/Framework/DataFlow",
+    "last_opened_file_path": "D:/Projects/Java/GameForge/run/resource_pack/Minecraft",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -146,18 +145,18 @@
       <recent name="com.gameforge.framework.system.log.core.formatter.pattern.element" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Projects\Java\GameForge\run\resource_pack\Minecraft" />
+      <recent name="D:\Projects\Java\GameForge\run\resource_pack\MyPack\assets\game" />
       <recent name="D:\Projects\Java\GameForge\Framework\DataFlow" />
       <recent name="D:\Projects\Java\GameForge\Framework\System\Resource\src\main\resources\assets\game\texture" />
       <recent name="D:\Projects\Java\GameForge\Framework\Listener\src\main\java\com\gameforge\framework\listener" />
-      <recent name="D:\Projects\Java\GameForge\Framework\System\Log\src\main\java\com\gameforge\framework\system\log\core\logger" />
-      <recent name="D:\Projects\Java\GameForge\Framework\System\Log\src\main\java\com\gameforge\framework\system\log\core" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Projects\Java\GameForge\run\resource_pack" />
       <recent name="D:\Projects\Java\GameForge\buildSrc\src\main\kotlin\io\github\wsyong11\gameforge\util" />
       <recent name="D:\Projects\Java\GameForge\Game\Core\Server\src\main\java\com\gameforge\game\core" />
       <recent name="D:\Projects\Java\GameForge\Framework" />
       <recent name="D:\Projects\Java\GameForge\Framework\System\Log\src\main\java\com\gameforge\framework\system\log\core\formatter\pattern" />
-      <recent name="D:\Projects\Java\GameForge\buildSrc\src\main\kotlin\com\gameforge\plugin\codegen\dsl" />
     </key>
     <key name="MoveMembersDialog.RECENTS_KEY">
       <recent name="com.gameforge.framework.system.log.adapter.log4j2.LogLevelConvertor" />
@@ -224,7 +223,33 @@
       <command value="gradle :shadowJar -PbuildType=RELEASE" />
     </option>
   </component>
-  <component name="RunManager" selected="应用程序.ResourcePath">
+  <component name="RunManager" selected="应用程序.DefaultResourceManager">
+    <configuration name="DefaultResourceManager" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="io.github.wsyong11.gameforge.framework.system.resource.manage.DefaultResourceManager" />
+      <module name="GameForge.Framework.System.Resource.main" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="io.github.wsyong11.gameforge.framework.system.resource.manage.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="DirResourcePack" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="io.github.wsyong11.gameforge.framework.system.resource.pack.DirResourcePack" />
+      <module name="GameForge.Framework.System.Resource.main" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="io.github.wsyong11.gameforge.framework.system.resource.pack.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="Main" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="io.github.wsyong11.gameforge.Main" />
       <module name="GameForge.main" />
@@ -248,49 +273,18 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="GameForge [:cleanAll]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value=":cleanAll" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>false</RunAsTest>
-      <method v="2" />
-    </configuration>
-    <configuration name="GameForge [:clean]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value=":clean" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>false</RunAsTest>
-      <method v="2" />
+    <configuration name="ZipResourcePack" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="io.github.wsyong11.gameforge.framework.system.resource.pack.ZipResourcePack" />
+      <module name="GameForge.Framework.System.Resource.main" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="io.github.wsyong11.gameforge.framework.system.resource.pack.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
     </configuration>
     <configuration name="GameForge [:shadowJar]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
@@ -314,30 +308,6 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
-    <configuration name="SimpleEventBusTest" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value=":Framework:Event:test" />
-            <option value="--tests" />
-            <option value="&quot;com.gameforge.framework.event.SimpleEventBusTest&quot;" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>true</RunAsTest>
-      <method v="2" />
-    </configuration>
     <configuration name="RemoteDebug" type="Remote">
       <module name="GameForge.main" />
       <option name="USE_SOCKET_TRANSPORT" value="true" />
@@ -353,21 +323,21 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Gradle.GameForge [:cleanAll]" />
-      <item itemvalue="Gradle.SimpleEventBusTest" />
-      <item itemvalue="Gradle.GameForge [:clean]" />
       <item itemvalue="Gradle.GameForge [:shadowJar]" />
       <item itemvalue="应用程序.Main" />
+      <item itemvalue="应用程序.DefaultResourceManager" />
+      <item itemvalue="应用程序.DirResourcePack" />
+      <item itemvalue="应用程序.ZipResourcePack" />
       <item itemvalue="应用程序.ResourcePath" />
       <item itemvalue="远程 JVM 调试.RemoteDebug" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="应用程序.DirResourcePack" />
+        <item itemvalue="应用程序.DefaultResourceManager" />
+        <item itemvalue="应用程序.ZipResourcePack" />
         <item itemvalue="应用程序.ResourcePath" />
         <item itemvalue="Gradle.GameForge [:shadowJar]" />
-        <item itemvalue="Gradle.GameForge [:cleanAll]" />
-        <item itemvalue="Gradle.SimpleEventBusTest" />
-        <item itemvalue="Gradle.GameForge [:clean]" />
       </list>
     </recent_temporary>
   </component>
@@ -421,7 +391,8 @@
       <workItem from="1756793810039" duration="12288000" />
       <workItem from="1756816665242" duration="1559000" />
       <workItem from="1756878713209" duration="1043000" />
-      <workItem from="1756885965115" duration="18604000" />
+      <workItem from="1756885965115" duration="18709000" />
+      <workItem from="1756969983365" duration="26757000" />
     </task>
     <task id="LOCAL-00001" summary="Removed gradle.properties in .gitignore">
       <option name="closed" value="true" />
@@ -431,30 +402,67 @@
       <option name="project" value="LOCAL" />
       <updated>1756886018863</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Updated code">
+      <option name="closed" value="true" />
+      <created>1756906077256</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1756906077256</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Removed gradle.properties in .gitignore" />
-    <option name="LAST_COMMIT_MESSAGE" value="Removed gradle.properties in .gitignore" />
+    <MESSAGE value="Updated code" />
+    <option name="LAST_COMMIT_MESSAGE" value="Updated code" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/Framework/System/Log/src/main/java/io/github/wsyong11/gameforge/framework/system/log/adapter/log4j2/plugin/ClassLoaderContextProvider.java</url>
-          <line>12</line>
-          <option name="timeStamp" value="26" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/Framework/Event/src/test/java/io/github/wsyong11/gameforge/framework/event/SimpleEventBusTest.java</url>
           <line>65</line>
           <option name="timeStamp" value="28" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/pack/DirResourcePack.java</url>
+          <line>186</line>
+          <option name="timeStamp" value="38" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/manage/DefaultResourceManager.java</url>
+          <line>207</line>
+          <option name="timeStamp" value="39" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/manage/DefaultResourceManager.java</url>
+          <line>188</line>
+          <option name="timeStamp" value="41" />
+        </line-breakpoint>
       </breakpoints>
+      <default-breakpoints>
+        <breakpoint enabled="true" type="java-exception">
+          <properties>
+            <option name="NOTIFY_CAUGHT" value="false" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
     </breakpoint-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">

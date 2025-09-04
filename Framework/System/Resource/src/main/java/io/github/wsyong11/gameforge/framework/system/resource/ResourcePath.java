@@ -46,6 +46,8 @@ public class ResourcePath {
 	@Nullable
 	private volatile String fullPath;
 
+	private volatile int hash;
+
 	protected ResourcePath(@NotNull String[] paths, boolean directory) {
 		Objects.requireNonNull(paths, "paths is null");
 
@@ -53,6 +55,7 @@ public class ResourcePath {
 		this.directory = directory;
 
 		this.fullPath = null;
+		this.hash = Integer.MAX_VALUE;
 	}
 
 	protected ResourcePath(@NotNull String path) {
@@ -97,6 +100,43 @@ public class ResourcePath {
 		return new ResourcePath(Arrays.copyOf(this.path, this.path.length - 1), true);
 	}
 
+	@NotNull
+	public ResourcePath subPath(int begin, int end) {
+		if (begin < 0 || end > this.path.length || begin >= end)
+			throw new ArrayIndexOutOfBoundsException(
+				"Invalid sub path range: " + begin + " to " + end +
+					", length=" + this.path.length
+			);
+
+		if (begin == 0 && end == this.path.length)
+			return this;
+
+		String[] sub = Arrays.copyOfRange(this.path, begin, end);
+
+		boolean isDir = (end < this.path.length) || this.directory;
+		return new ResourcePath(sub, isDir);
+	}
+
+	@NotNull
+	public ResourcePath relativize(@NotNull ResourcePath base, boolean strict) {
+		Objects.requireNonNull(base, "base is null");
+
+		int max = Math.min(this.path.length, base.path.length);
+		int i = 0;
+		while (i < max && Objects.equals(this.path[i], base.path[i]))
+			i++;
+
+		if (i < base.path.length) {
+			if (strict)
+				throw new IllegalArgumentException("Base path is not a prefix of this path");
+
+			return this;
+		}
+
+		String[] remaining = Arrays.copyOfRange(this.path, i, this.path.length);
+		return new ResourcePath(remaining, this.directory);
+	}
+
 	public boolean startsWith(@NotNull String path) {
 		Objects.requireNonNull(path, "path is null");
 		return this.startsWith(splitPath(path));
@@ -114,7 +154,7 @@ public class ResourcePath {
 			return false;
 
 		for (int i = 0; i < paths.length; i++) {
-			if (!this.path[i].equals(paths[i]))
+			if (!Objects.equals(this.path[i], paths[i]))
 				return false;
 		}
 
@@ -139,7 +179,7 @@ public class ResourcePath {
 
 		int offset = this.path.length - paths.length;
 		for (int i = 0; i < paths.length; i++) {
-			if (!this.path[offset + i].equals(paths[i]))
+			if (!Objects.equals(this.path[offset + i], paths[i]))
 				return false;
 		}
 
@@ -177,19 +217,21 @@ public class ResourcePath {
 
 		ResourcePath other = (ResourcePath) o;
 		return this.directory == other.directory
-			&& Objects.deepEquals(this.path, other.path);
+			&& Arrays.equals(this.path, other.path);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(Arrays.hashCode(this.path), this.directory);
+		if (this.hash == Integer.MAX_VALUE)
+			this.hash = Objects.hash(Arrays.hashCode(this.path), this.directory);
+		return this.hash;
 	}
 
 	@Override
 	public String toString() {
 		if (this.fullPath == null)
 			this.fullPath = String.join(separator, this.path)
-				 + (this.path.length == 0 || this.directory ? separator : "");
+				+ (this.directory ? separator : "");
 
 		return this.fullPath;
 	}
