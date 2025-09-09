@@ -1,10 +1,10 @@
 package io.github.wsyong11.gameforge.framework.system.log.core.logger;
 
-import io.github.wsyong11.gameforge.framework.annotation.Internal;
-import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import io.github.wsyong11.gameforge.framework.annotation.Internal;
+import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;

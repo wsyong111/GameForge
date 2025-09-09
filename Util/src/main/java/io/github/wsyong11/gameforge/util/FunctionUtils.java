@@ -8,7 +8,7 @@ import java.util.function.Supplier;
 
 @UtilityClass
 public class FunctionUtils {
-	public static <T> T run(@NotNull Supplier<T> supplier){
+	public static <T> T run(@NotNull Supplier<T> supplier) {
 		Objects.requireNonNull(supplier, "supplier is null");
 		return supplier.get();
 	}

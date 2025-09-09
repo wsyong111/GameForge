@@ -1,9 +1,8 @@
 package io.github.wsyong11.gameforge.framework.event.ex;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ListenerException extends RuntimeException{
+public class ListenerException extends RuntimeException {
 	public ListenerException() {
 	}
 

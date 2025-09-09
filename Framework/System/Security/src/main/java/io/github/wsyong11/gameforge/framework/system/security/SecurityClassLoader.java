@@ -2,12 +2,12 @@ package io.github.wsyong11.gameforge.framework.system.security;
 
 import org.jetbrains.annotations.Nullable;
 
-public class SecurityClassLoader extends ClassLoader{
+public class SecurityClassLoader extends ClassLoader {
 	static {
 		registerAsParallelCapable();
 	}
 
-	public SecurityClassLoader(@Nullable String name,@Nullable ClassLoader parent) {
+	public SecurityClassLoader(@Nullable String name, @Nullable ClassLoader parent) {
 		super(name, parent);
 	}
 

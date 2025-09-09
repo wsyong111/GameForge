@@ -41,7 +41,7 @@ public class BootstrapBuilder<T> {
 	}
 
 	@NotNull
-	public BootstrapBuilder<T> mainClass(@NotNull Supplier<Function<T,Application>> mainClassFactory) {
+	public BootstrapBuilder<T> mainClass(@NotNull Supplier<Function<T, Application>> mainClassFactory) {
 		Objects.requireNonNull(mainClassFactory, "mainClassFactory is null");
 		this.mainClassFactory = mainClassFactory;
 		return this;

@@ -1,9 +1,9 @@
 package io.github.wsyong11.gameforge.framework.listener.list;
 
-import io.github.wsyong11.gameforge.framework.listener.ex.ListenerExceptionCallback;
 import io.github.wsyong11.gameforge.framework.listener.IListener;
 import io.github.wsyong11.gameforge.framework.listener.ListenerList;
 import io.github.wsyong11.gameforge.framework.listener.ex.ListenerException;
+import io.github.wsyong11.gameforge.framework.listener.ex.ListenerExceptionCallback;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -128,6 +128,7 @@ public abstract class AbstractListenerList implements ListenerList {
 	public String toString() {
 		return this.getClass().getSimpleName() + "{" +
 			"total = " + this.size() + ", " +
-			"types = ["+ this.listenerMap.keySet().stream().map(Class::getSimpleName).collect(Collectors.joining(", ")) + "]}";
+			"types = [" + this.listenerMap.keySet().stream().map(Class::getSimpleName)
+			                              .collect(Collectors.joining(", ")) + "]}";
 	}
 }

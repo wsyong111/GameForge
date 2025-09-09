@@ -36,7 +36,7 @@ public enum LogLevel {
 	@Contract("null -> null")
 	@Nullable
 	public static LogLevel parse(@Nullable String type) {
-		if (type==null)
+		if (type == null)
 			return null;
 
 		return STRING_LOG_LEVEL_MAP.get(type.toLowerCase(Locale.ROOT));

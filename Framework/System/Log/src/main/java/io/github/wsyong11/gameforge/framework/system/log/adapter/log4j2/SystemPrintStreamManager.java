@@ -25,6 +25,7 @@ public class SystemPrintStreamManager {
 		assert impl != null : "Stdout impl is null";
 		return impl;
 	}
+
 	public static void setStderr(@NotNull PrintStream stderr) {
 		Objects.requireNonNull(stderr, "stderr is null");
 		stderrWrapper.setImpl(stderr);

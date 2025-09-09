@@ -58,7 +58,8 @@ public class ReflectUtils {
 		                      .map(Class::getName)
 		                      .collect(Collectors.joining(", "));
 
-		return modifiers + " " + method.getDeclaringClass().getName() + "#" + method.getName() + "(" + params + "): " + returnType;
+		return modifiers + " " + method.getDeclaringClass()
+		                               .getName() + "#" + method.getName() + "(" + params + "): " + returnType;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
@@ -75,7 +76,7 @@ public class ReflectUtils {
 		try {
 			classLoader.loadClass(name);
 			return true;
-		}catch (ClassNotFoundException ignored){
+		} catch (ClassNotFoundException ignored) {
 			return false;
 		}
 	}

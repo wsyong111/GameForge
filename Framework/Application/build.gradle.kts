@@ -4,6 +4,6 @@ artifactId = "Application"
 
 dependencies {
 
-    implementation(project(":Framework:Lifecycle"))
+	implementation(project(":Framework:Lifecycle"))
 	implementation(project(":Framework:System:Log"))
 }

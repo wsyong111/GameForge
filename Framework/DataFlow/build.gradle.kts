@@ -1,4 +1,7 @@
-import io.github.wsyong11.gameforge.dependencies.*
+import io.github.wsyong11.gameforge.dependencies.JACKSON
+import io.github.wsyong11.gameforge.dependencies.JACKSON_TOML
+import io.github.wsyong11.gameforge.dependencies.JACKSON_YAML
+import io.github.wsyong11.gameforge.dependencies.implementation
 
 dependencies {
 	implementation(JACKSON)

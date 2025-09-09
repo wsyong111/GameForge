@@ -55,7 +55,8 @@ codegen {
 
 	val dcLogger = "io.github.wsyong11.gameforge.framework.system.log" withClass "Logger"
 	val dcAbstractLogger = "io.github.wsyong11.gameforge.framework.system.log.core.logger" withClass "AbstractLogger"
-	val dcLazyLoadLoggerImpl = "io.github.wsyong11.gameforge.framework.system.log.core.logger" withClass "LazyLoadLoggerImpl"
+	val dcLazyLoadLoggerImpl =
+		"io.github.wsyong11.gameforge.framework.system.log.core.logger" withClass "LazyLoadLoggerImpl"
 
 	fun TypeSpecDSL.generateLogLevelMethods(
 		level: LogLevel,

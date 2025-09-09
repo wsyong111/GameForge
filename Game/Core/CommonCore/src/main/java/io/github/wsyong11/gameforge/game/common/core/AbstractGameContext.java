@@ -4,7 +4,6 @@ import io.github.wsyong11.gameforge.framework.event.EventBus;
 import io.github.wsyong11.gameforge.framework.event.bus.DebugEventBus;
 import io.github.wsyong11.gameforge.framework.lifecycle.ILifecycle;
 import io.github.wsyong11.gameforge.framework.lifecycle.LifecycleInstance;
-import io.github.wsyong11.gameforge.framework.system.resource.manage.DefaultResourceManager;
 import io.github.wsyong11.gameforge.framework.system.resource.manage.ResourceManager;
 import io.github.wsyong11.gameforge.game.common.Game;
 import io.github.wsyong11.gameforge.game.common.GameContext;

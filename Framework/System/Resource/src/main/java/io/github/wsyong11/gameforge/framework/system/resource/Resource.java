@@ -1,6 +1,5 @@
 package io.github.wsyong11.gameforge.framework.system.resource;
 
-import io.github.wsyong11.gameforge.framework.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;

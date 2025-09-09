@@ -5,9 +5,9 @@ import com.palantir.javapoet.ParameterSpec
 
 @JavaPoetMarker
 class ParameterDSL(
-	private val builder: ParameterSpec.Builder
+	private val builder: ParameterSpec.Builder,
 ) {
-	fun annotation(type: ClassName)=
+	fun annotation(type: ClassName) =
 		this.builder.addAnnotation(type)
 
 	fun build() = this.builder.build()

@@ -5,7 +5,7 @@ import io.github.wsyong11.gameforge.project.artifactId
 
 artifactId = "Event"
 
-dependencies{
+dependencies {
 	implementation(GEANTYREF)
 
 	implementation(project(":Util"))

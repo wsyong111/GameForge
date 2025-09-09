@@ -24,6 +24,7 @@ public class Log4jLogger extends AbstractLogger {
 		Template.process(args);
 		this.logger.log(LogLevelConvertor.toLog4jLevel(level), message, args);
 	}
+
 	@NotNull
 	@Override
 	public String getName() {

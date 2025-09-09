@@ -22,7 +22,7 @@ public interface DebugInstanceProvider<T> {
 	@NotNull
 	<V extends T> T wrap(@NotNull V instance);
 
-	default void dump(@NotNull StringBuilder sb, @NotNull T instance){
+	default void dump(@NotNull StringBuilder sb, @NotNull T instance) {
 		throw new UnsupportedOperationException();
 	}
 }

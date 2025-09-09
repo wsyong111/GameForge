@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class ListenerException extends RuntimeException{
+public class ListenerException extends RuntimeException {
 	public ListenerException() {
 	}
 

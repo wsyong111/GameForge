@@ -18,6 +18,7 @@ public interface IListener extends Nameable {
 	@NotNull
 	@Override
 	default String getName() {
-		return this.getClass().getName() + "[0x" + Integer.toHexString(Objects.hashCode(this)).toUpperCase(Locale.ROOT) + "]";
+		return this.getClass().getName() + "[0x" + Integer.toHexString(Objects.hashCode(this))
+		                                                  .toUpperCase(Locale.ROOT) + "]";
 	}
 }

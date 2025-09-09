@@ -1,9 +1,9 @@
 package io.github.wsyong11.gameforge.framework.system.log.core.logger;
 
-import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;

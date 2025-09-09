@@ -13,7 +13,7 @@ private fun DependencyHandler.addDependency(configuration: String, dependency: D
 	}
 }
 
-fun DependencyHandler.`implementation`(id: Dependency)=
+fun DependencyHandler.`implementation`(id: Dependency) =
 	addDependency("implementation", id)
 
 fun DependencyHandler.`compileOnly`(id: Dependency) =

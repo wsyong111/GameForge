@@ -62,7 +62,7 @@ public class ExceptionHandler implements Consumer<Throwable> {
 			return callable.call();
 		} catch (Throwable e) {
 			this.exceptions.add(e);
-		return null;
+			return null;
 		}
 	}
 

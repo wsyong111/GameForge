@@ -41,7 +41,7 @@ class CodeDSL {
 		this.add("\n".repeat(count))
 	}
 
-	fun returns(format: String, vararg args: Any){
+	fun returns(format: String, vararg args: Any) {
 		this.add("return ")
 		this.format(format, *args)
 		this.add(";")

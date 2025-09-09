@@ -9,7 +9,7 @@ import java.util.Objects;
 @UtilityClass
 public class LogTemplate {
 	@NotNull
-	public static TemplateValueProvider lazy(@NotNull TemplateValueProvider supplier){
+	public static TemplateValueProvider lazy(@NotNull TemplateValueProvider supplier) {
 		Objects.requireNonNull(supplier, "supplier is null");
 		return supplier;
 	}

@@ -90,7 +90,7 @@ public class SimpleEventBus extends ReflectEventBus {
 			.map(listener -> (Runnable) () -> {
 				try {
 					listener.onEvent(event);
-				}catch (Throwable e) {
+				} catch (Throwable e) {
 					exceptionCallback.onException(listener, e);
 				}
 			})

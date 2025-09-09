@@ -16,7 +16,7 @@ import java.util.function.Consumer;
  */
 public interface ListenerList extends IListenerList {
 	@NotNull
-	static ListenerList sync(){
+	static ListenerList sync() {
 		return new SyncListenerList();
 	}
 

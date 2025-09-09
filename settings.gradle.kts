@@ -1,13 +1,13 @@
 pluginManagement {
-    plugins {
-        kotlin("jvm") version "2.0.0" apply false
+	plugins {
+		kotlin("jvm") version "2.0.0" apply false
 
-        id("com.gradleup.shadow") version "9.0.0-beta15" apply false
-    }
+		id("com.gradleup.shadow") version "9.0.0-beta15" apply false
+	}
 
-    repositories {
-        gradlePluginPortal()
-    }
+	repositories {
+		gradlePluginPortal()
+	}
 }
 
 rootProject.name = "GameForge"

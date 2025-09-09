@@ -34,7 +34,7 @@ public abstract class Token {
 
 		Token other = (Token) o;
 		return this.charIndex == other.charIndex
-		       && Objects.equals(this.token, other.token);
+			&& Objects.equals(this.token, other.token);
 	}
 
 	@Override

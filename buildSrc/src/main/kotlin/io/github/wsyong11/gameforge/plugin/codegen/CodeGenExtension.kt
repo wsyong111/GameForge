@@ -1,8 +1,8 @@
 package io.github.wsyong11.gameforge.plugin.codegen
 
+import com.palantir.javapoet.*
 import io.github.wsyong11.gameforge.plugin.codegen.dsl.TypeSpecDSL
 import io.github.wsyong11.gameforge.plugin.codegen.dsl.dsl
-import com.palantir.javapoet.*
 import kotlin.reflect.KClass
 
 open class CodeGenExtension {
@@ -57,7 +57,7 @@ open class CodeGenExtension {
 	fun primitive(type: KClass<*>) =
 		TypeName.get(type.java)
 
-	inline fun<reified  T> primitive() =
+	inline fun <reified T> primitive() =
 		primitive(T::class)
 
 	infix fun String.withClass(name: String) =

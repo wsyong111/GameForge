@@ -4,7 +4,8 @@ import io.github.wsyong11.gameforge.util.Nameable;
 import org.apache.commons.lang3.ClassUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
 
 public abstract class Event implements Nameable {
 	@SuppressWarnings("unchecked")

@@ -7,6 +7,6 @@ import org.jetbrains.annotations.NotNull;
 public class TextComponents {
 	@NotNull
 	public static TextComponent literal(@NotNull String text) {
-return null;
+		return null;
 	}
 }

@@ -1,6 +1,5 @@
 package io.github.wsyong11.gameforge.util.collection;
 
-import io.github.wsyong11.gameforge.util.collection.AbstractMultiTree;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

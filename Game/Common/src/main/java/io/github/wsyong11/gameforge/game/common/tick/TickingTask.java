@@ -10,9 +10,9 @@ public interface TickingTask {
 
 	boolean isDone();
 
-    long getNextTick();
+	long getNextTick();
 
-    int getInterval();
+	int getInterval();
 
 	@NotNull
 	@UnsafeAPI

@@ -1,7 +1,6 @@
 package io.github.wsyong11.gameforge.framework.text.rich
 
 import io.github.wsyong11.gameforge.framework.Color
-import io.github.wsyong11.gameforge.framework.text.rich.TextStyleModifier
 
 class TextStyleBuilder {
 	var color: Color = Color.BLACK

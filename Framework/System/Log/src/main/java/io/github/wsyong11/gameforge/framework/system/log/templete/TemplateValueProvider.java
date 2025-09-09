@@ -1,18 +1,16 @@
 package io.github.wsyong11.gameforge.framework.system.log.templete;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
-import java.util.function.*;
+import java.util.function.Supplier;
 
 @FunctionalInterface
-public interface TemplateValueProvider extends Supplier<Object>{
+public interface TemplateValueProvider extends Supplier<Object> {
 	@Nullable
 	Object getValue();
 
 	@Override
-	default Object get(){
+	default Object get() {
 		return this.getValue();
 	}
 }

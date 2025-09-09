@@ -1,8 +1,9 @@
 package io.github.wsyong11.gameforge.plugin.configurator
 
+import io.github.wsyong11.gameforge.project.EMPTY_ARTIFACT_ID
+import io.github.wsyong11.gameforge.project.artifactId
 import org.gradle.api.Project
 import org.gradle.api.Project.DEFAULT_VERSION
-import io.github.wsyong11.gameforge.project.*
 
 internal class ModuleCheckConfigurator : Configurator {
 	override fun apply(project: Project) {
