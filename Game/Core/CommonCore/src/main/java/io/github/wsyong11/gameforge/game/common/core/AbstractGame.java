@@ -6,6 +6,7 @@ import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.manage.DefaultResourceManager;
 import io.github.wsyong11.gameforge.framework.system.resource.manage.ResourceManager;
+import io.github.wsyong11.gameforge.framework.system.resource.pack.AssetsResourcePack;
 import io.github.wsyong11.gameforge.game.common.Game;
 import io.github.wsyong11.gameforge.game.common.GameContext;
 import io.github.wsyong11.gameforge.game.common.GameEnvConfig;
@@ -61,6 +62,10 @@ public abstract class AbstractGame extends Application implements Game {
 	@Override
 	protected void onStarting() throws Throwable {
 		super.onStarting();
+
+		LOGGER.debug("Setting up the resource system");
+		this.resourceManager.addPack(0, new AssetsResourcePack("game"));
+		this.resourceManager.reload();
 	}
 
 	@MustBeInvokedByOverriders

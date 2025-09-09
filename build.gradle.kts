@@ -1,12 +1,13 @@
+import io.github.wsyong11.gameforge.project.ignoreDefaultConfig
 import io.github.wsyong11.gameforge.project.includeDebug
 import io.github.wsyong11.gameforge.project.includeRelease
+import io.github.wsyong11.gameforge.project.visual
 
 //language=jvm-class-name
 val mainClassName: String = "io.github.wsyong11.gameforge.Main"
 
 plugins {
 	java
-	application
 	id("com.gradleup.shadow")
 }
 
@@ -15,9 +16,17 @@ allprojects {
 	version = "0.0.0-beta"
 
 	apply(plugin = "io.github.wsyong11.gameforge.plugin")
+}
 
-	repositories {
-		mavenCentral()
+subprojects {
+	if (project.visual || project.ignoreDefaultConfig)
+		return@subprojects
+
+	if (project.path == ":Assets")
+		return@subprojects
+
+	dependencies {
+		implementation(project(":Assets"))
 	}
 }
 

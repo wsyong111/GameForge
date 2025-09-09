@@ -8,6 +8,9 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 internal class DependenciesConfigurator : Configurator {
 	override fun apply(project: Project) {
+		project.repositories.mavenCentral()
+		project.repositories.mavenLocal()
+
 		project.dependencies.compileOnly(LOMBOK)
 
 		project.dependencies.implementation(ANNOTATIONS)

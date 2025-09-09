@@ -1,6 +1,7 @@
 package io.github.wsyong11.gameforge.framework.bootstrap;
 
 import io.github.wsyong11.gameforge.framework.app.Application;
+import io.github.wsyong11.gameforge.framework.lifecycle.LifecycleState;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.log.core.LogManager;
@@ -72,6 +73,9 @@ public class Bootstrap<T> implements AutoCloseable {
 
 	@Override
 	public void close() {
+		if (this.app.getLifecycle().getState() == LifecycleState.ERROR)
+			return;
+
 		try {
 			this.app.stop();
 		} catch (Exception e) {

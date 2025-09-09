@@ -21,6 +21,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/AnnotationProcessor" />
+            <option value="$PROJECT_DIR$/Assets" />
             <option value="$PROJECT_DIR$/BuildInfo" />
             <option value="$PROJECT_DIR$/Framework" />
             <option value="$PROJECT_DIR$/Framework/Annotation" />

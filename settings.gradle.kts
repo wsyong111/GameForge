@@ -13,6 +13,7 @@ pluginManagement {
 rootProject.name = "GameForge"
 
 include(":AnnotationProcessor")
+include(":Assets")
 include(":BuildInfo")
 include(":Util")
 
