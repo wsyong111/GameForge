@@ -14,4 +14,5 @@ dependencies {
 	implementation(project(":Framework:Lifecycle"))
 	implementation(project(":Framework:Event"))
 	implementation(project(":Framework:System:Resource"))
+	implementation(project(":Framework:System:Log"))
 }

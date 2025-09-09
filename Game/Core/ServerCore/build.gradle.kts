@@ -8,6 +8,7 @@ artifactId = "ServerCore"
 
 dependencies {
 	implementation(JLINE)
+	implementation(project(":Framework:System:Resource"))
 	runtimeOnly(JANSI)
 
 	implementation(project(":Framework:Application"))

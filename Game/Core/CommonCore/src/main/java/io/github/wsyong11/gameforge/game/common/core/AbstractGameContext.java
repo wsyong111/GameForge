@@ -4,6 +4,7 @@ import io.github.wsyong11.gameforge.framework.event.EventBus;
 import io.github.wsyong11.gameforge.framework.event.bus.DebugEventBus;
 import io.github.wsyong11.gameforge.framework.lifecycle.ILifecycle;
 import io.github.wsyong11.gameforge.framework.lifecycle.LifecycleInstance;
+import io.github.wsyong11.gameforge.framework.system.resource.manage.DefaultResourceManager;
 import io.github.wsyong11.gameforge.framework.system.resource.manage.ResourceManager;
 import io.github.wsyong11.gameforge.game.common.Game;
 import io.github.wsyong11.gameforge.game.common.GameContext;
@@ -18,18 +19,18 @@ public abstract class AbstractGameContext extends LifecycleInstance implements G
 	private final GameSide side;
 	private final Game game;
 
-//	private final ResourceManager resourceManager;
+	private final ResourceManager resourceManager;
 
 	private final EventBus globalEventBus;
 
-	public AbstractGameContext(@NotNull GameSide side, @NotNull Game game) {
+	public AbstractGameContext(@NotNull GameSide side, @NotNull Game game, @NotNull ResourceManager resourceManager) {
 		Objects.requireNonNull(side, "side is null");
 		Objects.requireNonNull(game, "game is null");
 
 		this.side = side;
 		this.game = game;
 
-//		this.resourceManager
+		this.resourceManager = resourceManager;
 
 		this.globalEventBus = DebugEventBus.wrap(EventBus.simple(), "game");
 	}
@@ -43,7 +44,7 @@ public abstract class AbstractGameContext extends LifecycleInstance implements G
 	@NotNull
 	@Override
 	public RegistryManager getRegistry() {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	@NotNull
@@ -55,13 +56,13 @@ public abstract class AbstractGameContext extends LifecycleInstance implements G
 	@NotNull
 	@Override
 	public TickManager getTickManager() {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	@NotNull
 	@Override
 	public ResourceManager getResourceManager() {
-		return null;
+		return this.resourceManager;
 	}
 
 	@NotNull

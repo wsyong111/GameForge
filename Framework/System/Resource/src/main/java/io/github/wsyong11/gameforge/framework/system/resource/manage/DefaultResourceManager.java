@@ -5,21 +5,17 @@ import io.github.wsyong11.gameforge.framework.listener.ListenerList;
 import io.github.wsyong11.gameforge.framework.listener.ex.ListenerExceptionCallback;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
-import io.github.wsyong11.gameforge.framework.system.log.core.LogLevel;
-import io.github.wsyong11.gameforge.framework.system.log.core.LogManager;
 import io.github.wsyong11.gameforge.framework.system.resource.Resource;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourceConflictHandler;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.listener.ReloadListener;
-import io.github.wsyong11.gameforge.framework.system.resource.pack.DirResourcePack;
 import io.github.wsyong11.gameforge.framework.system.resource.pack.ResourcePack;
-import io.github.wsyong11.gameforge.framework.system.resource.pack.ZipResourcePack;
+import io.github.wsyong11.gameforge.util.collection.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -73,6 +69,13 @@ public class DefaultResourceManager implements ResourceManager {
 	@Override
 	public List<ResourcePack> getResourcePacks() {
 		return Collections.unmodifiableList(this.resourcePacks);
+	}
+
+	@Override
+	public void sortResourcePacks(@NotNull List<String> ids) {
+		Objects.requireNonNull(ids, "ids is null");
+		CollectionUtils.sort(ids, this.resourcePacks, (id, pack) ->
+			pack.getId().equals(id));
 	}
 
 	@Override
@@ -178,5 +181,19 @@ public class DefaultResourceManager implements ResourceManager {
 	public Resource getResource(@NotNull Identifier name) {
 		Objects.requireNonNull(name, "name is null");
 		return this.resourceMap.get(name);
+	}
+
+	public void clean() {
+		List<ResourcePack> resourcePacks = List.copyOf(this.resourcePacks);
+		for (ResourcePack resourcePack : resourcePacks) {
+			try {
+				resourcePack.close();
+			} catch (IOException e) {
+				LOGGER.warn("Failed to close resource pack {}", resourcePack.getId(), e);
+			}
+		}
+
+		this.resourcePacks.clear();
+		this.resourceMap = Map.of();
 	}
 }

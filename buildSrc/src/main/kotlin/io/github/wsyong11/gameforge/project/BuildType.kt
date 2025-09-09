@@ -21,7 +21,8 @@ val Project.includeDebug
 	get() = this.buildType == BuildType.DEBUG || this.hasProperty("includeDebug")
 
 val Project.includeRelease
-	get() = this.buildType == BuildType.RELEASE || this.hasProperty("includeRelease")
+	get() = true
+//	get() = this.buildType == BuildType.RELEASE || this.hasProperty("includeRelease")
 
 enum class BuildType {
 	RELEASE,

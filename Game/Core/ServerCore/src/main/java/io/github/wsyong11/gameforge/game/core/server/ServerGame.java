@@ -3,6 +3,7 @@ package io.github.wsyong11.gameforge.game.core.server;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.log.core.LogManager;
+import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.game.common.core.AbstractGame;
 import io.github.wsyong11.gameforge.game.common.core.StartupConfig;
 import io.github.wsyong11.gameforge.util.io.CallbackPrintStream;
@@ -19,7 +20,7 @@ public class ServerGame extends AbstractGame {
 	private CommandPrompt commandPrompt;
 
 	public ServerGame(@NotNull StartupConfig config) {
-		super(config);
+		super(config, ResourcePath.of("data"));
 
 		this.commandPrompt = null;
 	}

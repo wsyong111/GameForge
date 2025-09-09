@@ -23,6 +23,8 @@ public interface ResourceManager extends ResourceProvider {
 	@UnmodifiableView
 	List<ResourcePack> getResourcePacks();
 
+	void sortResourcePacks(@NotNull List<String> ids);
+
 	void addPack(int index, @NotNull ResourcePack pack);
 
 	void removePack(@NotNull ResourcePack pack);

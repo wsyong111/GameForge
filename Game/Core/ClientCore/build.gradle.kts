@@ -9,4 +9,5 @@ dependencies {
 
 	implementation(project(":Framework:Application"))
 	implementation(project(":Framework:Lifecycle"))
+	implementation(project(":Framework:System:Resource"))
 }
