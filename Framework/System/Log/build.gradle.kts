@@ -29,8 +29,14 @@ tasks.compileJava {
 
 // ------------------------------------------------------------------------------------------------------------------ //
 
-enum class LogLevel {
-	TRACE, DEBUG, INFO, WARN, ERROR;
+enum class LogLevel(
+	val localeName: String,
+) {
+	TRACE("追踪"),
+	DEBUG("调试"),
+	INFO("信息"),
+	WARN("警告"),
+	ERROR("错误");
 
 	companion object {
 		fun forEach(callback: (LogLevel) -> Unit) {
@@ -74,6 +80,12 @@ codegen {
 				if (abstractMethod) modifier(Modifier.ABSTRACT)
 				returns(jBoolean)
 				this.dsl(enabledMethodConfigurator)
+
+				doc {
+					-"检查${level.localeName}是否被启用"
+					newLine()
+					-"@return ${level.localeName}是否已被启用"
+				}
 			}
 
 		for (i in -1..9) {
@@ -96,6 +108,17 @@ codegen {
 				}
 
 				if (logMethodConfigurator != null) this.logMethodConfigurator(argNames)
+
+				doc {
+					+"输出${level.localeName}日志等级的信息"
+					if (i > 0) +"，并按照参数进行格式化"
+					newLine(2)
+					+"@param message 日志信息"
+					for (v in 0..i) {
+						newLine()
+						+"@param arg${v} 参数 ${v}"
+					}
+				}
 			}
 		}
 
@@ -111,6 +134,13 @@ codegen {
 			varargs()
 
 			this.dsl(logVarargMethodConfigurator)
+
+			doc {
+				-"输出${level.localeName}日志等级的信息，并按照参数进行格式化"
+				newLine()
+				-"@param message 日志信息"
+				-"@param args    参数"
+			}
 		}
 	}
 
@@ -133,11 +163,11 @@ codegen {
 
 					+"return "
 					controlFlow("switch (level)") {
-						+"case TRACE -> this.isTraceEnabled();\n"
-						+"case DEBUG -> this.isDebugEnabled();\n"
-						+"case INFO -> this.isInfoEnabled();\n"
-						+"case WARN -> this.isWarnEnabled();\n"
-						+"case ERROR -> this.isErrorEnabled();\n"
+						-"case TRACE -> this.isTraceEnabled();"
+						-"case DEBUG -> this.isDebugEnabled();"
+						-"case INFO -> this.isInfoEnabled();"
+						-"case WARN -> this.isWarnEnabled();"
+						-"case ERROR -> this.isErrorEnabled();"
 					}
 					+";"
 				}

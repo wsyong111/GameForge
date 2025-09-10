@@ -1,3 +1,4 @@
+import io.github.wsyong11.gameforge.project.artifactId
 import io.github.wsyong11.gameforge.project.includeDebug
 import java.time.LocalDateTime
 import javax.lang.model.element.Modifier
@@ -5,6 +6,8 @@ import javax.lang.model.element.Modifier
 plugins {
 	id("io.github.wsyong11.gameforge.codegen")
 }
+
+artifactId = "BuildInfo"
 
 codegen {
 	val dcBuildInfo = "io.github.wsyong11.gameforge" withClass "BuildInfo"

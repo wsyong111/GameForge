@@ -137,10 +137,16 @@ public final class LogManager {
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
+	private static void hookJavaLogger() {
+
+	}
+
 	static {
 		Thread cleanerThread = new Thread(LogManager::unbindAll);
 		cleanerThread.setName("LogSystemCleaner");
 		Runtime.getRuntime().addShutdownHook(cleanerThread);
+
+		JavaLoggerHandler.install();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //

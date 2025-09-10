@@ -15,7 +15,11 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+/**
+ * 事件总线的基本抽象类，实现了事件监听器的注册逻辑，并通过缓存提升查找监听器的速度
+ */
 public abstract class AbstractEventBus implements EventBus {
+	/** 默认监听器缓存大小 */
 	public static final int DEFAULT_CACHE_SIZE = 32;
 
 	private final Map<IEventListener<?>, Set<Class<? extends Event>>> listenerClassMap;
@@ -23,10 +27,20 @@ public abstract class AbstractEventBus implements EventBus {
 	private final Map<Class<? extends Event>, List<ListenerItem<?>>> listenerMap;
 	private final LoadingCache<Class<? extends Event>, List<ListenerItem<?>>> listenerCache;
 
+	/**
+	 * 使用默认缓存大小实例化
+	 *
+	 * @see #DEFAULT_CACHE_SIZE
+	 */
 	protected AbstractEventBus() {
 		this(DEFAULT_CACHE_SIZE);
 	}
 
+	/**
+	 * 使用自定义缓存大小实例化
+	 *
+	 * @param cacheSize 监听器缓存大小
+	 */
 	protected AbstractEventBus(int cacheSize) {
 		this.listenerClassMap = new ConcurrentHashMap<>();
 
@@ -39,6 +53,15 @@ public abstract class AbstractEventBus implements EventBus {
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
+	/**
+	 * 获取事件监听器列表，不包括事件继承的监听器
+	 *
+	 * @param eventType 事件类型
+	 * @param readOnly  是否为只读，如果为真则在监听器列表未注册时返回空的不可变列表，否则则自动创建并注册监听器列表并返回可变的列表
+	 * @param <T>       事件类型
+	 * @return 监听器列表
+	 * @apiNote 请勿在只读的情况下修改监听器列表
+	 */
 	@NotNull
 	protected <T extends Event> List<ListenerItem<T>> getSingleTypeListeners(@NotNull Class<T> eventType, boolean readOnly) {
 		Objects.requireNonNull(eventType, "eventType is null");
@@ -49,6 +72,14 @@ public abstract class AbstractEventBus implements EventBus {
 	}
 
 
+	/**
+	 * 获取监听器列表，将包含事件继承的监听器
+	 *
+	 * @param eventType 事件类型
+	 * @param <T>       事件类型
+	 * @return 不可变的事件监听器列表，监听器将按照其注册时的优先级按大到小排列
+	 * @see #getCachedListeners(Class)
+	 */
 	@SuppressWarnings("unchecked")
 	@NotNull
 	@Unmodifiable
@@ -64,6 +95,13 @@ public abstract class AbstractEventBus implements EventBus {
 			.toList();
 	}
 
+	/**
+	 * 获取缓存的监听器列表，将包含事件继承的监听器
+	 *
+	 * @param eventType 事件类型
+	 * @param <T>       事件类型
+	 * @return 不可变的监听器列表，监听器将按照其注册时的优先级按大到小排列
+	 */
 	@NotNull
 	@Unmodifiable
 	protected <T extends Event> List<ListenerItem<T>> getCachedListeners(@NotNull Class<T> eventType) {
@@ -71,6 +109,11 @@ public abstract class AbstractEventBus implements EventBus {
 		return CollectionUtils.forceCast(this.listenerCache.getUnchecked(eventType));
 	}
 
+	/**
+	 * 使指定的事件类型及其所有父事件类型的监听器缓存失效
+	 *
+	 * @param eventType 事件类型
+	 */
 	protected void invalidateCache(@NotNull Class<? extends Event> eventType) {
 		Objects.requireNonNull(eventType, "eventType is null");
 
@@ -146,20 +189,44 @@ public abstract class AbstractEventBus implements EventBus {
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
+	/**
+	 * 用于保存监听器配置的对象
+	 *
+	 * @param <T> 监听器接受的事件类型
+	 */
 	protected static class ListenerItem<T extends Event> implements Comparable<ListenerItem<?>> {
 		private final IEventListener<? super T> listener;
 		private final EventPriority priority;
 
+		/**
+		 * 实例化一个监听器配置
+		 *
+		 * @param listener 监听器实例
+		 * @param priority 监听器优先级
+		 */
 		public ListenerItem(@NotNull IEventListener<? super T> listener, @NotNull EventPriority priority) {
+			Objects.requireNonNull(listener, "listener is null");
+			Objects.requireNonNull(priority, "priority is null");
+
 			this.listener = listener;
 			this.priority = priority;
 		}
 
+		/**
+		 * 获取监听器实例
+		 *
+		 * @return 监听器实例
+		 */
 		@NotNull
 		public IEventListener<? super T> getListener() {
 			return this.listener;
 		}
 
+		/**
+		 * 获取监听器的优先级
+		 *
+		 * @return 监听器的优先级
+		 */
 		@NotNull
 		public EventPriority getPriority() {
 			return this.priority;

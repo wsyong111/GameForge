@@ -53,9 +53,9 @@ public class DefaultResourceManager implements ResourceManager {
 	}
 
 	@Override
-	public void addPack(int index, @NotNull ResourcePack pack) {
+	public void addPack(@NotNull ResourcePack pack) {
 		Objects.requireNonNull(pack, "pack is null");
-		this.resourcePacks.add(index, pack);
+		this.resourcePacks.add(pack);
 	}
 
 	@Override
@@ -83,7 +83,7 @@ public class DefaultResourceManager implements ResourceManager {
 		List<ResourcePack> packs = List.copyOf(this.resourcePacks);
 		Map<Identifier, ResourceConflictHandler> conflictHandlerMap = Map.copyOf(this.conflictHandlerMap);
 
-		LOGGER.debug("Reloading resource manager");
+		LOGGER.debug("Reloading resource manager with the root path \"{}\"", this.basePath);
 		long startTimeNs = System.nanoTime();
 
 		this.listenerList.fire(ReloadListener.class,

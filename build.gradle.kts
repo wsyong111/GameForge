@@ -72,6 +72,29 @@ tasks.register("cleanAll") {
 }
 
 
+tasks.register<Javadoc>("aggregateJavadoc") {
+	val sourceSets = subprojects
+		.mapNotNull { it.extensions.findByType<JavaPluginExtension>() }
+		.map { it.sourceSets }
+		.map { it.getByName("main") }
+
+	setSource(sourceSets.map { it.allJava })
+	classpath = files(sourceSets.map { it.compileClasspath })
+
+	(options as StandardJavadocDocletOptions).apply {
+		encoding = "UTF-8"
+		windowTitle = "Game Forge API"
+		docTitle = "Game Forge API Documentation"
+		version = true
+		tags(
+            "apiNote:a:API Note:",
+            "implSpec:m:Implementation Spec:",
+            "implNote:c:Implementation Note:"
+        )
+	}
+}
+
+
 afterEvaluate {
 	println("Run configuration:")
 	println("| Include Debug: ${includeDebug}")

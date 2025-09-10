@@ -4,6 +4,7 @@ import io.github.wsyong11.gameforge.framework.listener.ex.ListenerException;
 import io.github.wsyong11.gameforge.framework.listener.ex.ListenerExceptionCallback;
 import io.github.wsyong11.gameforge.framework.listener.list.AsyncListenerList;
 import io.github.wsyong11.gameforge.framework.listener.list.NamedListenerList;
+import io.github.wsyong11.gameforge.framework.listener.list.ScopedListenerList;
 import io.github.wsyong11.gameforge.framework.listener.list.SyncListenerList;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,6 +32,12 @@ public interface ListenerList extends IListenerList {
 		Objects.requireNonNull(delegate, "delegate is null");
 		Objects.requireNonNull(name, "name is null");
 		return new NamedListenerList(delegate, name);
+	}
+
+	@NotNull
+	static ListenerList scoped(@NotNull ListenerList delegate) {
+		Objects.requireNonNull(delegate, "delegate is null");
+		return new ScopedListenerList(delegate);
 	}
 
 	/**

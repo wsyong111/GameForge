@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -24,7 +25,7 @@ public final class Assets {
 				.lines()
 				.filter(entry -> !entry.isEmpty())
 				.map(entry -> entry.split("\t"))
-				.filter(entry -> entry.length != 2)
+				.filter(entry -> entry.length == 2)
 				.map(entry -> {
 					long size;
 					try {

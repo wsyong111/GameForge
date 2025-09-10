@@ -24,7 +24,7 @@ public interface ResourceManager extends ResourceProvider {
 
 	void sortResourcePacks(@NotNull List<String> ids);
 
-	void addPack(int index, @NotNull ResourcePack pack);
+	void addPack(@NotNull ResourcePack pack);
 
 	void removePack(@NotNull ResourcePack pack);
 

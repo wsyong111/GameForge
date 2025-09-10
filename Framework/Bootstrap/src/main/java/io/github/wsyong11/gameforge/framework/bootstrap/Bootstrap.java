@@ -54,6 +54,9 @@ public class Bootstrap<T> implements AutoCloseable {
 	}
 
 	public void start() {
+		if (this.app != null)
+			throw new IllegalStateException("Application instance is running");
+
 		T config = this.getConfig();
 		LOGGER.info("Initializing application with config {}", config);
 		try {
@@ -73,16 +76,19 @@ public class Bootstrap<T> implements AutoCloseable {
 
 	@Override
 	public void close() {
+		if (this.app == null)
+			return;
+
 		if (this.app.getLifecycle().getState() == LifecycleState.ERROR)
 			return;
+
+		LOGGER.info("Cleaning data");
 
 		try {
 			this.app.stop();
 		} catch (Exception e) {
 			LOGGER.error("Exception in cleaning main class", e);
 		}
-
-		LOGGER.info("Cleaning data");
 
 		this.app = null;
 	}

@@ -126,4 +126,9 @@ class CodeDSL {
 	operator fun String.unaryPlus() {
 		this@CodeDSL.add(this)
 	}
+
+	operator fun String.unaryMinus() {
+		this@CodeDSL.add(this)
+		this@CodeDSL.newLine()
+	}
 }

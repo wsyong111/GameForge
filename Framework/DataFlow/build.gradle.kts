@@ -2,6 +2,9 @@ import io.github.wsyong11.gameforge.dependencies.JACKSON
 import io.github.wsyong11.gameforge.dependencies.JACKSON_TOML
 import io.github.wsyong11.gameforge.dependencies.JACKSON_YAML
 import io.github.wsyong11.gameforge.dependencies.implementation
+import io.github.wsyong11.gameforge.project.artifactId
+
+artifactId = "DataFlow"
 
 dependencies {
 	implementation(JACKSON)
