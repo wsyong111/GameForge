@@ -12,8 +12,8 @@ plugins {
 artifactId = "LogSystem"
 
 dependencies {
-	implementation(LOG4J2_CORE)
-	annotationProcessor(LOG4J2_CORE)
+	implementation(project, LOG4J2_CORE)
+	annotationProcessor(project, LOG4J2_CORE)
 
 	implementation(project(":Framework:Annotation"))
 	implementation(project(":Framework:EnvConfig"))

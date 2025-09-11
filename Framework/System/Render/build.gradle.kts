@@ -5,7 +5,7 @@ import io.github.wsyong11.gameforge.project.artifactId
 artifactId = "RenderSystem"
 
 dependencies {
-	implementation(JOML)
+	implementation(project, JOML)
 	implementation(project(":Framework:System:Log"))
 	implementation(project(":Framework:System:Resource"))
 	implementation(project(":Framework:Listener"))

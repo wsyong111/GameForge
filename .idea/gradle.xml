@@ -38,10 +38,12 @@
             <option value="$PROJECT_DIR$/Framework/Listener" />
             <option value="$PROJECT_DIR$/Framework/RichText" />
             <option value="$PROJECT_DIR$/Framework/System" />
+            <option value="$PROJECT_DIR$/Framework/System/Input" />
             <option value="$PROJECT_DIR$/Framework/System/Log" />
             <option value="$PROJECT_DIR$/Framework/System/Render" />
             <option value="$PROJECT_DIR$/Framework/System/Resource" />
             <option value="$PROJECT_DIR$/Framework/System/Security" />
+            <option value="$PROJECT_DIR$/Framework/System/Window" />
             <option value="$PROJECT_DIR$/Game" />
             <option value="$PROJECT_DIR$/Game/Client" />
             <option value="$PROJECT_DIR$/Game/Common" />

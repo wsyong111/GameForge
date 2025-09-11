@@ -5,7 +5,7 @@ import io.github.wsyong11.gameforge.project.artifactId
 artifactId = "Loader"
 
 dependencies {
-	implementation(COMMONS_CLI)
+	implementation(project, COMMONS_CLI)
 
 	implementation(project(":Game:Core:CommonCore"))
 	implementation(project(":Game:Core:ClientCore"))

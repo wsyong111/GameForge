@@ -4,10 +4,10 @@ import io.github.wsyong11.gameforge.project.artifactId
 artifactId = "ResourceSystem"
 
 dependencies {
-	implementation(JACKSON)
-	implementation(JACKSON_TOML)
-	implementation(JACKSON_YAML)
-	implementation(JSON_PATH)
+	implementation(project, JACKSON)
+	implementation(project, JACKSON_TOML)
+	implementation(project, JACKSON_YAML)
+	implementation(project, JSON_PATH)
 
 	implementation(project(":Framework:Common"))
 	implementation(project(":Framework:Listener"))

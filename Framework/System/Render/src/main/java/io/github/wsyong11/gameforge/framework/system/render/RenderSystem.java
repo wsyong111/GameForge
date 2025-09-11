@@ -142,10 +142,10 @@ public final class RenderSystem {
 			Objects.requireNonNull(level, "level is null");
 			Objects.requireNonNull(message, "message is null");
 
-		this.listenerList.fire(
-			RenderEngineErrorListener.class,
-			l -> l.onRenderEngineError(level, message, code),
-			ListenerExceptionCallback.log(LOGGER));
+			this.listenerList.fire(
+				RenderEngineErrorListener.class,
+				l -> l.onRenderEngineError(level, message, code),
+				ListenerExceptionCallback.log(LOGGER));
 		}
 
 		@Override

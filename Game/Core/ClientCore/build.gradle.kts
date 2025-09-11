@@ -5,7 +5,7 @@ import io.github.wsyong11.gameforge.project.artifactId
 artifactId = "ClientCore"
 
 dependencies {
-	implementation(JOML)
+	implementation(project, JOML)
 
 	implementation(project(":Game:Core:CommonCore"))
 	implementation(project(":Game:Client"))

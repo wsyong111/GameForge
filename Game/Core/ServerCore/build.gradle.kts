@@ -7,9 +7,9 @@ import io.github.wsyong11.gameforge.project.artifactId
 artifactId = "ServerCore"
 
 dependencies {
-	implementation(JLINE)
+	implementation(project, JLINE)
 	implementation(project(":Framework:System:Resource"))
-	runtimeOnly(JANSI)
+	runtimeOnly(project, JANSI)
 
 	implementation(project(":Framework:Application"))
 	implementation(project(":Framework:Lifecycle"))

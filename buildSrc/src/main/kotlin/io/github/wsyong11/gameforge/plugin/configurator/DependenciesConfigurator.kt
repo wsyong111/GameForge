@@ -11,16 +11,16 @@ internal class DependenciesConfigurator : Configurator {
 		project.repositories.mavenCentral()
 		project.repositories.mavenLocal()
 
-		project.dependencies.compileOnly(LOMBOK)
+		project.dependencies.compileOnly(project, LOMBOK)
 
-		project.dependencies.implementation(ANNOTATIONS)
+		project.dependencies.implementation(project, ANNOTATIONS)
 
-		project.dependencies.implementation(GUAVA)
-		project.dependencies.implementation(COMMONS_LANG)
-		project.dependencies.implementation(COMMONS_COLLECTIONS)
+		project.dependencies.implementation(project, GUAVA)
+		project.dependencies.implementation(project, COMMONS_LANG)
+		project.dependencies.implementation(project, COMMONS_COLLECTIONS)
 
-		project.dependencies.implementation(AUTO_SERVICE)
-		project.dependencies.annotationProcessor(AUTO_SERVICE)
+		project.dependencies.implementation(project, AUTO_SERVICE)
+		project.dependencies.annotationProcessor(project, AUTO_SERVICE)
 
 		val kotlinExtension = project.extensions.findByType<KotlinJvmProjectExtension>()
 		if (kotlinExtension != null)

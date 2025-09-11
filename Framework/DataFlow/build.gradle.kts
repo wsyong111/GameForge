@@ -7,9 +7,9 @@ import io.github.wsyong11.gameforge.project.artifactId
 artifactId = "DataFlow"
 
 dependencies {
-	implementation(JACKSON)
-	implementation(JACKSON_TOML)
-	implementation(JACKSON_YAML)
+	implementation(project, JACKSON)
+	implementation(project, JACKSON_TOML)
+	implementation(project, JACKSON_YAML)
 
 	implementation(project(":Framework:System:Log"))
 	implementation(project(":Framework:Annotation"))

@@ -5,7 +5,7 @@ import io.github.wsyong11.gameforge.project.artifactId
 artifactId = "Common"
 
 dependencies {
-	implementation(JOML)
+	implementation(project, JOML)
 
 	implementation(project(":Util"))
 }
