@@ -4,12 +4,7 @@ import io.github.wsyong11.gameforge.framework.system.log.core.LogLevel;
 import io.github.wsyong11.gameforge.framework.system.render.listener.LogicSizeListener;
 import org.jetbrains.annotations.NotNull;
 
-public interface RenderEngine {
-	interface Lifecycle {
-		void error(@NotNull LogLevel level, @NotNull String message, int code);
-
-		void registerLogicSizeListener(@NotNull LogicSizeListener listener);
-
-		void unregisterLogicSizeListener(@NotNull LogicSizeListener listener);
-	}
+public interface RenderEngine extends AutoCloseable{
+	@Override
+	void close();
 }

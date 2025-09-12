@@ -1,5 +1,10 @@
 package io.github.wsyong11.gameforge.util.concurrent.signal;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+
 public class ThreadSignal {
 	private final Object signal;
 	private volatile boolean set;
@@ -35,6 +40,11 @@ public class ThreadSignal {
 			while (!this.set)
 				this.signal.wait();
 		}
+	}
+
+	public boolean await(long timeout, @NotNull TimeUnit unit) throws InterruptedException {
+		Objects.requireNonNull(unit, "unit is null");
+		return this.await(unit.toMillis(timeout));
 	}
 
 	public boolean await(long timeoutMs) throws InterruptedException {

@@ -138,11 +138,10 @@ public abstract class AbstractGame extends Application implements Game {
 		LOGGER.info("Cleaning resources");
 		handler.run(this.resourceManager::clean);
 
-		if (!handler.isEmpty()) {
-			RuntimeException exception = handler.toException(RuntimeException::new);
-			exception.fillInStackTrace();
-			LOGGER.warn("An exception occurred during cleaning", exception);
-		}
+		handler.toExceptionOptional(RuntimeException::new)
+		       .map(Throwable::fillInStackTrace)
+		       .ifPresent(exception ->
+			       LOGGER.warn("An exception occurred during cleaning", exception));
 	}
 
 	@NotNull

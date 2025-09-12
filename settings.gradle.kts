@@ -12,6 +12,14 @@ pluginManagement {
 
 rootProject.name = "GameForge"
 
+// FIXME: 给每个模块设定name
+private fun include(path: String, name: String? = null) {
+	settings.include(path)
+
+	if (name != null)
+		project(path).name = name
+}
+
 include(":AnnotationProcessor")
 include(":Assets")
 include(":BuildInfo")

@@ -5,7 +5,7 @@ import io.github.wsyong11.gameforge.framework.system.window.listener.WindowListe
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2ic;
 
-public interface Window {
+public interface Window extends AutoCloseable {
 	void setTitle(@NotNull String title);
 
 	@NotNull
@@ -31,6 +31,10 @@ public interface Window {
 	@NotNull
 	Vector2ic getWindowPosition();
 
+	void setVisible(boolean visible);
+
+	boolean isVisible();
+
 	// -------------------------------------------------------------------------------------------------------------- //
 
 	void addWindowListener(@NotNull WindowListener listener);
@@ -40,4 +44,7 @@ public interface Window {
 	void addInputListener(@NotNull WindowInputListener listener);
 
 	void removeInputListener(@NotNull WindowInputListener listener);
+
+	@Override
+	void close();
 }

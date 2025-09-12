@@ -2,16 +2,13 @@ package io.github.wsyong11.gameforge.util.exception;
 
 import org.jetbrains.annotations.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class ExceptionHandler implements Consumer<Throwable> {
+public class ExceptionHandler implements Consumer<Throwable>, Iterable<Throwable> {
 	@NotNull
 	public static ExceptionHandler create() {
 		return new ExceptionHandler();
@@ -31,8 +28,13 @@ public class ExceptionHandler implements Consumer<Throwable> {
 		return this.exceptions.size();
 	}
 
-	@UnmodifiableView
+	@Unmodifiable
 	public List<Throwable> toList() {
+		return List.copyOf(this.exceptions);
+	}
+
+	@UnmodifiableView
+	public List<Throwable> view() {
 		return Collections.unmodifiableList(this.exceptions);
 	}
 
@@ -53,7 +55,7 @@ public class ExceptionHandler implements Consumer<Throwable> {
 	}
 
 	@Contract("null -> null")
-	@UnknownNullability
+	@Nullable
 	public <T> T run(@Nullable Callable<T> callable) {
 		if (callable == null)
 			return null;
@@ -67,7 +69,7 @@ public class ExceptionHandler implements Consumer<Throwable> {
 	}
 
 	@Contract("null -> null")
-	@UnknownNullability
+	@Nullable
 	public <T> T run(@Nullable Supplier<T> supplier) {
 		if (supplier == null)
 			return null;
@@ -81,8 +83,8 @@ public class ExceptionHandler implements Consumer<Throwable> {
 	}
 
 	@Contract("_, null -> null")
-	@UnknownNullability
-	public <T, R> R run(@UnknownNullability T p0, @Nullable Function<T, R> function) {
+	@Nullable
+	public <T, R> R run(@Nullable T p0, @Nullable Function<T, R> function) {
 		if (function == null)
 			return null;
 
@@ -92,6 +94,47 @@ public class ExceptionHandler implements Consumer<Throwable> {
 			this.exceptions.add(e);
 			return null;
 		}
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	@NotNull
+	public ExceptionHandler pickOnce(@NotNull Consumer<Throwable> callback) {
+		Objects.requireNonNull(callback, "callback is null");
+
+		if (this.exceptions.isEmpty())
+			return this;
+
+		callback.accept(this.exceptions.remove(0));
+		return this;
+	}
+
+	@NotNull
+	public ExceptionHandler pickAllEach(@NotNull Consumer<Throwable> callback) {
+		Objects.requireNonNull(callback, "callback is null");
+
+		if (this.exceptions.isEmpty())
+			return this;
+
+		ListIterator<Throwable> iterator = this.exceptions.listIterator();
+		while (iterator.hasNext()) {
+			callback.accept(iterator.next());
+			iterator.remove();
+		}
+		return this;
+	}
+
+	@NotNull
+	public ExceptionHandler pickAll(@NotNull Consumer<List<Throwable>> callback) {
+		Objects.requireNonNull(callback, "callback is null");
+
+		if (this.exceptions.isEmpty())
+			return this;
+
+		callback.accept(List.copyOf(this.exceptions));
+		this.exceptions.clear();
+
+		return this;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
@@ -129,9 +172,21 @@ public class ExceptionHandler implements Consumer<Throwable> {
 	}
 
 	@NotNull
+	public <T extends Throwable> Optional<T> toExceptionOptional(@NotNull String message, @NotNull Function<String, T> exceptionBuilder) {
+		Objects.requireNonNull(exceptionBuilder, "exceptionBuilder is null");
+		return this.isEmpty() ? Optional.empty() : Optional.of(this.toException(message, exceptionBuilder));
+	}
+
+	@NotNull
 	public <T extends Throwable> T toException(@NotNull Supplier<T> exceptionBuilder) {
 		Objects.requireNonNull(exceptionBuilder, "exceptionBuilder is null");
 		return this.fillException(exceptionBuilder.get());
+	}
+
+	@NotNull
+	public <T extends Throwable> Optional<T> toExceptionOptional(@NotNull Supplier<T> exceptionBuilder) {
+		Objects.requireNonNull(exceptionBuilder, "exceptionBuilder is null");
+		return this.isEmpty() ? Optional.empty() : Optional.of(this.toException(exceptionBuilder));
 	}
 
 	@Contract("null -> null; !null -> !null")
@@ -144,7 +199,9 @@ public class ExceptionHandler implements Consumer<Throwable> {
 		if (size == 0)
 			return exception;
 
-		exception.initCause(this.exceptions.get(0));
+		if (exception.getCause() == null)
+			exception.initCause(this.exceptions.get(0));
+
 		if (size == 1)
 			return exception;
 
@@ -159,6 +216,12 @@ public class ExceptionHandler implements Consumer<Throwable> {
 		if (throwable == null)
 			return;
 		this.exceptions.add(throwable);
+	}
+
+	@NotNull
+	@Override
+	public Iterator<Throwable> iterator() {
+		return Collections.unmodifiableList(this.exceptions).iterator();
 	}
 
 	@Override

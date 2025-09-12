@@ -15,4 +15,5 @@ dependencies {
 	implementation(project(":Framework:Lifecycle"))
 	implementation(project(":Framework:System:Resource"))
 	implementation(project(":Framework:System:Render"))
+	implementation(project(":Framework:System:Window"))
 }

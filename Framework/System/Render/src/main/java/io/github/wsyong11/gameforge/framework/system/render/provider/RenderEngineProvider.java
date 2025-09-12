@@ -1,6 +1,7 @@
-package io.github.wsyong11.gameforge.framework.system.render;
+package io.github.wsyong11.gameforge.framework.system.render.provider;
 
 import io.github.wsyong11.gameforge.framework.system.render.engine.RenderEngine;
+import io.github.wsyong11.gameforge.framework.system.render.engine.RenderSystemContext;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
@@ -15,5 +16,5 @@ public interface RenderEngineProvider {
 	 * @return 渲染引擎工厂
 	 */
 	@NotNull
-	Function<RenderEngine.Lifecycle, RenderEngine> getFactory();
+	Function<RenderSystemContext, RenderEngine> getFactory();
 }
