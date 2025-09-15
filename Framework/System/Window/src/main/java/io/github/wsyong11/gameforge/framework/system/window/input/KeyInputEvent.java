@@ -1,4 +1,4 @@
 package io.github.wsyong11.gameforge.framework.system.window.input;
 
-public abstract class InputEvent {
+public class KeyInputEvent {
 }

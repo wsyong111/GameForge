@@ -8,7 +8,6 @@ data class WindowConfig(
 	val size: Vector2ic,
 	val position: Vector2ic?,
 	val displayType: WindowDisplayType,
-	val vsync: VSyncType,
 
 	val api: Identifier,
 	val graphicsConfig: WindowGraphicsConfig,

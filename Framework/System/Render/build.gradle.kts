@@ -11,4 +11,6 @@ dependencies {
 	implementation(project(":Framework:Listener"))
 	implementation(project(":Util"))
 	implementation(project(":Framework:System:Window"))
+	implementation(project(":Framework:Common"))
+	implementation(project(":Framework:Annotation"))
 }

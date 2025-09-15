@@ -6,13 +6,13 @@ import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2ic;
 
 public interface WindowListener extends IListener {
-	void onResize(@NotNull Vector2ic newSize);
+	default void onResize(@NotNull Vector2ic newSize) { /* no-op */ }
 
-	void onMove(@NotNull Vector2ic newPosition);
+	default void onMove(@NotNull Vector2ic newPosition) { /* no-op */ }
 
-	void onFocusChanged(boolean isFocus);
+	default void onFocusChanged(boolean isFocus) { /* no-op */ }
 
-	void onDisplayTypeChanged(@NotNull WindowDisplayType newType);
+	default void onDisplayTypeChanged(@NotNull WindowDisplayType newType) { /* no-op */ }
 
-	void onClose();
+	default void onClose() { /* no-op */ }
 }

@@ -1,5 +1,6 @@
 package io.github.wsyong11.gameforge.framework.system.render;
 
+import io.github.wsyong11.gameforge.framework.annotation.UnsafeAPI;
 import io.github.wsyong11.gameforge.framework.listener.ListenerList;
 import io.github.wsyong11.gameforge.framework.listener.ex.ListenerExceptionCallback;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
@@ -8,12 +9,13 @@ import io.github.wsyong11.gameforge.framework.system.log.core.LogLevel;
 import io.github.wsyong11.gameforge.framework.system.render.engine.RenderEngine;
 import io.github.wsyong11.gameforge.framework.system.render.engine.RenderEngineContext;
 import io.github.wsyong11.gameforge.framework.system.render.engine.RenderSystemContext;
+import io.github.wsyong11.gameforge.framework.system.render.ex.RenderSystemInitiationException;
 import io.github.wsyong11.gameforge.framework.system.render.listener.LogicSizeListener;
 import io.github.wsyong11.gameforge.framework.system.render.listener.RenderEngineErrorListener;
 import io.github.wsyong11.gameforge.framework.system.render.provider.RenderEngineProvider;
 import io.github.wsyong11.gameforge.framework.system.render.provider.WindowManagerProvider;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourceProvider;
-import io.github.wsyong11.gameforge.framework.system.window.WindowManager;
+import io.github.wsyong11.gameforge.framework.system.window.*;
 import io.github.wsyong11.gameforge.util.concurrent.TaskHandler;
 import io.github.wsyong11.gameforge.util.concurrent.executor.TaskQueueExecutor;
 import io.github.wsyong11.gameforge.util.exception.ExceptionHandler;
@@ -22,11 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
 
-import java.lang.invoke.LambdaMetafactory;
-import java.util.Deque;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  *
@@ -42,8 +40,8 @@ public final class RenderSystem {
 		@NotNull Vector2ic logicSize,
 		boolean debug,
 		@NotNull RenderEngineProvider engineProvider,
-		@NotNull WindowManagerProvider windowManagerProvider,
-		) {
+		@NotNull WindowManagerProvider windowManagerProvider
+	) throws RenderSystemInitiationException {
 		Objects.requireNonNull(resourceProvider, "resourceProvider is null");
 		Objects.requireNonNull(logicSize, "logicSize is null");
 		Objects.requireNonNull(engineProvider, "engineProvider is null");
@@ -70,10 +68,8 @@ public final class RenderSystem {
 
 	public static void shutdown() {
 		RenderSystem instance = getInstanceSafe();
-		if (instance == null) {
-			LOGGER.warn("Attempted to shutdown RenderSystem, but none was bound");
+		if (instance == null)
 			return;
-		}
 
 		LOGGER.debug("Shutdown RenderSystem on thread {}", Thread.currentThread());
 		instance.shutdownThis();
@@ -106,6 +102,7 @@ public final class RenderSystem {
 	private final WindowManager windowManager;
 	private final RenderEngine engine;
 	private final Context context;
+	private final Window window;
 
 	private boolean running;
 
@@ -115,7 +112,7 @@ public final class RenderSystem {
 		@NotNull WindowManagerProvider windowManagerProvider,
 		@NotNull Vector2ic logicSize,
 		boolean debug
-	) {
+	) throws RenderSystemInitiationException {
 		Objects.requireNonNull(resourceProvider, "resourceProvider is null");
 		Objects.requireNonNull(provider, "provider is null");
 		Objects.requireNonNull(logicSize, "logicSize is null");
@@ -128,12 +125,29 @@ public final class RenderSystem {
 		this.taskExecutor = new TaskQueueExecutor();
 		this.taskHandler = new TaskHandler(this.taskExecutor);
 
-		this.context = new Context(this.listenerList, this.taskHandler);
+		this.context = new Context(this.listenerList, this.taskHandler, debug);
 
 		this.running = false;
 
-		this.windowManager = windowManagerProvider.getFactory().get();
-		this.engine = provider.getFactory().apply(this.context);
+		try {
+			this.windowManager = windowManagerProvider.getFactory().get();
+			this.engine = provider.getFactory().apply(this.context);
+
+			this.windowManager.init();
+
+			LOGGER.debug("Building window");
+			WindowConfigBuilder windowConfigBuilder = new WindowConfigBuilder()
+				.size(new Vector2i(800, 600))
+				.position(new Vector2i(100, 100))
+				.displayType(WindowDisplayType.WINDOW);
+			this.engine.buildWindow(windowConfigBuilder);
+
+			this.window = this.windowManager.createWindow(windowConfigBuilder.build());
+
+			this.window.getGraphicContext().bind();
+		} catch (Exception e) {
+			throw new RenderSystemInitiationException(e);
+		}
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
@@ -160,11 +174,33 @@ public final class RenderSystem {
 			ListenerExceptionCallback.log(LOGGER));
 	}
 
+	@NotNull
+	public Window getWindow() {
+		return this.window;
+	}
+
+	@NotNull
+	@UnsafeAPI
+	public WindowManager getWindowManager() {
+		return this.windowManager;
+	}
+
+	@NotNull
+	@UnsafeAPI
+	public RenderEngine getEngine() {
+		return this.engine;
+	}
+
 	// -------------------------------------------------------------------------------------------------------------- //
 
 	@NotNull
 	public TaskHandler getTaskHandler() {
 		return this.taskHandler;
+	}
+
+	public void runOnUIThread(@NotNull Runnable action) {
+		Objects.requireNonNull(action, "action is null");
+		this.taskHandler.run(action);
 	}
 
 	public boolean isRunning() {
@@ -183,8 +219,19 @@ public final class RenderSystem {
 			return;
 		this.running = true;
 
+		WindowGraphicContext windowGraphicContext = this.window.getGraphicContext();
+
+		this.window.setVisible(true);
+
 		while (this.running) {
 			this.executeTask();
+
+			// FIX: Causes state abnormality when modifying state in a task
+			if (!this.running)
+				break;
+
+			windowGraphicContext.swap();
+			this.windowManager.update();
 		}
 	}
 
@@ -200,10 +247,14 @@ public final class RenderSystem {
 
 		this.taskExecutor.clear();
 
+		this.window.getGraphicContext().unbind();
+
 		ExceptionHandler
 			.create()
 			.run(this.engine::close)
 			.pickOnce(e -> LOGGER.warn("An exception occurred while closing the render engine", e))
+			.run(this.window::close)
+			.pickOnce(e -> LOGGER.warn("Cannot close the window", e))
 			.run(this.windowManager::close)
 			.pickOnce(e -> LOGGER.warn("An exception occurred while closing the window manager", e));
 	}
@@ -213,13 +264,20 @@ public final class RenderSystem {
 	private static class Context implements RenderSystemContext, RenderEngineContext {
 		private final ListenerList listenerList;
 		private final TaskHandler taskHandler;
+		private final boolean debug;
 
-		public Context(@NotNull ListenerList listenerList, TaskHandler taskHandler) {
+		public Context(@NotNull ListenerList listenerList, TaskHandler taskHandler, boolean debug) {
 			Objects.requireNonNull(listenerList, "listenerList is null");
 			Objects.requireNonNull(taskHandler, "taskHandler is null");
 
 			this.listenerList = listenerList;
 			this.taskHandler = taskHandler;
+			this.debug = debug;
+		}
+
+		@Override
+		public boolean isDebug(){
+			return this.debug;
 		}
 
 		@Override

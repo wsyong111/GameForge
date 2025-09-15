@@ -14,4 +14,5 @@ dependencies {
 	implementation(project(":Util"))
 	implementation(project(":Framework:Annotation"))
 	implementation(project(":Framework:Common"))
+	implementation(project(":Framework:System:Log"))
 }

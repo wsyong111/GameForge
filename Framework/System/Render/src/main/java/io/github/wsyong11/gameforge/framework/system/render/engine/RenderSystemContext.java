@@ -4,6 +4,8 @@ import io.github.wsyong11.gameforge.util.concurrent.TaskHandler;
 import org.jetbrains.annotations.NotNull;
 
 public interface RenderSystemContext {
+	boolean isDebug();
+
 	@NotNull
 	TaskHandler getTaskHandler();
 }

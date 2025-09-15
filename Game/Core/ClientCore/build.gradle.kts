@@ -16,4 +16,6 @@ dependencies {
 	implementation(project(":Framework:System:Resource"))
 	implementation(project(":Framework:System:Render"))
 	implementation(project(":Framework:System:Window"))
+	implementation(project(":Framework:Listener"))
+	implementation(project(":Util"))
 }

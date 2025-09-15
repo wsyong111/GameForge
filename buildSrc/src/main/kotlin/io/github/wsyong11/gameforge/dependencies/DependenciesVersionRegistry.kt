@@ -49,7 +49,8 @@ class DependencyDSL(
 	}
 
 	fun addition(type: ImportType, dependency: Dependency) {
-		this._dependency = this._dependency.copy(additionDependency = this._dependency.additionDependency + (type to dependency))
+		this._dependency =
+			this._dependency.copy(additionDependency = this._dependency.additionDependency + (type to dependency))
 	}
 }
 
@@ -104,16 +105,28 @@ val JOML        = "org.joml"                 dependsOn "joml"       version "1.1
 val LOG4J2_CORE = "org.apache.logging.log4j" dependsOn "log4j-core" version "2.25.1"
 
 val LWJGL_BOM      = "org.lwjgl" dependsOn "lwjgl-bom"      version "3.3.6"   type DependencyType.BOM
-val LWJGL          = "org.lwjgl" dependsOn "lwjgl"          addImpl LWJGL_BOM
-val LWJGL_ASSIMP   = "org.lwjgl" dependsOn "lwjgl-assimp"   addImpl LWJGL_BOM
+
+private const val lwjglNatives = "natives-windows"
+val LWJGL_NATIVE          = "org.lwjgl" dependsOn "lwjgl::${lwjglNatives}"          addImpl LWJGL_BOM
+val LWJGL_ASSIMP_NATIVE   = "org.lwjgl" dependsOn "lwjgl-assimp::${lwjglNatives}"   addImpl LWJGL_BOM
+val LWJGL_GLFW_NATIVE     = "org.lwjgl" dependsOn "lwjgl-glfw::${lwjglNatives}"     addImpl LWJGL_BOM
+val LWJGL_HARFBUZZ_NATIVE = "org.lwjgl" dependsOn "lwjgl-harfbuzz::${lwjglNatives}" addImpl LWJGL_BOM
+val LWJGL_MEOW_NATIVE     = "org.lwjgl" dependsOn "lwjgl-meow::${lwjglNatives}"     addImpl LWJGL_BOM
+val LWJGL_NFD_NATIVE      = "org.lwjgl" dependsOn "lwjgl-nfd::${lwjglNatives}"      addImpl LWJGL_BOM
+val LWJGL_OPENAL_NATIVE   = "org.lwjgl" dependsOn "lwjgl-openal::${lwjglNatives}"   addImpl LWJGL_BOM
+val LWJGL_OPENGL_NATIVE   = "org.lwjgl" dependsOn "lwjgl-opengl::${lwjglNatives}"   addImpl LWJGL_BOM
+val LWJGL_STB_NATIVE      = "org.lwjgl" dependsOn "lwjgl-stb::${lwjglNatives}"      addImpl LWJGL_BOM
+
+val LWJGL          = "org.lwjgl" dependsOn "lwjgl"          addImpl LWJGL_BOM addImpl LWJGL_NATIVE
+val LWJGL_ASSIMP   = "org.lwjgl" dependsOn "lwjgl-assimp"   addImpl LWJGL_BOM addImpl LWJGL_ASSIMP_NATIVE
 val LWJGL_FMOD     = "org.lwjgl" dependsOn "lwjgl-fmod"     addImpl LWJGL_BOM
-val LWJGL_GLFW     = "org.lwjgl" dependsOn "lwjgl-glfw"     addImpl LWJGL_BOM
-val LWJGL_HARFBUZZ = "org.lwjgl" dependsOn "lwjgl-harfbuzz" addImpl LWJGL_BOM
-val LWJGL_MEOW     = "org.lwjgl" dependsOn "lwjgl-meow"     addImpl LWJGL_BOM
-val LWJGL_NFD      = "org.lwjgl" dependsOn "lwjgl-nfd"      addImpl LWJGL_BOM
-val LWJGL_OPENAL   = "org.lwjgl" dependsOn "lwjgl-openal"   addImpl LWJGL_BOM
-val LWJGL_OPENGL   = "org.lwjgl" dependsOn "lwjgl-opengl"   addImpl LWJGL_BOM
-val LWJGL_STB      = "org.lwjgl" dependsOn "lwjgl-stb"      addImpl LWJGL_BOM
+val LWJGL_GLFW     = "org.lwjgl" dependsOn "lwjgl-glfw"     addImpl LWJGL_BOM addImpl LWJGL_GLFW_NATIVE
+val LWJGL_HARFBUZZ = "org.lwjgl" dependsOn "lwjgl-harfbuzz" addImpl LWJGL_BOM addImpl LWJGL_HARFBUZZ_NATIVE
+val LWJGL_MEOW     = "org.lwjgl" dependsOn "lwjgl-meow"     addImpl LWJGL_BOM addImpl LWJGL_MEOW_NATIVE
+val LWJGL_NFD      = "org.lwjgl" dependsOn "lwjgl-nfd"      addImpl LWJGL_BOM addImpl LWJGL_NFD_NATIVE
+val LWJGL_OPENAL   = "org.lwjgl" dependsOn "lwjgl-openal"   addImpl LWJGL_BOM addImpl LWJGL_OPENAL_NATIVE
+val LWJGL_OPENGL   = "org.lwjgl" dependsOn "lwjgl-opengl"   addImpl LWJGL_BOM addImpl LWJGL_OPENGL_NATIVE
+val LWJGL_STB      = "org.lwjgl" dependsOn "lwjgl-stb"      addImpl LWJGL_BOM addImpl LWJGL_STB_NATIVE
 
 val JACKSON      = "com.fasterxml.jackson.core"       dependsOn "jackson-databind"        version "2.19.2"
 val JACKSON_YAML = "com.fasterxml.jackson.dataformat" dependsOn "jackson-dataformat-yaml" version JACKSON
