@@ -122,7 +122,7 @@ public class GLFWWindowManager implements WindowManager {
 
 	@Override
 	public void close() {
-		freeCallback(this.errorCallback);
+		this.errorCallback.free();
 		glfwTerminate();
 	}
 }

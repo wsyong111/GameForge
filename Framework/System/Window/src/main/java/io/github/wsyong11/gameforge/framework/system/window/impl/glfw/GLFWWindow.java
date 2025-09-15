@@ -18,12 +18,14 @@ import org.joml.Vector2i;
 import org.joml.Vector2ic;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.glfw.*;
+import org.lwjgl.system.Callback;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
-import static io.github.wsyong11.gameforge.framework.system.window.impl.glfw.GlfwUtils.freeCallback;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
@@ -47,10 +49,7 @@ public class GLFWWindow implements Window {
 	private long handler;
 	private GLFWGraphicContext graphicContext;
 
-	private GLFWWindowSizeCallback sizeCallback;
-	private GLFWWindowPosCallback positionCallback;
-	private GLFWKeyCallback inputCallback;
-	private GLFWWindowCloseCallback closeCallback;
+	private final List<Callback> callbacks;
 
 	private final ListenerList listenerList;
 
@@ -70,6 +69,8 @@ public class GLFWWindow implements Window {
 		this.handler = handler;
 		this.graphicContext = graphicContext;
 
+		this.callbacks = new ArrayList<>();
+
 		this.listenerList = ListenerList.sync();
 
 		this.title = "";
@@ -86,28 +87,49 @@ public class GLFWWindow implements Window {
 		this.setWindowPosition(config.getPosition());
 	}
 
+	@Contract("_ -> param1")
+	@NotNull
+	private <T extends Callback> T addCallback(@NotNull T callback) {
+		Objects.requireNonNull(callback, "callback is null");
+		this.callbacks.add(callback);
+		return callback;
+	}
+
 	private void initCallback() {
-		this.sizeCallback = GLFWWindowSizeCallback.create((window, width, height) -> {
-			this.windowSize.set(width, height);
-			this.fireWindowResized();
-		});
+		glfwSetWindowSizeCallback(this.handler, this.addCallback(GLFWWindowSizeCallback
+			.create((window, width, height) -> {
+				this.windowSize.set(width, height);
+				this.fireWindowResized();
+			})));
 
-		this.positionCallback = GLFWWindowPosCallback.create((window, x, y) -> {
-			this.windowPosition.set(x, y);
-			this.fireWindowMoved();
-		});
+		glfwSetWindowPosCallback(this.handler, this.addCallback(GLFWWindowPosCallback
+			.create((window, x, y) -> {
+				this.windowPosition.set(x, y);
+				this.fireWindowMoved();
+			})));
 
-		this.inputCallback = GLFWKeyCallback.create((window, key, scancode, action, mods) -> {
+		glfwSetWindowCloseCallback(this.handler, this.addCallback(GLFWWindowCloseCallback
+			.create((window) -> this.fireWindowClose())));
 
-		});
+		glfwSetKeyCallback(this.handler, this.addCallback(GLFWKeyCallback
+			.create((window, keyCode, scanCode, action, mods) -> {
 
-		this.closeCallback = GLFWWindowCloseCallback.create((window) ->
-			this.fireWindowClose());
+			})));
 
-		freeCallback(glfwSetWindowSizeCallback(this.handler, this.sizeCallback));
-		freeCallback(glfwSetWindowPosCallback(this.handler, this.positionCallback));
-		freeCallback(glfwSetKeyCallback(this.handler, this.inputCallback));
-		freeCallback(glfwSetWindowCloseCallback(this.handler, this.closeCallback));
+		glfwSetMouseButtonCallback(this.handler, this.addCallback(GLFWMouseButtonCallback
+			.create((window, button, action, mods) -> {
+
+			})));
+
+		glfwSetCursorPosCallback(this.handler, this.addCallback(GLFWCursorPosCallback
+			.create((window, xPos, yPos) -> {
+
+			})));
+
+		glfwSetCursorEnterCallback(this.handler, this.addCallback(GLFWCursorEnterCallback
+			.create((window, entered) -> {
+
+			})));
 	}
 
 	public long getHandler() {
@@ -377,17 +399,10 @@ public class GLFWWindow implements Window {
 		this.graphicContext.close();
 		this.graphicContext = null;
 
-		freeCallback(this.sizeCallback);
-		this.sizeCallback = null;
+		for (Callback callback : this.callbacks)
+			callback.free();
 
-		freeCallback(this.positionCallback);
-		this.positionCallback = null;
-
-		freeCallback(this.inputCallback);
-		this.inputCallback = null;
-
-		freeCallback(this.closeCallback);
-		this.closeCallback = null;
+		this.callbacks.clear();
 
 		glfwDestroyWindow(this.handler);
 	}

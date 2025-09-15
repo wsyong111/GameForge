@@ -12,6 +12,7 @@ import io.github.wsyong11.gameforge.framework.system.render.engine.RenderSystemC
 import io.github.wsyong11.gameforge.framework.system.render.ex.RenderSystemInitiationException;
 import io.github.wsyong11.gameforge.framework.system.render.listener.LogicSizeListener;
 import io.github.wsyong11.gameforge.framework.system.render.listener.RenderEngineErrorListener;
+import io.github.wsyong11.gameforge.framework.system.render.listener.RendererListener;
 import io.github.wsyong11.gameforge.framework.system.render.provider.RenderEngineProvider;
 import io.github.wsyong11.gameforge.framework.system.render.provider.WindowManagerProvider;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourceProvider;
@@ -24,6 +25,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -101,7 +103,6 @@ public final class RenderSystem {
 
 	private final WindowManager windowManager;
 	private final RenderEngine engine;
-	private final Context context;
 	private final Window window;
 
 	private boolean running;
@@ -125,15 +126,17 @@ public final class RenderSystem {
 		this.taskExecutor = new TaskQueueExecutor();
 		this.taskHandler = new TaskHandler(this.taskExecutor);
 
-		this.context = new Context(this.listenerList, this.taskHandler, debug);
 
 		this.running = false;
 
 		try {
+			Context context = new Context(this.listenerList, this.taskHandler, debug);
+
 			this.windowManager = windowManagerProvider.getFactory().get();
-			this.engine = provider.getFactory().apply(this.context);
+			this.engine = provider.getFactory().apply(context);
 
 			this.windowManager.init();
+			this.engine.init();
 
 			LOGGER.debug("Building window");
 			WindowConfigBuilder windowConfigBuilder = new WindowConfigBuilder()
@@ -230,6 +233,9 @@ public final class RenderSystem {
 			if (!this.running)
 				break;
 
+			this.engine.preRender();
+			this.engine.render(List.of());
+
 			windowGraphicContext.swap();
 			this.windowManager.update();
 		}
@@ -276,7 +282,7 @@ public final class RenderSystem {
 		}
 
 		@Override
-		public boolean isDebug(){
+		public boolean isDebug() {
 			return this.debug;
 		}
 
@@ -301,6 +307,18 @@ public final class RenderSystem {
 		public void unregisterLogicSizeListener(@NotNull LogicSizeListener listener) {
 			Objects.requireNonNull(listener, "listener is null");
 			this.listenerList.remove(LogicSizeListener.class, listener);
+		}
+
+		@Override
+		public void registerRendererListener(@NotNull RendererListener listener) {
+			Objects.requireNonNull(listener, "listener is null");
+			this.listenerList.add(RendererListener.class, listener);
+		}
+
+		@Override
+		public void unregisterRendererListener(@NotNull RendererListener listener) {
+			Objects.requireNonNull(listener, "listener is null");
+			this.listenerList.remove(RendererListener.class, listener);
 		}
 
 		@NotNull
