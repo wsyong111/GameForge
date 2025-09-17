@@ -34,12 +34,12 @@ public abstract class KeyInputEvent implements InputEvent {
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
-	private final Action action;
+	private final KeyAction action;
 
 	@ModeMask
 	private final int mods;
 
-	public KeyInputEvent(@NotNull Action action, int mods) {
+	public KeyInputEvent(@NotNull KeyAction action, int mods) {
 		Objects.requireNonNull(action, "action is null");
 
 		this.action = action;
@@ -47,7 +47,7 @@ public abstract class KeyInputEvent implements InputEvent {
 	}
 
 	@NotNull
-	public Action getAction() {
+	public KeyAction getAction() {
 		return this.action;
 	}
 
@@ -110,22 +110,23 @@ public abstract class KeyInputEvent implements InputEvent {
 		return Bit.has(this.mods, MODE_NUMLOCK);
 	}
 
-	@Override
-	public String toString() {
-		List<String> data = new ArrayList<>(7);
+	protected void toString(@NotNull List<String> data) {
+		Objects.requireNonNull(data, "data is null");
+
 		if (this.isShiftPress()) data.add("SHIFT");
 		if (this.isControlPress()) data.add("CTRL");
 		if (this.isAltPress()) data.add("ALT");
 		if (this.isSuperPress()) data.add("SUPER");
 		if (this.isCapsLockPress()) data.add("CAPS_LCK");
 		if (this.isNumLockPress()) data.add("NUM_LCK");
-
-		return "KeyInfo{" + this.action + ", [" + String.join(", ", data) + "]}";
 	}
 
-	public enum Action {
-		UP,
-		DOWN,
-		HOLD
+	@NotNull
+	@Override
+	public String toString() {
+		List<String> data = new ArrayList<>(7);
+		this.toString(data);
+
+		return "Key[" + this.action + ", [" + String.join(", ", data) + "]]";
 	}
 }

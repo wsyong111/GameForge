@@ -43,7 +43,7 @@ public class ClientGame extends AbstractGame {
 			}
 		});
 		window.addInputListener(event -> {
-
+			System.out.println(event);
 		});
 	}
 

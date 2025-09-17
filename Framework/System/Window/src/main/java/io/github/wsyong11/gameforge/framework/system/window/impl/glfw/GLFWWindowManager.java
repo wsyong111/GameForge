@@ -19,7 +19,6 @@ import org.lwjgl.system.MemoryUtil;
 import java.util.Locale;
 import java.util.Objects;
 
-import static io.github.wsyong11.gameforge.framework.system.window.impl.glfw.GlfwUtils.freeCallback;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 

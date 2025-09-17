@@ -9,6 +9,10 @@ import io.github.wsyong11.gameforge.framework.system.window.WindowConfig;
 import io.github.wsyong11.gameforge.framework.system.window.WindowDisplayType;
 import io.github.wsyong11.gameforge.framework.system.window.WindowGraphicContext;
 import io.github.wsyong11.gameforge.framework.system.window.impl.glfw.graphic.GLFWGraphicContext;
+import io.github.wsyong11.gameforge.framework.system.window.input.InputEvent;
+import io.github.wsyong11.gameforge.framework.system.window.input.KeyboardInputEvent;
+import io.github.wsyong11.gameforge.framework.system.window.input.MouseClickEvent;
+import io.github.wsyong11.gameforge.framework.system.window.input.MouseMoveEvent;
 import io.github.wsyong11.gameforge.framework.system.window.listener.WindowInputListener;
 import io.github.wsyong11.gameforge.framework.system.window.listener.WindowListener;
 import org.jetbrains.annotations.Contract;
@@ -26,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static io.github.wsyong11.gameforge.framework.system.window.impl.glfw.GLFWInputUtils.*;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
@@ -113,18 +118,34 @@ public class GLFWWindow implements Window {
 
 		glfwSetKeyCallback(this.handler, this.addCallback(GLFWKeyCallback
 			.create((window, keyCode, scanCode, action, mods) -> {
-
+				this.fireInputEvent(new KeyboardInputEvent(
+					castAction(action),
+					castMods(mods),
+					castKeyCode(keyCode)));
 			})));
 
 		glfwSetMouseButtonCallback(this.handler, this.addCallback(GLFWMouseButtonCallback
 			.create((window, button, action, mods) -> {
+				MouseClickEvent.Key mouseKey = switch (button) {
+					case GLFW_MOUSE_BUTTON_LEFT -> MouseClickEvent.Key.LEFT;
+					case GLFW_MOUSE_BUTTON_MIDDLE -> MouseClickEvent.Key.MIDDLE;
+					case GLFW_MOUSE_BUTTON_RIGHT -> MouseClickEvent.Key.RIGHT;
+					default -> null;
+				};
 
+				if (mouseKey == null) {
+					LOGGER.debug("Unknown mouse key {}", button);
+					return;
+				}
+
+				this.fireInputEvent(new MouseClickEvent(
+					castAction(action),
+					castMods(mods),
+					mouseKey));
 			})));
 
 		glfwSetCursorPosCallback(this.handler, this.addCallback(GLFWCursorPosCallback
-			.create((window, xPos, yPos) -> {
-
-			})));
+			.create((window, xPos, yPos) -> this.fireInputEvent(new MouseMoveEvent(xPos, yPos)))));
 
 		glfwSetCursorEnterCallback(this.handler, this.addCallback(GLFWCursorEnterCallback
 			.create((window, entered) -> {
@@ -156,6 +177,15 @@ public class GLFWWindow implements Window {
 		this.listenerList.fire(
 			WindowListener.class,
 			WindowListener::onClose,
+			ListenerExceptionCallback.log(LOGGER));
+	}
+
+	private void fireInputEvent(@NotNull InputEvent event) {
+		Objects.requireNonNull(event, "event is null");
+
+		this.listenerList.fire(
+			WindowInputListener.class,
+			l -> l.onInput(event),
 			ListenerExceptionCallback.log(LOGGER));
 	}
 
