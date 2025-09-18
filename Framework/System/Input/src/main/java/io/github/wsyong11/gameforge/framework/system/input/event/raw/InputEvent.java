@@ -1,4 +1,4 @@
-package io.github.wsyong11.gameforge.framework.system.window.input;
+package io.github.wsyong11.gameforge.framework.system.input.event.raw;
 
 import org.jetbrains.annotations.NotNull;
 

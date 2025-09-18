@@ -1,5 +1,6 @@
-package io.github.wsyong11.gameforge.framework.system.window.input;
+package io.github.wsyong11.gameforge.framework.system.input.event.raw;
 
+import io.github.wsyong11.gameforge.framework.key.KeyAction;
 import io.github.wsyong11.gameforge.util.Bit;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +16,7 @@ public abstract class KeyInputEvent implements InputEvent {
 	public static final int MODE_ALT      = 1 << 2;
 	public static final int MODE_SUPER    = 1 << 3;
 	public static final int MODE_CAPSLOCK = 1 << 4;
-	public static final int MODE_NUMLOCK  = 1 << 4;
+	public static final int MODE_NUMLOCK  = 1 << 5;
 
 	@ModeMask
 	public static final int MODE_ALL = MODE_SHIFT | MODE_CONTROL | MODE_ALT | MODE_SUPER | MODE_CAPSLOCK | MODE_NUMLOCK;

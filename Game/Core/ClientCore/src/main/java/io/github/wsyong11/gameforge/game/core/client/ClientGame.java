@@ -6,7 +6,6 @@ import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.window.Window;
 import io.github.wsyong11.gameforge.framework.system.window.impl.glfw.GLFWWindowManager;
 import io.github.wsyong11.gameforge.framework.system.window.input.InputEvent;
-import io.github.wsyong11.gameforge.framework.system.window.listener.WindowInputListener;
 import io.github.wsyong11.gameforge.framework.system.window.listener.WindowListener;
 import io.github.wsyong11.gameforge.game.common.core.AbstractGame;
 import io.github.wsyong11.gameforge.game.common.core.StartupConfig;

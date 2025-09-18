@@ -1,10 +1,11 @@
-package io.github.wsyong11.gameforge.framework;
+package io.github.wsyong11.gameforge.framework.key;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -82,7 +83,7 @@ public enum KeyCode {
 	RIGHT_ALT    (0x0309, '\0', "AltRight"),
 	ENTER        (0x030A, '\n', "Enter"),
 	BACKSPACE    (0x030B, '\b', "Backspace"),
-	SPACE        (0x030C, ' ', "Space"),
+	SPACE        (0x030C, ' ' , "Space"),
 	DELETE       (0x030D, '\0', "Delete"),
 	INSERT       (0x030E, '\0', "Insert"),
 	HOME         (0x030F, '\0', "Home"),
@@ -98,35 +99,35 @@ public enum KeyCode {
 	MENU         (0x0319, '\0', "Menu"),
 
 	// 符号键 (0x04FF)
-	MINUS        (0x0400, '-', "Minus"),
-	EQUAL        (0x0401, '=', "Equal"),
-	LEFT_BRACKET (0x0402, '[', "BracketLeft"),
-	RIGHT_BRACKET(0x0403, ']', "BracketRight"),
+	MINUS        (0x0400, '-' , "Minus"),
+	EQUAL        (0x0401, '=' , "Equal"),
+	LEFT_BRACKET (0x0402, '[' , "BracketLeft"),
+	RIGHT_BRACKET(0x0403, ']' , "BracketRight"),
 	BACKSLASH    (0x0404, '\\', "Backslash"),
-	SEMICOLON    (0x0405, ';', "Semicolon"),
+	SEMICOLON    (0x0405, ';' , "Semicolon"),
 	APOSTROPHE   (0x0406, '\'', "Quote"),
-	GRAVE_ACCENT (0x0407, '`', "Backquote"),
-	COMMA        (0x0408, ',', "Comma"),
-	PERIOD       (0x0409, '.', "Period"),
-	SLASH        (0x040A, '/', "Slash"),
+	GRAVE_ACCENT (0x0407, '`' , "Backquote"),
+	COMMA        (0x0408, ',' , "Comma"),
+	PERIOD       (0x0409, '.' , "Period"),
+	SLASH        (0x040A, '/' , "Slash"),
 
 	// 小键盘 (0x05FF)
-	NUMPAD_0       (0x0500, '0', "Numpad0"),
-	NUMPAD_1       (0x0501, '1', "Numpad1"),
-	NUMPAD_2       (0x0502, '2', "Numpad2"),
-	NUMPAD_3       (0x0503, '3', "Numpad3"),
-	NUMPAD_4       (0x0504, '4', "Numpad4"),
-	NUMPAD_5       (0x0505, '5', "Numpad5"),
-	NUMPAD_6       (0x0506, '6', "Numpad6"),
-	NUMPAD_7       (0x0507, '7', "Numpad7"),
-	NUMPAD_8       (0x0508, '8', "Numpad8"),
-	NUMPAD_9       (0x0509, '9', "Numpad9"),
-	NUMPAD_DECIMAL (0x0510, '.', "NumpadDecimal"),
-	NUMPAD_ADD     (0x0511, '+', "NumpadAdd"),
-	NUMPAD_SUBTRACT(0x0512, '-', "NumpadSubtract"),
-	NUMPAD_MULTIPLY(0x0513, '*', "NumpadMultiply"),
-	NUMPAD_DIVIDE  (0x0514, '/', "NumpadDivide"),
-	NUMPAD_ENTER   (0x0515,'\n',"NumpadEnter"),
+	NUMPAD_0       (0x0500, '0' , "Numpad0"),
+	NUMPAD_1       (0x0501, '1' , "Numpad1"),
+	NUMPAD_2       (0x0502, '2' , "Numpad2"),
+	NUMPAD_3       (0x0503, '3' , "Numpad3"),
+	NUMPAD_4       (0x0504, '4' , "Numpad4"),
+	NUMPAD_5       (0x0505, '5' , "Numpad5"),
+	NUMPAD_6       (0x0506, '6' , "Numpad6"),
+	NUMPAD_7       (0x0507, '7' , "Numpad7"),
+	NUMPAD_8       (0x0508, '8' , "Numpad8"),
+	NUMPAD_9       (0x0509, '9' , "Numpad9"),
+	NUMPAD_DECIMAL (0x0510, '.' , "NumpadDecimal"),
+	NUMPAD_ADD     (0x0511, '+' , "NumpadAdd"),
+	NUMPAD_SUBTRACT(0x0512, '-' , "NumpadSubtract"),
+	NUMPAD_MULTIPLY(0x0513, '*' , "NumpadMultiply"),
+	NUMPAD_DIVIDE  (0x0514, '/' , "NumpadDivide"),
+	NUMPAD_ENTER   (0x0515, '\n',"NumpadEnter"),
 
 	// 特殊键 (0x06FF)
 	PRINT_SCREEN(0x0600, '\0', "PrintScreen"),
@@ -135,13 +136,18 @@ public enum KeyCode {
 	;//@formatter:on
 
 	static {
-		BitSet set = new BitSet();
+		assert checkUniqueCodes();
+	}
+
+	private static boolean checkUniqueCodes() {
+		BitSet set = new BitSet(0x06FF);
 		for (KeyCode code : values()) {
 			int codeIndex = code.getCode();
 			if (set.get(codeIndex))
 				throw new IllegalArgumentException("Multi define key code " + codeIndex + ": " + code);
 			set.set(codeIndex);
 		}
+		return true;
 	}
 
 	private static final Map<Integer, KeyCode> CODE_MAP = Arrays
@@ -157,7 +163,9 @@ public enum KeyCode {
 	private final char charCode;
 	private final String name;
 
-	KeyCode(int code, char charCode, String name) {
+	KeyCode(int code, char charCode, @NotNull String name) {
+		Objects.requireNonNull(name, "name is null");
+
 		this.code = code;
 		this.charCode = charCode;
 		this.name = name;
@@ -206,7 +214,7 @@ public enum KeyCode {
 
 	@Override
 	public String toString() {
-		return "Key[" + this.name + "]";
+		return "KeyCode[" + this.name + "]";
 	}
 }
 

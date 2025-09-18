@@ -1,10 +1,12 @@
 package io.github.wsyong11.gameforge.framework.system.window.impl.glfw;
 
-import io.github.wsyong11.gameforge.framework.KeyCode;
+import io.github.wsyong11.gameforge.framework.key.KeyAction;
+import io.github.wsyong11.gameforge.framework.key.KeyCode;
+import io.github.wsyong11.gameforge.framework.key.ModifyKey;
+import io.github.wsyong11.gameforge.framework.key.MouseButton;
+import io.github.wsyong11.gameforge.framework.platform.Platform;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
-import io.github.wsyong11.gameforge.framework.system.window.input.KeyAction;
-import io.github.wsyong11.gameforge.framework.system.window.input.KeyInputEvent;
 import io.github.wsyong11.gameforge.util.Bit;
 import lombok.experimental.UtilityClass;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +17,7 @@ import java.util.Map;
 import static org.lwjgl.glfw.GLFW.*;
 
 @UtilityClass
-public class GLFWInputUtils {
+class GLFWInputUtils {
 	private static final Logger LOGGER = Log.getLogger();
 
 	private static final Map<Integer, KeyCode> GLFW_TO_KEYCODE = new HashMap<>();
@@ -138,24 +140,30 @@ public class GLFWInputUtils {
 		GLFW_TO_KEYCODE.put(GLFW_KEY_SCROLL_LOCK, KeyCode.SCROLL_LOCK);
 		GLFW_TO_KEYCODE.put(GLFW_KEY_PAUSE, KeyCode.PAUSE);
 
+		assert checkKeyCodeCast();
+	}
+
+	private static boolean checkKeyCodeCast() {
 		for (KeyCode code : KeyCode.values()) {
-			if (code==KeyCode.UNKNOWN)
+			if (code == KeyCode.UNKNOWN)
 				continue;
 
 			if (!GLFW_TO_KEYCODE.containsValue(code))
 				throw new IllegalArgumentException("Missing cast " + code);
 		}
+		return true;
 	}
 
-	@KeyInputEvent.ModeMask
+	@ModifyKey.Mask
 	public static int castMods(int mods) {
+		@ModifyKey.Mask
 		int result = 0;
-		if (Bit.has(mods, GLFW_MOD_SHIFT)) result |= KeyInputEvent.MODE_SHIFT;
-		if (Bit.has(mods, GLFW_MOD_CONTROL)) result |= KeyInputEvent.MODE_CONTROL;
-		if (Bit.has(mods, GLFW_MOD_ALT)) result |= KeyInputEvent.MODE_ALT;
-		if (Bit.has(mods, GLFW_MOD_SUPER)) result |= KeyInputEvent.MODE_SUPER;
-		if (Bit.has(mods, GLFW_MOD_CAPS_LOCK)) result |= KeyInputEvent.MODE_CAPSLOCK;
-		if (Bit.has(mods, GLFW_MOD_NUM_LOCK)) result |= KeyInputEvent.MODE_NUMLOCK;
+		if (Bit.has(mods, GLFW_MOD_SHIFT)) result |= ModifyKey.SHIFT;
+		if (Bit.has(mods, GLFW_MOD_CONTROL)) result |= ModifyKey.CONTROL;
+		if (Bit.has(mods, GLFW_MOD_ALT)) result |= ModifyKey.ALT;
+		if (Bit.has(mods, GLFW_MOD_SUPER)) result |= ModifyKey.SUPER;
+		if (Bit.has(mods, GLFW_MOD_CAPS_LOCK)) result |= ModifyKey.CAPSLOCK;
+		if (Bit.has(mods, GLFW_MOD_NUM_LOCK)) result |= ModifyKey.NUMLOCK;
 		return result;
 	}
 
@@ -166,6 +174,21 @@ public class GLFWInputUtils {
 			LOGGER.debug("Unknown glfw key code: {}", code);
 
 		return keyCode;
+	}
+
+	@NotNull
+	public static MouseButton castMouseButton(int button) {
+		return switch (button) {
+			case GLFW_MOUSE_BUTTON_LEFT -> MouseButton.LEFT;
+			case GLFW_MOUSE_BUTTON_MIDDLE -> MouseButton.MIDDLE;
+			case GLFW_MOUSE_BUTTON_RIGHT -> MouseButton.RIGHT;
+			case GLFW_MOUSE_BUTTON_4 -> MouseButton.BUTTON_4;
+			case GLFW_MOUSE_BUTTON_5 -> MouseButton.BUTTON_5;
+			case GLFW_MOUSE_BUTTON_6 -> MouseButton.BUTTON_6;
+			case GLFW_MOUSE_BUTTON_7 -> MouseButton.BUTTON_7;
+			case GLFW_MOUSE_BUTTON_8 -> MouseButton.BUTTON_8;
+			default -> MouseButton.UNKNOWN;
+		};
 	}
 
 	@NotNull

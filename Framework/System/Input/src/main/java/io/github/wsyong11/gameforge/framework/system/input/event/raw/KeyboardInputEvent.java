@@ -1,6 +1,7 @@
-package io.github.wsyong11.gameforge.framework.system.window.input;
+package io.github.wsyong11.gameforge.framework.system.input.event.raw;
 
-import io.github.wsyong11.gameforge.framework.KeyCode;
+import io.github.wsyong11.gameforge.framework.key.KeyAction;
+import io.github.wsyong11.gameforge.framework.key.KeyCode;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
