@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @UtilityClass
 public class ModifyKey {
@@ -87,17 +88,32 @@ public class ModifyKey {
 		return Bit.has(modifier, NUMLOCK);
 	}
 
+	public static boolean isValid(@Mask int modifier) {
+		return Bit.isValid(modifier, ALL);
+	}
+
+	private static final Map<Integer, String> STRING_CAST = Map.of(
+		SHIFT, "SHIFT",
+		CONTROL, "CONTROL",
+		ALT, "ALT",
+		SUPER, "SUPER",
+		CAPSLOCK, "CAPSLOCK",
+		NUMLOCK, "NUMLOCK"
+	);
+
 	@NotNull
 	public static String toString(@Mask int modifier) {
-		List<String> list = new ArrayList<>(7);
-		
-		if (isShift(modifier)) list.add("SHIFT");
-		if (isControl(modifier)) list.add("CONTROL");
-		if (isAlt(modifier)) list.add("ALT");
-		if (isSuper(modifier)) list.add("SUPER");
-		if (isCapsLock(modifier)) list.add("CAPSLOCK");
-		if (isNumLock(modifier)) list.add("NUMLOCK");
+		return Bit.toString(modifier, STRING_CAST);
 
-		return String.join(" | ", list);
+//		List<String> list = new ArrayList<>(7);
+//
+//		if (isShift(modifier)) list.add("SHIFT");
+//		if (isControl(modifier)) list.add("CONTROL");
+//		if (isAlt(modifier)) list.add("ALT");
+//		if (isSuper(modifier)) list.add("SUPER");
+//		if (isCapsLock(modifier)) list.add("CAPSLOCK");
+//		if (isNumLock(modifier)) list.add("NUMLOCK");
+//
+//		return String.join(" | ", list);
 	}
 }

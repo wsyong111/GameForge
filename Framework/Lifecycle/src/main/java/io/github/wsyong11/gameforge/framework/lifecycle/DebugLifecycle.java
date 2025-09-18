@@ -70,6 +70,11 @@ public class DebugLifecycle implements Lifecycle {
 	}
 
 	@Override
+	public boolean isState(@NotNull LifecycleState state) {
+		return this.delegate.isState(state);
+	}
+
+	@Override
 	public void assertState(@NotNull LifecycleState state) {
 		this.delegate.assertState(state);
 	}

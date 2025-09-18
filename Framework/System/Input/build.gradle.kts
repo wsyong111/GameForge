@@ -7,4 +7,5 @@ dependencies {
 	implementation(project(":Framework:Common"))
 	implementation(project(":Util"))
 	implementation(project(":Framework:Listener"))
+	implementation(project(":Framework:System:Log"))
 }

@@ -15,5 +15,4 @@ dependencies {
 	implementation(project(":Framework:Annotation"))
 	implementation(project(":Framework:Common"))
 	implementation(project(":Framework:System:Log"))
-	implementation(project(":Framework:System:Input"))
 }

@@ -8,5 +8,10 @@ public interface Lifecycle extends ILifecycle {
 		return new DefaultLifecycle();
 	}
 
+	@NotNull
+	static Lifecycle debug(@NotNull Lifecycle lifecycle, @NotNull String debugName) {
+		return DebugLifecycle.wrap(lifecycle, debugName);
+	}
+
 	void setState(@NotNull LifecycleState newState);
 }

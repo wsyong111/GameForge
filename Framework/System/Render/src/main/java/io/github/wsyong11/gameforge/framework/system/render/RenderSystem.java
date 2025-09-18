@@ -1,5 +1,6 @@
 package io.github.wsyong11.gameforge.framework.system.render;
 
+import io.github.wsyong11.gameforge.framework.annotation.ThreadSensitive;
 import io.github.wsyong11.gameforge.framework.annotation.UnsafeAPI;
 import io.github.wsyong11.gameforge.framework.listener.ListenerList;
 import io.github.wsyong11.gameforge.framework.listener.ex.ListenerExceptionCallback;
@@ -55,7 +56,7 @@ public final class RenderSystem {
 
 		LOGGER.debug("RenderSystem bound to thread {}", thread);
 
-		RenderSystem renderSystem = new RenderSystem(resourceProvider, engineProvider, windowManagerProvider, logicSize, debug);
+		RenderSystem renderSystem = new RenderSystem(resourceProvider, engineProvider, windowManagerProvider, logicSize, debug, thread);
 
 		INSTANCE.set(renderSystem);
 		return renderSystem;
@@ -95,6 +96,7 @@ public final class RenderSystem {
 
 	private final boolean debug;
 	private final Vector2i logicSize;
+	private final Thread thread;
 
 	private final ListenerList listenerList;
 
@@ -112,7 +114,8 @@ public final class RenderSystem {
 		@NotNull RenderEngineProvider provider,
 		@NotNull WindowManagerProvider windowManagerProvider,
 		@NotNull Vector2ic logicSize,
-		boolean debug
+		boolean debug,
+		@NotNull Thread thread
 	) throws RenderSystemInitiationException {
 		Objects.requireNonNull(resourceProvider, "resourceProvider is null");
 		Objects.requireNonNull(provider, "provider is null");
@@ -120,6 +123,7 @@ public final class RenderSystem {
 
 		this.logicSize = new Vector2i(logicSize);
 		this.debug = debug;
+		this.thread = thread;
 
 		this.listenerList = ListenerList.sync();
 
@@ -201,9 +205,14 @@ public final class RenderSystem {
 		return this.taskHandler;
 	}
 
+	@ThreadSensitive
 	public void runOnUIThread(@NotNull Runnable action) {
 		Objects.requireNonNull(action, "action is null");
-		this.taskHandler.run(action);
+
+		if (Thread.currentThread() == this.thread)
+			action.run();
+		else
+			this.taskHandler.run(action);
 	}
 
 	public boolean isRunning() {

@@ -1,6 +1,7 @@
 package io.github.wsyong11.gameforge.framework.bootstrap;
 
 import io.github.wsyong11.gameforge.framework.app.Application;
+import io.github.wsyong11.gameforge.framework.lifecycle.ILifecycle;
 import io.github.wsyong11.gameforge.framework.lifecycle.LifecycleState;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
@@ -79,7 +80,8 @@ public class Bootstrap<T> implements AutoCloseable {
 		if (this.app == null)
 			return;
 
-		if (this.app.getLifecycle().getState() == LifecycleState.ERROR)
+		ILifecycle appLifecycle = this.app.getLifecycle();
+		if (!appLifecycle.isState(LifecycleState.RUNNING))
 			return;
 
 		LOGGER.info("Cleaning data");

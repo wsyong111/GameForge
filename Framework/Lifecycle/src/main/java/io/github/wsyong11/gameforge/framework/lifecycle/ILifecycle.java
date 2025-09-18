@@ -12,6 +12,11 @@ public interface ILifecycle {
 
 	void removeListener(@NotNull LifecycleListener listener);
 
+	default boolean isState(@NotNull LifecycleState state) {
+		Objects.requireNonNull(state, "state is null");
+		return this.getState() == state;
+	}
+
 	default void assertState(@NotNull LifecycleState state) {
 		Objects.requireNonNull(state, "state is null");
 
