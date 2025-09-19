@@ -5,26 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a72e7484-598a-40d2-8080-c72fd6c580c8" name="更改" comment="Updated code">
-      <change afterPath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/DefaultInputManager.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/listener/KeyListener.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Game/Core/ClientCore/src/main/java/io/github/wsyong11/gameforge/game/core/client/InputManagerWindowListener.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Game/Core/ClientCore/src/main/java/io/github/wsyong11/gameforge/game/core/client/RenderThread.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/runConfigurations/RunClient.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/runConfigurations/RunServer.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Game/Core/CommonCore/src/main/java/io/github/wsyong11/gameforge/game/common/core/Watchdog.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/Bootstrap/src/main/java/io/github/wsyong11/gameforge/framework/bootstrap/Bootstrap.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Bootstrap/src/main/java/io/github/wsyong11/gameforge/framework/bootstrap/Bootstrap.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/Common/src/main/java/io/github/wsyong11/gameforge/framework/key/KeyAction.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Common/src/main/java/io/github/wsyong11/gameforge/framework/key/KeyAction.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/Common/src/main/java/io/github/wsyong11/gameforge/framework/key/ModifyKey.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Common/src/main/java/io/github/wsyong11/gameforge/framework/key/ModifyKey.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/Lifecycle/src/main/java/io/github/wsyong11/gameforge/framework/lifecycle/DebugLifecycle.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Lifecycle/src/main/java/io/github/wsyong11/gameforge/framework/lifecycle/DebugLifecycle.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Framework/Lifecycle/src/main/java/io/github/wsyong11/gameforge/framework/lifecycle/ILifecycle.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Lifecycle/src/main/java/io/github/wsyong11/gameforge/framework/lifecycle/ILifecycle.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/Lifecycle/src/main/java/io/github/wsyong11/gameforge/framework/lifecycle/Lifecycle.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Lifecycle/src/main/java/io/github/wsyong11/gameforge/framework/lifecycle/Lifecycle.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Input/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Input/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/InputManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/InputManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/listener/MouseListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/listener/MouseListener.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/RenderSystem.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/RenderSystem.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Window/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Window/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Window/src/main/java/io/github/wsyong11/gameforge/framework/system/window/listener/WindowInputListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Window/src/main/java/io/github/wsyong11/gameforge/framework/system/window/listener/WindowInputListener.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Game/Core/ClientCore/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Core/ClientCore/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Lifecycle/src/main/java/io/github/wsyong11/gameforge/framework/lifecycle/LifecycleInstance.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Lifecycle/src/main/java/io/github/wsyong11/gameforge/framework/lifecycle/LifecycleInstance.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Game/Common/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Common/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Game/Common/src/main/java/io/github/wsyong11/gameforge/game/common/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Common/src/main/java/io/github/wsyong11/gameforge/game/common/Game.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Game/Core/ClientCore/src/main/java/io/github/wsyong11/gameforge/game/core/client/ClientGame.java" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Core/ClientCore/src/main/java/io/github/wsyong11/gameforge/game/core/client/ClientGame.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/Bit.java" beforeDir="false" afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/Bit.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Game/Core/CommonCore/src/main/java/io/github/wsyong11/gameforge/game/common/core/AbstractGame.java" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Core/CommonCore/src/main/java/io/github/wsyong11/gameforge/game/common/core/AbstractGame.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Game/Core/ServerCore/src/main/java/io/github/wsyong11/gameforge/game/core/server/CommandPrompt.java" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Core/ServerCore/src/main/java/io/github/wsyong11/gameforge/game/core/server/CommandPrompt.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Game/Core/ServerCore/src/main/java/io/github/wsyong11/gameforge/game/core/server/ServerGame.java" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Core/ServerCore/src/main/java/io/github/wsyong11/gameforge/game/core/server/ServerGame.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -291,17 +283,7 @@
       <command value="gradle :aggregateJavadoc" />
     </option>
   </component>
-  <component name="RunManager" selected="应用程序.Main">
-    <configuration name="Main" type="Application" factoryName="Application">
-      <option name="MAIN_CLASS_NAME" value="io.github.wsyong11.gameforge.Main" />
-      <module name="GameForge.main" />
-      <option name="PROGRAM_PARAMETERS" value="--type client --log-level trace --debug --temp-dir &quot;./temp/&quot; " />
-      <option name="VM_PARAMETERS" value="-Dlog4j2.debug=false" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/run" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
+  <component name="RunManager" selected="应用程序.RunServer">
     <configuration name="Main" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="io.github.wsyong11.gameforge.Main" />
       <module name="GameForge.main" />
@@ -398,20 +380,6 @@
       <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
       <DebugAllEnabled>false</DebugAllEnabled>
       <RunAsTest>false</RunAsTest>
-      <method v="2" />
-    </configuration>
-    <configuration name="RemoteDebug" type="Remote">
-      <module name="GameForge.main" />
-      <option name="USE_SOCKET_TRANSPORT" value="true" />
-      <option name="SERVER_MODE" value="false" />
-      <option name="SHMEM_ADDRESS" />
-      <option name="HOST" value="localhost" />
-      <option name="PORT" value="5005" />
-      <option name="AUTO_RESTART" value="false" />
-      <RunnerSettings RunnerId="Debug">
-        <option name="DEBUG_PORT" value="5005" />
-        <option name="LOCAL" value="false" />
-      </RunnerSettings>
       <method v="2" />
     </configuration>
     <configuration name="RemoteDebug" type="Remote">
@@ -433,8 +401,8 @@
       <item itemvalue="Gradle.DebugFatJar" />
       <item itemvalue="Gradle.ReleaseFatJar" />
       <item itemvalue="Gradle.GameForge [:aggregateJavadoc]" />
-      <item itemvalue="应用程序.Main" />
-      <item itemvalue="远程 JVM 调试.RemoteDebug" />
+      <item itemvalue="应用程序.RunClient" />
+      <item itemvalue="应用程序.RunServer" />
     </list>
     <recent_temporary>
       <list>
@@ -501,7 +469,9 @@
       <workItem from="1757895041058" duration="29420000" />
       <workItem from="1758064829999" duration="14027000" />
       <workItem from="1758181240908" duration="10373000" />
-      <workItem from="1758196853953" duration="7536000" />
+      <workItem from="1758196853953" duration="8610000" />
+      <workItem from="1758264607858" duration="468000" />
+      <workItem from="1758265864362" duration="10486000" />
     </task>
     <task id="LOCAL-00001" summary="Removed gradle.properties in .gitignore">
       <option name="closed" value="true" />
@@ -599,13 +569,46 @@
       <option name="project" value="LOCAL" />
       <updated>1758196927869</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="Updated code">
+      <option name="closed" value="true" />
+      <created>1758204779136</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1758204779136</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="backup/sync" />
+                </option>
+              </RecentGroup>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="backup/master" />
+                </option>
+              </RecentGroup>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="sync" />
+                </option>
+              </RecentGroup>
+            </list>
+          </value>
+        </entry>
+      </map>
+    </option>
     <option name="TAB_STATES">
       <map>
         <entry key="MAIN">
@@ -621,7 +624,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="backupUsb/sync" />
+                        <option value="backup/sync" />
                       </list>
                     </value>
                   </entry>
@@ -658,9 +661,14 @@
           <option name="timeStamp" value="49" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/Framework/System/Log/src/main/java/io/github/wsyong11/gameforge/framework/system/log/core/JavaLoggerHandler.java</url>
-          <line>45</line>
-          <option name="timeStamp" value="52" />
+          <url>jar://$PROJECT_DIR$/../../.IntellijIdea/Gradle/caches/modules-2/files-2.1/org.jline/jline/3.30.5/913740a5d0b0481b1970fa6264a8da0c017975f2/jline-3.30.5-sources.jar!/org/jline/reader/impl/LineReaderImpl.java</url>
+          <line>784</line>
+          <option name="timeStamp" value="54" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$PROJECT_DIR$/../../.IntellijIdea/Gradle/caches/modules-2/files-2.1/org.jline/jline/3.30.5/913740a5d0b0481b1970fa6264a8da0c017975f2/jline-3.30.5-sources.jar!/org/jline/keymap/BindingReader.java</url>
+          <line>235</line>
+          <option name="timeStamp" value="55" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

@@ -5,6 +5,8 @@ import io.github.wsyong11.gameforge.framework.listener.ListenerList;
 import io.github.wsyong11.gameforge.framework.listener.ex.ListenerExceptionCallback;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
+import io.github.wsyong11.gameforge.framework.system.log.core.LogManager;
+import io.github.wsyong11.gameforge.util.io.CallbackPrintStream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jline.reader.EndOfFileException;
@@ -17,6 +19,8 @@ import org.jline.terminal.TerminalBuilder;
 import java.io.Closeable;
 import java.io.IOError;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.charset.Charset;
 import java.util.Objects;
 
 public class CommandPrompt extends Thread implements Closeable {
@@ -28,6 +32,11 @@ public class CommandPrompt extends Thread implements Closeable {
 	private final LineReader lineReader;
 
 	private final ListenerList listenerList;
+
+	private PrintStream defaultOut;
+	private PrintStream defaultErr;
+
+	private volatile boolean closed;
 
 	public CommandPrompt() throws IOException {
 		this.terminal = TerminalBuilder
@@ -41,6 +50,8 @@ public class CommandPrompt extends Thread implements Closeable {
 			.build();
 
 		this.listenerList = ListenerList.sync();
+
+		this.closed = false;
 
 		this.setName("CommandPromptThread");
 		this.setDaemon(true);
@@ -58,12 +69,16 @@ public class CommandPrompt extends Thread implements Closeable {
 
 	@Override
 	public void run() {
-		while (true) {
-			if (this.isInterrupted()) {
-				this.interrupt();
-				break;
-			}
+		this.defaultOut = LogManager.getDefaultStdout();
+		this.defaultErr = LogManager.getDefaultStderr();
 
+		Charset encoding = this.terminal.outputEncoding();
+
+		CallbackPrintStream consolePrintStream = new CallbackPrintStream(this.lineReader::printAbove, encoding);
+		LogManager.setDefaultStdout(consolePrintStream);
+		LogManager.setDefaultStderr(consolePrintStream);
+
+		while (!this.closed) {
 			String input;
 			try {
 				input = this.readInput();
@@ -87,10 +102,16 @@ public class CommandPrompt extends Thread implements Closeable {
 
 	@Nullable
 	private String readInput() {
+		if (this.closed)
+			return null;
+
 		LOGGER.trace("Reading user input");
 		try {
 			return this.lineReader.readLine(PROMPT);
 		} catch (UserInterruptException e) {
+			if (this.closed)
+				return null;
+
 			LOGGER.trace("Handled Ctrl + C");
 			this.listenerList.fire(UserInterruptListener.class,
 				UserInterruptListener::onInterrupt,
@@ -115,8 +136,20 @@ public class CommandPrompt extends Thread implements Closeable {
 
 	@Override
 	public void close() throws IOException {
+		if (this.closed)
+			return;
+		this.closed = true;
+
+		LOGGER.debug("Closing terminal");
+
+		LogManager.setDefaultStdout(this.defaultOut);
+		LogManager.setDefaultStderr(this.defaultErr);
+
 		this.interrupt();
 		this.listenerList.clear();
+
+//		this.terminal.writer().print("\033[2K");
+		this.terminal.raise(Terminal.Signal.INT);
 		this.terminal.close();
 	}
 

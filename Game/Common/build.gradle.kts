@@ -8,4 +8,5 @@ dependencies {
 	implementation(project(":Framework:Event"))
 	implementation(project(":Framework:Annotation"))
 	implementation(project(":Framework:System:Resource"))
+	implementation(project(":Util"))
 }

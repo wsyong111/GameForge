@@ -1,6 +1,7 @@
 package io.github.wsyong11.gameforge.game.common;
 
 import io.github.wsyong11.gameforge.framework.lifecycle.LifecycleProvider;
+import io.github.wsyong11.gameforge.util.concurrent.TaskHandler;
 import org.jetbrains.annotations.NotNull;
 
 /**

@@ -27,18 +27,6 @@ public class ServerGame extends AbstractGame {
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
-	@Override
-	protected void onStarting() throws Throwable {
-		super.onStarting();
-		this.commandPrompt = new CommandPrompt();
-		this.commandPrompt.addUserInterruptListener(() -> {
-			LOGGER.info("Stopping command prompt thread");
-			this.commandPrompt.interrupt();
-		});
-
-		this.redirectTerminal();
-	}
-
 	private void redirectTerminal() {
 		Terminal terminal = this.commandPrompt.getTerminal();
 		LineReader lineReader = this.commandPrompt.getLineReader();
@@ -50,18 +38,37 @@ public class ServerGame extends AbstractGame {
 		LogManager.setDefaultStderr(consolePrintStream);
 	}
 
+	@Override
+	protected void onStarting() throws Throwable {
+		super.onStarting();
+		this.commandPrompt = new CommandPrompt();
+
+		this.redirectTerminal();
+	}
+
 	// -------------------------------------------------------------------------------------------------------------- //
+
+	@Override
+	protected void tick() {
+		try {
+			Thread.sleep(1100);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
 	@Override
 	protected void onRunning() throws Throwable {
 		super.onRunning();
 
 		this.commandPrompt.start();
-
+		this.mainLoop();
 	}
 
+	// -------------------------------------------------------------------------------------------------------------- //
+
 	@Override
-	protected void onDestroy() {
+	protected void onStopping() throws Throwable {
 		LOGGER.debug("Closing command prompt");
 		try {
 			this.commandPrompt.close();
@@ -69,6 +76,11 @@ public class ServerGame extends AbstractGame {
 			LOGGER.warn("Failed to close command prompt", e);
 		}
 
+		super.onStopping();
+	}
+
+	@Override
+	protected void onDestroy() {
 		super.onDestroy();
 	}
 }

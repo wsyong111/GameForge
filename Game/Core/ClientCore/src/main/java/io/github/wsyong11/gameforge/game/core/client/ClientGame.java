@@ -2,6 +2,8 @@ package io.github.wsyong11.gameforge.game.core.client;
 
 import io.github.wsyong11.gameforge.framework.system.input.DefaultInputManager;
 import io.github.wsyong11.gameforge.framework.system.input.InputManager;
+import io.github.wsyong11.gameforge.framework.system.log.Log;
+import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.render.ex.RenderSystemInitiationException;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.window.Window;
@@ -10,7 +12,11 @@ import io.github.wsyong11.gameforge.game.common.core.AbstractGame;
 import io.github.wsyong11.gameforge.game.common.core.StartupConfig;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.locks.LockSupport;
+
 public class ClientGame extends AbstractGame {
+	private static final Logger LOGGER = Log.getLogger();
+
 	private RenderThread renderThread;
 	private InputManager inputManager;
 
@@ -38,7 +44,7 @@ public class ClientGame extends AbstractGame {
 		window.addWindowListener(new WindowListener() {
 			@Override
 			public void onClose() {
-				stop();
+				requireStop();
 			}
 		});
 	}
@@ -51,6 +57,11 @@ public class ClientGame extends AbstractGame {
 		this.initInputManager();
 	}
 
+	@Override
+	protected void tick() {
+
+	}
+
 	// -------------------------------------------------------------------------------------------------------------- //
 
 	@Override
@@ -58,14 +69,18 @@ public class ClientGame extends AbstractGame {
 		super.onRunning();
 
 		this.renderThread.runThread();
-		this.renderThread.join();
+		this.mainLoop();
 	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
 
 	@Override
 	protected void onStopping() throws Throwable {
 		super.onStopping();
 
 		this.renderThread.close();
+		LOGGER.info("Waiting render thread exit");
+		this.renderThread.join();
 	}
 
 	@Override

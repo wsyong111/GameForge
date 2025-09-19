@@ -10,11 +10,14 @@ import io.github.wsyong11.gameforge.framework.system.resource.pack.AssetsResourc
 import io.github.wsyong11.gameforge.game.common.Game;
 import io.github.wsyong11.gameforge.game.common.GameContext;
 import io.github.wsyong11.gameforge.game.common.GameEnvConfig;
+import io.github.wsyong11.gameforge.util.concurrent.TaskHandler;
+import io.github.wsyong11.gameforge.util.concurrent.executor.TaskQueueExecutor;
 import io.github.wsyong11.gameforge.util.exception.ExceptionHandler;
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
+import java.util.concurrent.locks.LockSupport;
 
 /**
  * 游戏的基本抽象实现，实现了基本的资源管理系统
@@ -23,8 +26,15 @@ public abstract class AbstractGame extends Application implements Game {
 	private static final Logger LOGGER = Log.getLogger();
 
 	private final StartupConfig config;
+	private final Thread thread;
 	private final DefaultResourceManager resourceManager;
 
+	private final Watchdog watchdog;
+
+	private final TaskQueueExecutor taskExecutor;
+	private final TaskHandler handler;
+
+	private volatile boolean stopping;
 	private volatile boolean cleaned;
 
 	/**
@@ -39,10 +49,27 @@ public abstract class AbstractGame extends Application implements Game {
 
 		this.config = config;
 
+		this.thread = Thread.currentThread();
 		this.resourceManager = new DefaultResourceManager(resourceBasePath);
 
+		this.watchdog = new Watchdog(this::watchdogTimeout);
+
+		this.taskExecutor = new TaskQueueExecutor();
+		this.handler = new TaskHandler(this.taskExecutor);
+
+		this.stopping = false;
 		this.cleaned = false;
 	}
+
+	public void requireStop() {
+		if (!this.stopping)
+			LOGGER.debug("Require stop");
+
+		this.stopping = true;
+		LockSupport.unpark(this.thread);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
 
 	/**
 	 * 获取资源管理器实例
@@ -60,6 +87,19 @@ public abstract class AbstractGame extends Application implements Game {
 	public GameContext getContext() {
 		return null;
 	}
+
+	@NotNull
+	@Override
+	public GameEnvConfig getEnvConfig() {
+		return this.config;
+	}
+
+	@NotNull
+	public TaskHandler getHandler() {
+		return this.handler;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
 
 	/**
 	 * 获取启动配置
@@ -81,13 +121,78 @@ public abstract class AbstractGame extends Application implements Game {
 		return this.getClass().getClassLoader();
 	}
 
+	@NotNull
+	protected Thread getThread() {
+		return this.thread;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	protected void watchdogTimeout() {
+		this.requireStop();
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	@Override
+	public void start() {
+		if (Thread.currentThread() != this.thread)
+			throw new IllegalThreadStateException("Can only start in the main thread");
+
+		super.start();
+	}
+
 	@MustBeInvokedByOverriders
 	@Override
 	protected void onStarting() throws Throwable {
 		super.onStarting();
 
+		Thread.setDefaultUncaughtExceptionHandler(this::onUncaughtException);
+
 		LOGGER.debug("Setting up the resource system");
 		this.resourceManager.addPack(new AssetsResourcePack("game"));
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	protected void executeTask() {
+		this.taskExecutor.run(ex ->
+			LOGGER.error("Exception in logic executor", ex));
+	}
+
+	protected abstract void tick();
+
+	protected void mainLoop() {
+		this.thread.setName("LogicThread");
+
+		this.watchdog.start();
+
+		int tps = 20;
+		long tickIntervalNanos = 1_000_000_000L / tps;
+
+		while (!this.stopping) {
+			long start = System.nanoTime();
+
+			this.executeTask();
+			if (this.stopping)
+				break;
+
+			try {
+				this.tick();
+			} catch (Throwable t) {
+				LOGGER.error("Tick error", t);
+				this.requireStop();
+				break;
+			}
+
+			long elapsed = System.nanoTime() - start;
+
+			long waitTime = tickIntervalNanos - elapsed;
+			if (waitTime > 0)
+				LockSupport.parkNanos(waitTime);
+		}
+
+		this.stop();
 	}
 
 	@MustBeInvokedByOverriders
@@ -97,10 +202,16 @@ public abstract class AbstractGame extends Application implements Game {
 		this.resourceManager.reload();
 	}
 
+	// -------------------------------------------------------------------------------------------------------------- //
+
 	@MustBeInvokedByOverriders
 	@Override
 	protected void onStopping() throws Throwable {
 		super.onStopping();
+
+		LOGGER.info("Stopping");
+		this.requireStop();
+		this.watchdog.exit();
 	}
 
 	@MustBeInvokedByOverriders
@@ -111,6 +222,16 @@ public abstract class AbstractGame extends Application implements Game {
 		} finally {
 			this.clean();
 		}
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	protected void onUncaughtException(@NotNull Thread thread, @NotNull Throwable exception) {
+		Objects.requireNonNull(thread, "thread is null");
+		Objects.requireNonNull(exception, "exception is null");
+
+		LOGGER.error("Uncaught exception in thread {}", thread, exception);
+		this.processError(exception);
 	}
 
 	@Override
@@ -138,15 +259,7 @@ public abstract class AbstractGame extends Application implements Game {
 		LOGGER.info("Cleaning resources");
 		handler.run(this.resourceManager::clean);
 
-		handler.toExceptionOptional(RuntimeException::new)
-		       .map(Throwable::fillInStackTrace)
-		       .ifPresent(exception ->
-			       LOGGER.warn("An exception occurred during cleaning", exception));
-	}
-
-	@NotNull
-	@Override
-	public GameEnvConfig getEnvConfig() {
-		return this.config;
+		handler.pickAllEach(exception ->
+			LOGGER.warn("An exception occurred during cleaning", exception));
 	}
 }

@@ -22,7 +22,7 @@ public interface ILifecycle {
 
 		LifecycleState currentState = this.getState();
 		if (currentState != state)
-			throw new IllegalStateException("Error lifecycle state " + currentState);
+			throw new IllegalStateException("Assert state " + state + ", current state " + currentState);
 	}
 
 	default void assertState(@NotNull LifecycleState... states) {
@@ -32,7 +32,7 @@ public interface ILifecycle {
 
 		for (LifecycleState state : states) {
 			if (currentState != state)
-				throw new IllegalStateException("Error lifecycle state " + currentState);
+				throw new IllegalStateException("Assert state " + state + ", current state " + currentState);
 		}
 	}
 }

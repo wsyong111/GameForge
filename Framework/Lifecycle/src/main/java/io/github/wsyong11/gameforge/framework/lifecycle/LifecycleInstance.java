@@ -90,7 +90,7 @@ public abstract class LifecycleInstance implements LifecycleProvider {
 		}
 	}
 
-	private void processError(@NotNull Throwable exception) {
+	protected void processError(@NotNull Throwable exception) {
 		try {
 			this.onError(exception);
 		} finally {
