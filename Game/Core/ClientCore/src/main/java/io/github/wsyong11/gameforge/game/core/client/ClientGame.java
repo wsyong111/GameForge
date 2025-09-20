@@ -57,11 +57,6 @@ public class ClientGame extends AbstractGame {
 		this.initInputManager();
 	}
 
-	@Override
-	protected void tick() {
-
-	}
-
 	// -------------------------------------------------------------------------------------------------------------- //
 
 	@Override

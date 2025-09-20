@@ -15,4 +15,5 @@ dependencies {
 	implementation(project(":Framework:Event"))
 	implementation(project(":Framework:System:Resource"))
 	implementation(project(":Framework:System:Log"))
+	implementation(project(":Framework:Annotation"))
 }

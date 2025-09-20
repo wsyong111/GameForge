@@ -10,6 +10,8 @@ import io.github.wsyong11.gameforge.framework.system.resource.pack.AssetsResourc
 import io.github.wsyong11.gameforge.game.common.Game;
 import io.github.wsyong11.gameforge.game.common.GameContext;
 import io.github.wsyong11.gameforge.game.common.GameEnvConfig;
+import io.github.wsyong11.gameforge.game.common.core.tick.RootTickManager;
+import io.github.wsyong11.gameforge.game.common.tick.TickManager;
 import io.github.wsyong11.gameforge.util.concurrent.TaskHandler;
 import io.github.wsyong11.gameforge.util.concurrent.executor.TaskQueueExecutor;
 import io.github.wsyong11.gameforge.util.exception.ExceptionHandler;
@@ -28,13 +30,13 @@ public abstract class AbstractGame extends Application implements Game {
 	private final StartupConfig config;
 	private final Thread thread;
 	private final DefaultResourceManager resourceManager;
+	private final TickManager tickManager;
 
-	private final Watchdog watchdog;
+	private final GameLoop gameLoop;
 
 	private final TaskQueueExecutor taskExecutor;
 	private final TaskHandler handler;
 
-	private volatile boolean stopping;
 	private volatile boolean cleaned;
 
 	/**
@@ -51,22 +53,18 @@ public abstract class AbstractGame extends Application implements Game {
 
 		this.thread = Thread.currentThread();
 		this.resourceManager = new DefaultResourceManager(resourceBasePath);
+		this.tickManager = new RootTickManager();
 
-		this.watchdog = new Watchdog(this::watchdogTimeout);
+		this.gameLoop = new GameLoop(DEFAULT_TPS, this.tickManager);
 
 		this.taskExecutor = new TaskQueueExecutor();
 		this.handler = new TaskHandler(this.taskExecutor);
 
-		this.stopping = false;
 		this.cleaned = false;
 	}
 
 	public void requireStop() {
-		if (!this.stopping)
-			LOGGER.debug("Require stop");
-
-		this.stopping = true;
-		LockSupport.unpark(this.thread);
+		this.gameLoop.stop();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
@@ -79,6 +77,11 @@ public abstract class AbstractGame extends Application implements Game {
 	@NotNull
 	public ResourceManager getResourceManager() {
 		return this.resourceManager;
+	}
+
+	@NotNull
+	public TickManager getTickManager() {
+		return this.tickManager;
 	}
 
 	// TODO: 2025/9/2 Impl game context
@@ -128,12 +131,6 @@ public abstract class AbstractGame extends Application implements Game {
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
-	protected void watchdogTimeout() {
-		this.requireStop();
-	}
-
-	// -------------------------------------------------------------------------------------------------------------- //
-
 	@Override
 	public void start() {
 		if (Thread.currentThread() != this.thread)
@@ -146,8 +143,9 @@ public abstract class AbstractGame extends Application implements Game {
 	@Override
 	protected void onStarting() throws Throwable {
 		super.onStarting();
-
 		Thread.setDefaultUncaughtExceptionHandler(this::onUncaughtException);
+
+		this.tickManager.register(Integer.MAX_VALUE, this::tick);
 
 		LOGGER.debug("Setting up the resource system");
 		this.resourceManager.addPack(new AssetsResourcePack("game"));
@@ -160,42 +158,13 @@ public abstract class AbstractGame extends Application implements Game {
 			LOGGER.error("Exception in logic executor", ex));
 	}
 
-	protected abstract void tick();
+	protected void tick() {
+		this.executeTask();
+	}
 
 	protected void mainLoop() {
 		this.thread.setName("LogicThread");
-
-		this.watchdog.start();
-
-		int tps = 20;
-		long tickIntervalNanos = 1_000_000_000L / tps;
-
-		while (!this.stopping) {
-			this.watchdog.tick();
-
-			long start = System.nanoTime();
-
-			this.executeTask();
-			if (this.stopping)
-				break;
-
-			try {
-				this.tick();
-			} catch (Throwable t) {
-				LOGGER.error("Tick error", t);
-				this.requireStop();
-				break;
-			}
-
-			long elapsed = System.nanoTime() - start;
-
-			long waitTime = tickIntervalNanos - elapsed;
-			if (waitTime > 0)
-				LockSupport.parkNanos(waitTime);
-		}
-
-		this.watchdog.exit();
-
+		this.gameLoop.run();
 		this.stop();
 	}
 

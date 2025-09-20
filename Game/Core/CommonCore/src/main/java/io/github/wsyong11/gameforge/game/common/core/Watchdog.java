@@ -5,6 +5,7 @@ import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
 public class Watchdog extends Thread {
@@ -13,13 +14,16 @@ public class Watchdog extends Thread {
 	private final Runnable callback;
 
 	private long lastTickTimeNs;
-	private long warningElapseNs = 1000L * 1000L * 1000L;
-	private long maxElapseNs = 1000L * 1000L * 1000L;
+	private long warningElapseNs;
+	private long maxElapseNs;
 
-	public Watchdog(@NotNull Runnable callback) {
+	public Watchdog(@NotNull Runnable callback, long warningElapse, long maxElapse, @NotNull TimeUnit unit) {
 		Objects.requireNonNull(callback, "callback is null");
+		Objects.requireNonNull(unit, "unit is null");
 
 		this.callback = callback;
+		this.warningElapseNs=unit.toNanos(warningElapse);
+		this.maxElapseNs=unit.toNanos(maxElapse);
 
 		this.lastTickTimeNs = 0L;
 
@@ -31,8 +35,33 @@ public class Watchdog extends Thread {
 		this.lastTickTimeNs = System.nanoTime();
 	}
 
+	public void setWarningElapse(long warningElapse, @NotNull TimeUnit unit) {
+		Objects.requireNonNull(unit, "unit is null");
+
+		long warningElapseNs = unit.toNanos(warningElapse);
+		if (this.warningElapseNs == warningElapseNs)
+			return;
+
+		this.warningElapseNs = warningElapseNs;
+		LockSupport.unpark(this);
+	}
+
+	public void setMaxElapse(long maxElapse, @NotNull TimeUnit unit) {
+		Objects.requireNonNull(unit, "unit is null");
+
+		long maxElapseNs = unit.toNanos(maxElapse);
+		if (this.maxElapseNs == maxElapseNs)
+			return;
+
+		this.maxElapseNs = maxElapseNs;
+		LockSupport.unpark(this);
+	}
+
 	@Override
 	public synchronized void start() {
+		if (this.getState() != State.NEW)
+			return;
+
 		this.tick();
 		super.start();
 	}
@@ -48,14 +77,14 @@ public class Watchdog extends Thread {
 			if (!warned && elapseNs > this.warningElapseNs) {
 				warned = true;
 				LOGGER.warn("Logic thread unresponsive for {} ms",
-					elapseNs / 1000L / 1000L);
+					TimeUnit.NANOSECONDS.toMillis(elapseNs));
 			}
 
 			if (elapseNs > this.maxElapseNs) {
 				if (!callbackInvoked) {
 					LOGGER.error("Logic thread exceeded max allowed {} ms (actual {} ms)",
-						this.maxElapseNs / 1000L / 1000L,
-						elapseNs / 1000L / 1000L);
+						TimeUnit.NANOSECONDS.toMillis(this.maxElapseNs),
+						TimeUnit.NANOSECONDS.toMillis(elapseNs));
 
 					callbackInvoked = true;
 					try {
