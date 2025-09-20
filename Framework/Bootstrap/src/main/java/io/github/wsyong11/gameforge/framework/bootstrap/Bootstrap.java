@@ -81,17 +81,17 @@ public class Bootstrap<T> implements AutoCloseable {
 			return;
 
 		ILifecycle appLifecycle = this.app.getLifecycle();
-		if (!appLifecycle.isState(LifecycleState.RUNNING))
-			return;
+		if (appLifecycle.isState(LifecycleState.RUNNING)) {
+			LOGGER.info("Cleaning data");
 
-		LOGGER.info("Cleaning data");
-
-		try {
-			this.app.stop();
-		} catch (Exception e) {
-			LOGGER.error("Exception in cleaning main class", e);
+			try {
+				this.app.stop();
+			} catch (Exception e) {
+				LOGGER.error("Exception in cleaning main class", e);
+			}
 		}
 
 		this.app = null;
+		LOGGER.info("Application exited");
 	}
 }

@@ -33,8 +33,8 @@ public class CommandPrompt extends Thread implements Closeable {
 
 	private final ListenerList listenerList;
 
-	private PrintStream defaultOut;
-	private PrintStream defaultErr;
+	private volatile PrintStream defaultOut;
+	private volatile PrintStream defaultErr;
 
 	private volatile boolean closed;
 
@@ -42,6 +42,7 @@ public class CommandPrompt extends Thread implements Closeable {
 		this.terminal = TerminalBuilder
 			.builder()
 			.system(true)
+			.encoding(Charset.defaultCharset())
 			.build();
 
 		this.lineReader = LineReaderBuilder
@@ -68,16 +69,21 @@ public class CommandPrompt extends Thread implements Closeable {
 	}
 
 	@Override
-	public void run() {
+	public synchronized void start() {
 		this.defaultOut = LogManager.getDefaultStdout();
 		this.defaultErr = LogManager.getDefaultStderr();
 
-		Charset encoding = this.terminal.outputEncoding();
+		Charset encoding = Charset.defaultCharset();
 
 		CallbackPrintStream consolePrintStream = new CallbackPrintStream(this.lineReader::printAbove, encoding);
 		LogManager.setDefaultStdout(consolePrintStream);
 		LogManager.setDefaultStderr(consolePrintStream);
 
+		super.start();
+	}
+
+	@Override
+	public void run() {
 		while (!this.closed) {
 			String input;
 			try {
@@ -95,9 +101,16 @@ public class CommandPrompt extends Thread implements Closeable {
 
 			LOGGER.trace("User input: \"{}\"", input);
 
-			if ("exit".equalsIgnoreCase(input))
-				this.interrupt();
+			this.listenerList.fire(
+				InputListener.class,
+				l -> l.onInput(input),
+				ListenerExceptionCallback.log(LOGGER));
 		}
+
+		LogManager.setDefaultStdout(this.defaultOut);
+		LogManager.setDefaultStderr(this.defaultErr);
+
+		LOGGER.debug("Closed");
 	}
 
 	@Nullable
@@ -132,6 +145,16 @@ public class CommandPrompt extends Thread implements Closeable {
 		this.listenerList.remove(UserInterruptListener.class, listener);
 	}
 
+	public void addInputListener(@NotNull InputListener listener) {
+		Objects.requireNonNull(listener, "listener is null");
+		this.listenerList.add(InputListener.class, listener);
+	}
+
+	public void removeInputListener(@NotNull InputListener listener) {
+		Objects.requireNonNull(listener, "listener is null");
+		this.listenerList.remove(InputListener.class, listener);
+	}
+
 	// -------------------------------------------------------------------------------------------------------------- //
 
 	@Override
@@ -142,18 +165,23 @@ public class CommandPrompt extends Thread implements Closeable {
 
 		LOGGER.debug("Closing terminal");
 
-		LogManager.setDefaultStdout(this.defaultOut);
-		LogManager.setDefaultStderr(this.defaultErr);
-
 		this.interrupt();
-		this.listenerList.clear();
+		try {
+			this.join();
+		} catch (InterruptedException e) {
+			LOGGER.debug("Interrupted when waiting command prompt close", e);
+			Thread.currentThread().interrupt();
+		}
 
-//		this.terminal.writer().print("\033[2K");
-		this.terminal.raise(Terminal.Signal.INT);
+		this.listenerList.clear();
 		this.terminal.close();
 	}
 
 	public interface UserInterruptListener extends IListener {
 		void onInterrupt();
+	}
+
+	public interface InputListener extends IListener {
+		void onInput(@NotNull String text);
 	}
 }

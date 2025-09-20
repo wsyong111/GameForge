@@ -4,20 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a72e7484-598a-40d2-8080-c72fd6c580c8" name="更改" comment="Updated code">
-      <change afterPath="$PROJECT_DIR$/.idea/runConfigurations/RunClient.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/runConfigurations/RunServer.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Game/Core/CommonCore/src/main/java/io/github/wsyong11/gameforge/game/common/core/Watchdog.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/Lifecycle/src/main/java/io/github/wsyong11/gameforge/framework/lifecycle/ILifecycle.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Lifecycle/src/main/java/io/github/wsyong11/gameforge/framework/lifecycle/ILifecycle.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/Lifecycle/src/main/java/io/github/wsyong11/gameforge/framework/lifecycle/LifecycleInstance.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Lifecycle/src/main/java/io/github/wsyong11/gameforge/framework/lifecycle/LifecycleInstance.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Game/Common/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Common/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Game/Common/src/main/java/io/github/wsyong11/gameforge/game/common/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Common/src/main/java/io/github/wsyong11/gameforge/game/common/Game.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Game/Core/ClientCore/src/main/java/io/github/wsyong11/gameforge/game/core/client/ClientGame.java" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Core/ClientCore/src/main/java/io/github/wsyong11/gameforge/game/core/client/ClientGame.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Game/Core/CommonCore/src/main/java/io/github/wsyong11/gameforge/game/common/core/AbstractGame.java" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Core/CommonCore/src/main/java/io/github/wsyong11/gameforge/game/common/core/AbstractGame.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Game/Core/ServerCore/src/main/java/io/github/wsyong11/gameforge/game/core/server/CommandPrompt.java" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Core/ServerCore/src/main/java/io/github/wsyong11/gameforge/game/core/server/CommandPrompt.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Game/Core/ServerCore/src/main/java/io/github/wsyong11/gameforge/game/core/server/ServerGame.java" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Core/ServerCore/src/main/java/io/github/wsyong11/gameforge/game/core/server/ServerGame.java" afterDir="false" />
-    </list>
+    <list default="true" id="a72e7484-598a-40d2-8080-c72fd6c580c8" name="更改" comment="Updated code" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -471,7 +458,7 @@
       <workItem from="1758181240908" duration="10373000" />
       <workItem from="1758196853953" duration="8610000" />
       <workItem from="1758264607858" duration="468000" />
-      <workItem from="1758265864362" duration="10486000" />
+      <workItem from="1758265864362" duration="10640000" />
     </task>
     <task id="LOCAL-00001" summary="Removed gradle.properties in .gitignore">
       <option name="closed" value="true" />
@@ -577,7 +564,15 @@
       <option name="project" value="LOCAL" />
       <updated>1758204779136</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="Updated code">
+      <option name="closed" value="true" />
+      <created>1758285531778</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1758285531778</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

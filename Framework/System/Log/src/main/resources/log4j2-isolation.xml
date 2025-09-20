@@ -1,19 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
+	<Properties>
+		<Property name="pattern">[%d{HH:mm:ss.SSS}] [%-5level] [%X{classLoader}/%t] [%logger{1.}] %msg%n</Property>
+	</Properties>
+
 	<Appenders>
 		<Console name="Console" target="SYSTEM_OUT" follow="true" direct="false">
-			<PatternLayout pattern="[%d{HH:mm:ss.SSS}] [%-5level] [%X{classLoader}/%t] [%logger{1.}] %msg%n"/>
+			<PatternLayout pattern="${pattern}"/>
 		</Console>
+
+		<RollingFile name="RollingFile"
+					 fileName="logs/latest.log"
+					 filePattern="logs/log_%d{yyyy-MM-dd_HH.mm.ss}.log.gz">
+			<PatternLayout pattern="${pattern}"/>
+			<Policies>
+				<OnStartupTriggeringPolicy/>
+				<DefaultRolloverStrategy max="10"/>
+			</Policies>
+		</RollingFile>
 
 		<Async name="AsyncConsole">
 			<AppenderRef ref="Console"/>
+		</Async>
+
+		<Async name="AsyncRollingFile">
+			<AppenderRef ref="RollingFile"/>
 		</Async>
 	</Appenders>
 
 	<Loggers>
 		<Root level="debug">
 			<AppenderRef ref="AsyncConsole"/>
-			<!--			<AppenderRef ref="RollingFile"/>-->
+			<AppenderRef ref="AsyncRollingFile"/>
 		</Root>
 	</Loggers>
 </Configuration>

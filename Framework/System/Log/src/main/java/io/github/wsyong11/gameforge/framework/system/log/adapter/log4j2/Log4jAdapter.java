@@ -97,12 +97,12 @@ public class Log4jAdapter implements LogSystemAdapter {
 
 	@Override
 	public void setDefaultStdout(@NotNull PrintStream stdout) {
-
+		LOGGER.debug("Set default stdout to {}", stdout);
 	}
 
 	@Override
 	public void setDefaultStderr(@NotNull PrintStream stderr) {
-
+		LOGGER.debug("Set default stderr to {}", stderr);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //

@@ -27,34 +27,17 @@ public class ServerGame extends AbstractGame {
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
-	private void redirectTerminal() {
-		Terminal terminal = this.commandPrompt.getTerminal();
-		LineReader lineReader = this.commandPrompt.getLineReader();
-
-		Charset encoding = terminal.outputEncoding();
-
-		CallbackPrintStream consolePrintStream = new CallbackPrintStream(lineReader::printAbove, encoding);
-		LogManager.setDefaultStdout(consolePrintStream);
-		LogManager.setDefaultStderr(consolePrintStream);
-	}
-
 	@Override
 	protected void onStarting() throws Throwable {
 		super.onStarting();
 		this.commandPrompt = new CommandPrompt();
-
-		this.redirectTerminal();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
 	@Override
 	protected void tick() {
-		try {
-			Thread.sleep(1100);
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
-		}
+
 	}
 
 	@Override
@@ -62,6 +45,11 @@ public class ServerGame extends AbstractGame {
 		super.onRunning();
 
 		this.commandPrompt.start();
+		this.commandPrompt.addInputListener(l -> {
+			if (l.equalsIgnoreCase("exit"))
+				requireStop();
+		});
+
 		this.mainLoop();
 	}
 

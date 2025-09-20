@@ -171,6 +171,8 @@ public abstract class AbstractGame extends Application implements Game {
 		long tickIntervalNanos = 1_000_000_000L / tps;
 
 		while (!this.stopping) {
+			this.watchdog.tick();
+
 			long start = System.nanoTime();
 
 			this.executeTask();
@@ -192,6 +194,8 @@ public abstract class AbstractGame extends Application implements Game {
 				LockSupport.parkNanos(waitTime);
 		}
 
+		this.watchdog.exit();
+
 		this.stop();
 	}
 
@@ -211,7 +215,6 @@ public abstract class AbstractGame extends Application implements Game {
 
 		LOGGER.info("Stopping");
 		this.requireStop();
-		this.watchdog.exit();
 	}
 
 	@MustBeInvokedByOverriders

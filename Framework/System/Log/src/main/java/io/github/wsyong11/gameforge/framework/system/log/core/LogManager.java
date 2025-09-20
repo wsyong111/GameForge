@@ -65,11 +65,15 @@ public final class LogManager {
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
-	private static PrintStream defaultStdout = System.out;
-	private static PrintStream defaultStderr = System.err;
+	private static volatile PrintStream defaultStdout = SystemPrintStreamManager.getStdout();
+	private static volatile PrintStream defaultStderr = SystemPrintStreamManager.getStderr();
 
-	public static void setDefaultStdout(@NotNull PrintStream stdout) {
+	public static synchronized void setDefaultStdout(@NotNull PrintStream stdout) {
 		Objects.requireNonNull(stdout, "stdout is null");
+
+		if (defaultStdout == stdout)
+			return;
+
 		defaultStdout = stdout;
 		if (currentAdapter != null)
 			currentAdapter.setDefaultStdout(stdout);
@@ -81,8 +85,12 @@ public final class LogManager {
 		return defaultStdout;
 	}
 
-	public static void setDefaultStderr(@NotNull PrintStream stderr) {
+	public static synchronized void setDefaultStderr(@NotNull PrintStream stderr) {
 		Objects.requireNonNull(stderr, "stderr is null");
+
+		if (defaultStderr == stderr)
+			return;
+
 		defaultStderr = stderr;
 		if (currentAdapter != null)
 			currentAdapter.setDefaultStderr(stderr);
