@@ -18,6 +18,7 @@ internal class DependenciesConfigurator : Configurator {
 		project.dependencies.implementation(project, GUAVA)
 		project.dependencies.implementation(project, COMMONS_LANG)
 		project.dependencies.implementation(project, COMMONS_COLLECTIONS)
+		project.dependencies.implementation(project, COMMONS_TEXT)
 
 		project.dependencies.implementation(project, AUTO_SERVICE)
 		project.dependencies.annotationProcessor(project, AUTO_SERVICE)

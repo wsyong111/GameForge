@@ -2,14 +2,14 @@ package io.github.wsyong11.gameforge.framework.lang.token;
 
 import org.jetbrains.annotations.NotNull;
 
-public class CommentToken extends Token {
-	public CommentToken(@NotNull String token, int charIndex) {
-		super(token, charIndex);
+public class CommentToken extends AbstractTextToken {
+	public CommentToken(@NotNull String token, int srcIndex) {
+		super(token, srcIndex);
 	}
 
 	@NotNull
 	@Override
-	protected String getTypeName() {
-		return "Comment";
+	public String toString() {
+		return "Comment" + super.toString();
 	}
 }
