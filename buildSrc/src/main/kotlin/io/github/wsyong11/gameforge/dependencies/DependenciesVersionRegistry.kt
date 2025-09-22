@@ -95,6 +95,7 @@ val LOMBOK       = "org.projectlombok"       dependsOn "lombok"       version "1
 val ANNOTATIONS         = "org.jetbrains"      dependsOn "annotations"          version "26.0.2"
 val COMMONS_LANG        = "org.apache.commons" dependsOn "commons-lang3"        version "3.17.0"
 val COMMONS_COLLECTIONS = "org.apache.commons" dependsOn "commons-collections4" version "4.5.0"
+val COMMONS_TEXT        = "org.apache.commons" dependsOn "commons-text"         version "1.14.0"
 val COMMONS_CLI         = "commons-cli"        dependsOn "commons-cli"          version "1.10.0"
 val GUAVA               = "com.google.guava"   dependsOn "guava"                version "3.4.8-jre"
 
