@@ -68,14 +68,19 @@ public class Tokenizer {
 		@Override
 		public boolean hasNext() {
 			this.skipWhitespace();
-			return this.index < this.src.length();
+			return this.index <= this.src.length();
 		}
 
 		@Override
 		public Token next() {
 			this.skipWhitespace();
 
-			if (this.index >= this.src.length())
+			if (this.index == this.src.length()) {
+				this.index++;
+				return new EOFToken(this.src.length());
+			}
+
+			if (this.index > this.src.length())
 				throw new NoSuchElementException();
 
 			int codePoint = this.src.codePointAt(this.index);

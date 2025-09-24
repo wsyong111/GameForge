@@ -1,4 +1,4 @@
-package io.github.wsyong11.gameforge.framework.lang.glsl;
+package io.github.wsyong11.gameforge.framework.lang.glsl.token;
 
 import io.github.wsyong11.gameforge.framework.lang.token.TokenRules;
 import io.github.wsyong11.gameforge.framework.lang.token.Tokenizer;
