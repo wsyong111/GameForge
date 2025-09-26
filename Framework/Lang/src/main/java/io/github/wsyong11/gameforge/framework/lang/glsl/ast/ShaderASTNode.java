@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public class ShaderASTNode extends AbstractASTNode<ShaderASTNode> {
-	protected ShaderASTNode(@NotNull List<ASTNode> defaultChildren) {
+	public ShaderASTNode(@NotNull List<ASTNode> defaultChildren) {
 		super(defaultChildren);
 	}
 

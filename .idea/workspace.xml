@@ -5,30 +5,31 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a72e7484-598a-40d2-8080-c72fd6c580c8" name="更改" comment="Updated code">
-      <change afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/Main.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/AbstractASTParser.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/node/ASTNodeVisitor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/node/AbstractASTNode.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/node/IdentifierNode.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/node/LineCommentASTNode.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/node/MultilineCommentASTNode.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/parser/ASTParser.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/parser/ASTParserStrategy.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/parser/TokenStream.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/parser/error/CompileReport.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/parser/error/CompileReportCollector.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/parser/error/CompileReportLevel.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/parser/error/SimpleCompileReport.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/glsl/GlslTokenParser.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/glsl/ast/ShaderASTNode.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/glsl/ast/UniformDeclarationASTNode.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/token/EOFToken.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/SimpleSourceInfo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/parser/error/DefaultCompileReportCollector.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/parser/stream/IteratorTokenStream.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/glsl/ast/GlslAST.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/PoseStack.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/RenderContext.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/VertexBuilder.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/collection/BoundedArrayList.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/collection/BoundedList.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/Lang/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Lang/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/ASTNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/node/ASTNode.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/SourceInfo.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/SourceInfo.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/glsl/GlslTokenizer.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/glsl/token/GlslTokenizer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/token/Tokenizer.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/token/Tokenizer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/parser/ASTParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/parser/ASTParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/parser/ASTParserStrategy.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/parser/ASTParserStrategy.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/parser/TokenStream.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/parser/stream/TokenStream.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/parser/error/CompileReport.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/parser/error/CompileReport.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/parser/error/CompileReportCollector.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/parser/error/CompileReportCollector.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/parser/error/SimpleCompileReport.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/parser/error/SimpleCompileReport.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/glsl/GlslTokenParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/glsl/GlslTokenParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/glsl/ast/ShaderASTNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/glsl/ast/ShaderASTNode.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/glsl/ast/UniformDeclarationASTNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/glsl/ast/UniformDeclarationASTNode.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/CommandQueue.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/RenderSystem.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/RenderSystem.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/Renderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Game/Core/ClientCore/src/main/java/io/github/wsyong11/gameforge/game/core/client/ClientGame.java" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Core/ClientCore/src/main/java/io/github/wsyong11/gameforge/game/core/client/ClientGame.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -84,8 +85,8 @@
         <option value="Kotlin File" />
         <option value="Kotlin Class" />
         <option value="JavaMain" />
-        <option value="Interface" />
         <option value="Class" />
+        <option value="Interface" />
       </list>
     </option>
   </component>
@@ -242,8 +243,8 @@
       <recent name="com.gameforge.util.pool" />
     </key>
     <key name="MoveInnerDialog.RECENTS_KEY">
-      <recent name="io.github.wsyong11.gameforge.framework.lang.ast.parser.error" />
       <recent name="io.github.wsyong11.gameforge.framework.lang.ast.parser" />
+      <recent name="io.github.wsyong11.gameforge.framework.lang.ast.parser.error" />
       <recent name="io.github.wsyong11.gameforge.framework.lang.token" />
       <recent name="" />
       <recent name="io.github.wsyong11.gameforge.framework.system.window.input" />
@@ -293,7 +294,7 @@
       <command value="gradle :aggregateJavadoc" />
     </option>
   </component>
-  <component name="RunManager" selected="应用程序.Main">
+  <component name="RunManager" selected="应用程序.RunClient">
     <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="io.github.wsyong11.gameforge.framework.lang.Main" />
       <module name="GameForge.Framework.Lang.main" />
@@ -491,7 +492,9 @@
       <workItem from="1758351176993" duration="21979000" />
       <workItem from="1758524344029" duration="19627000" />
       <workItem from="1758609261090" duration="11430000" />
-      <workItem from="1758695932581" duration="15887000" />
+      <workItem from="1758695932581" duration="16344000" />
+      <workItem from="1758783091670" duration="19631000" />
+      <workItem from="1758863934201" duration="12830000" />
     </task>
     <task id="LOCAL-00001" summary="Removed gradle.properties in .gitignore">
       <option name="closed" value="true" />
@@ -645,7 +648,15 @@
       <option name="project" value="LOCAL" />
       <updated>1758548883138</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="Updated code">
+      <option name="closed" value="true" />
+      <created>1758717324793</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1758717324793</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

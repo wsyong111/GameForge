@@ -1,7 +1,10 @@
 package io.github.wsyong11.gameforge.framework.lang.ast.parser;
 
 import io.github.wsyong11.gameforge.framework.lang.ast.node.ASTNode;
+import io.github.wsyong11.gameforge.framework.lang.ast.parser.error.CompileReportCollector;
+import io.github.wsyong11.gameforge.framework.lang.ast.parser.stream.TokenStream;
 import io.github.wsyong11.gameforge.framework.lang.token.Token;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.text.ParseException;
@@ -14,10 +17,11 @@ public interface ASTParserStrategy {
 	 * @throws ParseException 如果发现错误但无法恢复
 	 */
 	@Nullable
-	ASTNode parse() throws ParseException;
+	ASTNode parse(Token token, TokenStream tokenStream, CompileReportCollector reportCollector) throws ParseException;
 
 	/**
 	 * 判断这个策略是否适用于当前 token
 	 */
-	boolean matches(Token token);
+	boolean matches(@NotNull Token token);
+
 }

@@ -2,6 +2,7 @@ package io.github.wsyong11.gameforge.framework.lang.ast.parser.error;
 
 import io.github.wsyong11.gameforge.framework.lang.ast.SourceInfo;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public interface CompileReport {
 	@NotNull
@@ -14,6 +15,9 @@ public interface CompileReport {
 
 	@NotNull
 	String getMessage();
+
+	@Nullable
+	String getNote();
 
 	/**
 	 * 格式化报告为字符串

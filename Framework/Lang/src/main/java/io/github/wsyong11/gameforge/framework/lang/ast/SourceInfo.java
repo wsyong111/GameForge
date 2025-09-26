@@ -1,6 +1,7 @@
 package io.github.wsyong11.gameforge.framework.lang.ast;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.URL;
 
@@ -44,9 +45,9 @@ public interface SourceInfo {
 	/**
 	 * 获取源代码文件
 	 *
-	 * @return 源代码文件 URL 对象
+	 * @return 源代码文件 URL 对象，可能返回 null
 	 */
-	@NotNull
+	@Nullable
 	URL getFile();
 
 	/**

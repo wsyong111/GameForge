@@ -1,9 +1,13 @@
 package io.github.wsyong11.gameforge.game.core.client;
 
+import io.github.wsyong11.gameforge.framework.Identifier;
 import io.github.wsyong11.gameforge.framework.system.input.DefaultInputManager;
 import io.github.wsyong11.gameforge.framework.system.input.InputManager;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
+import io.github.wsyong11.gameforge.framework.system.render.RenderContext;
+import io.github.wsyong11.gameforge.framework.system.render.RenderSystem;
+import io.github.wsyong11.gameforge.framework.system.render.Renderer;
 import io.github.wsyong11.gameforge.framework.system.render.ex.RenderSystemInitiationException;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.window.Window;
@@ -11,8 +15,6 @@ import io.github.wsyong11.gameforge.framework.system.window.listener.WindowListe
 import io.github.wsyong11.gameforge.game.common.core.AbstractGame;
 import io.github.wsyong11.gameforge.game.common.core.StartupConfig;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.concurrent.locks.LockSupport;
 
 public class ClientGame extends AbstractGame {
 	private static final Logger LOGGER = Log.getLogger();
@@ -35,6 +37,32 @@ public class ClientGame extends AbstractGame {
 			this.getConfig().isDebug()
 		);
 		this.renderThread.init();
+
+		RenderSystem renderSystem = this.renderThread.getRenderSystem();
+		renderSystem.registerRenderer(new Renderer() {
+			Identifier SHADER = Identifier.parse("game:test");
+
+			@Override
+			public void render(@NotNull RenderContext context) {
+				context.shader(SHADER)
+				       .push()
+				       .vertex(-0.3F, -0.3F, 0.0F)
+				       .color(1.0F, 0.0F, 0.0F)
+				       .end()
+				       .pop()
+				       .draw();
+			}
+
+			@Override
+			public boolean shouldRender() {
+				return true;
+			}
+
+			@Override
+			public boolean isDirty() {
+				return true;
+			}
+		});
 	}
 
 	private void initInputManager() {

@@ -26,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -98,6 +99,8 @@ public final class RenderSystem {
 	private final Vector2i logicSize;
 	private final Thread thread;
 
+	private final List<Renderer> renderers;
+
 	private final ListenerList listenerList;
 
 	private final TaskQueueExecutor taskExecutor;
@@ -124,6 +127,8 @@ public final class RenderSystem {
 		this.logicSize = new Vector2i(logicSize);
 		this.debug = debug;
 		this.thread = thread;
+
+		this.renderers = new ArrayList<>();
 
 		this.listenerList = ListenerList.sync();
 
@@ -217,6 +222,48 @@ public final class RenderSystem {
 
 	public boolean isRunning() {
 		return this.running;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	@ThreadSensitive
+	public void registerRenderer(@NotNull Renderer renderer) {
+		Objects.requireNonNull(renderer, "renderer is null");
+
+		this.runOnUIThread(() -> {
+			if (this.renderers.contains(renderer)) {
+				LOGGER.debug("Ignored registered renderer {}", renderer);
+				return;
+			}
+
+			LOGGER.debug("Registered renderer {}", renderer);
+
+			this.renderers.add(renderer);
+
+			this.listenerList.fire(
+				RendererListener.class,
+				l -> l.onRendererRegister(renderer),
+				ListenerExceptionCallback.log(LOGGER)
+			);
+		});
+	}
+
+	@ThreadSensitive
+	public void unregisterRenderer(@NotNull Renderer renderer) {
+		Objects.requireNonNull(renderer, "renderer is null");
+
+		this.runOnUIThread(() -> {
+			if (!this.renderers.remove(renderer))
+				return;
+
+			LOGGER.debug("Unregistered renderer {}", renderer);
+
+			this.listenerList.fire(
+				RendererListener.class,
+				l -> l.onRendererUnregister(renderer),
+				ListenerExceptionCallback.log(LOGGER)
+			);
+		});
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
