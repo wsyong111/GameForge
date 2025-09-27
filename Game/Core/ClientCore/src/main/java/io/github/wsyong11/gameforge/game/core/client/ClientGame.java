@@ -5,9 +5,9 @@ import io.github.wsyong11.gameforge.framework.system.input.DefaultInputManager;
 import io.github.wsyong11.gameforge.framework.system.input.InputManager;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
-import io.github.wsyong11.gameforge.framework.system.render.RenderContext;
 import io.github.wsyong11.gameforge.framework.system.render.RenderSystem;
 import io.github.wsyong11.gameforge.framework.system.render.Renderer;
+import io.github.wsyong11.gameforge.framework.system.render.context.RenderContext;
 import io.github.wsyong11.gameforge.framework.system.render.ex.RenderSystemInitiationException;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.window.Window;
@@ -44,13 +44,14 @@ public class ClientGame extends AbstractGame {
 
 			@Override
 			public void render(@NotNull RenderContext context) {
-				context.shader(SHADER)
-				       .push()
-				       .vertex(-0.3F, -0.3F, 0.0F)
-				       .color(1.0F, 0.0F, 0.0F)
-				       .end()
-				       .pop()
-				       .draw();
+				context.push() // 入栈
+				       .shader(SHADER) // 使用着色器
+				       .beginMesh() // 开始构建Mesh
+				       .vertex(-0.3F, -0.3F, 0.0F).color(1.0F, 0.0F, 0.0F).end() // 声明顶点
+				       // ...
+				       .endMesh() // 结束构建顶点
+				       .draw() // 绘制上次的Mesh
+				       .pop(); // 出栈
 			}
 
 			@Override
