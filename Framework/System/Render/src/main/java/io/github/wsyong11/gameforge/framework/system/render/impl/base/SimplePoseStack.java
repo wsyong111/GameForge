@@ -1,4 +1,4 @@
-package io.github.wsyong11.gameforge.framework.system.render.impl;
+package io.github.wsyong11.gameforge.framework.system.render.impl.base;
 
 import io.github.wsyong11.gameforge.framework.system.render.context.PoseStack;
 import org.jetbrains.annotations.NotNull;
@@ -16,6 +16,13 @@ public class SimplePoseStack implements PoseStack {
 	public SimplePoseStack() {
 		this.stack = new LinkedList<>();
 
+		this.current = null;
+
+		this.push();
+	}
+
+	public void reset() {
+		this.stack.clear();
 		this.current = null;
 
 		this.push();

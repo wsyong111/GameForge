@@ -110,6 +110,8 @@ public final class RenderSystem {
 	private final RenderEngine engine;
 	private final Window window;
 
+	private final StandardFPSCounter fpsCounter;
+
 	private boolean running;
 
 	private RenderSystem(
@@ -135,6 +137,7 @@ public final class RenderSystem {
 		this.taskExecutor = new TaskQueueExecutor();
 		this.taskHandler = new TaskHandler(this.taskExecutor);
 
+		this.fpsCounter = new StandardFPSCounter();
 
 		this.running = false;
 
@@ -156,7 +159,8 @@ public final class RenderSystem {
 
 			this.window = this.windowManager.createWindow(windowConfigBuilder.build());
 
-			this.window.getGraphicContext().bind();
+			WindowGraphicContext graphicContext = this.window.getGraphicContext();
+			graphicContext.bind();
 		} catch (Exception e) {
 			throw new RenderSystemInitiationException(e);
 		}
@@ -226,6 +230,11 @@ public final class RenderSystem {
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
+	@NotNull
+	public FPSCounter getFpsCounter() {
+		return this.fpsCounter;
+	}
+
 	@ThreadSensitive
 	public void registerRenderer(@NotNull Renderer renderer) {
 		Objects.requireNonNull(renderer, "renderer is null");
@@ -290,10 +299,15 @@ public final class RenderSystem {
 				break;
 
 			this.engine.preRender();
+
+			this.fpsCounter.start();
+
 			this.engine.render(List.of());
 
 			windowGraphicContext.swap();
 			this.windowManager.update();
+
+			this.fpsCounter.end();
 		}
 	}
 
@@ -319,6 +333,10 @@ public final class RenderSystem {
 			.pickOnce(e -> LOGGER.warn("Cannot close the window", e))
 			.run(this.windowManager::close)
 			.pickOnce(e -> LOGGER.warn("An exception occurred while closing the window manager", e));
+	}
+
+	public void reloadShader() {
+
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
@@ -381,6 +399,41 @@ public final class RenderSystem {
 		@Override
 		public TaskHandler getTaskHandler() {
 			return this.taskHandler;
+		}
+	}
+
+	private static class StandardFPSCounter implements FPSCounter {
+		private long frameTimeNs;
+		private float fps;
+
+		private long startTimeNs;
+
+		public StandardFPSCounter() {
+			this.frameTimeNs = 0L;
+			this.fps = 0.0F;
+
+			this.startTimeNs = 0L;
+		}
+
+		public void start() {
+			this.startTimeNs = System.nanoTime();
+		}
+
+		public void end() {
+			long time = System.nanoTime();
+
+			this.frameTimeNs = time - this.startTimeNs;
+			this.fps = 1.0E9F / this.frameTimeNs;
+		}
+
+		@Override
+		public long getFrameTimeNs() {
+			return this.frameTimeNs;
+		}
+
+		@Override
+		public float getFPS() {
+			return this.fps;
 		}
 	}
 }
