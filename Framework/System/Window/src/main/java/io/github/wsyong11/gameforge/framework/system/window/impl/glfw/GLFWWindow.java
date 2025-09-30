@@ -8,6 +8,7 @@ import io.github.wsyong11.gameforge.framework.system.window.Window;
 import io.github.wsyong11.gameforge.framework.system.window.WindowConfig;
 import io.github.wsyong11.gameforge.framework.system.window.WindowDisplayType;
 import io.github.wsyong11.gameforge.framework.system.window.WindowGraphicContext;
+import io.github.wsyong11.gameforge.framework.system.window.icon.Icon;
 import io.github.wsyong11.gameforge.framework.system.window.impl.glfw.graphic.GLFWGraphicContext;
 import io.github.wsyong11.gameforge.framework.system.window.listener.WindowInputListener;
 import io.github.wsyong11.gameforge.framework.system.window.listener.WindowListener;
@@ -59,6 +60,7 @@ public class GLFWWindow implements Window {
 	private final Vector2i windowSize;
 	private final Vector2i windowPosition;
 	private boolean visible;
+	private Icon icon;
 
 	public GLFWWindow(long handler, @NotNull WindowConfig config, @NotNull GLFWGraphicContext graphicContext) {
 		Objects.requireNonNull(config, "config is null");
@@ -79,6 +81,7 @@ public class GLFWWindow implements Window {
 		this.windowSize = new Vector2i();
 		this.windowPosition = new Vector2i();
 		this.visible = false;
+		this.icon = null;
 
 		this.initCallback();
 
@@ -376,6 +379,49 @@ public class GLFWWindow implements Window {
 		glfwSetWindowShouldClose(this.handler, value);
 	}
 
+	@Override
+	public void setIcon(@Nullable Icon icon) {
+		this.assertWindow();
+
+		if (Objects.equals(this.icon, icon))
+			return;
+
+		this.icon = icon;
+
+		if (icon == null) {
+			glfwSetWindowIcon(this.handler, null);
+			return;
+		}
+
+		if (icon.isClosed())
+			throw new IllegalArgumentException("Icon is closed");
+
+		try (MemoryStack stack = MemoryStack.stackPush()) {
+			List<Vector2ic> sizes = icon.getSizes();
+			int iconCount = sizes.size();
+
+			GLFWImage.Buffer icons = GLFWImage.malloc(iconCount, stack);
+
+			for (int i = 0; i < iconCount; i++) {
+				Vector2ic size = sizes.get(i);
+
+				icons.position(i)
+				     .width(size.x())
+				     .height(size.y())
+				     .pixels(icon.getImage(i));
+			}
+
+			icons.position(0);
+			GLFW.glfwSetWindowIcon(this.handler, icons);
+		}
+	}
+
+	@Nullable
+	@Override
+	public Icon getIcon() {
+		return this.icon;
+	}
+
 	// -------------------------------------------------------------------------------------------------------------- //
 
 	@Override
@@ -427,6 +473,9 @@ public class GLFWWindow implements Window {
 
 		this.callbacks.clear();
 
+		this.icon = null;
+		glfwSetWindowIcon(handler, null);
+		
 		glfwDestroyWindow(handler);
 	}
 

@@ -24,7 +24,7 @@ public abstract class OpenGLRenderEngine implements RenderEngine {
 
 	private final SimplePoseStack poseStack;
 	private final RenderCommandStack commandStack;
-	private final RenderContext renderContext;
+	private final CommandRenderContext renderContext;
 
 	private final RendererListener rendererListener;
 
@@ -101,7 +101,11 @@ public abstract class OpenGLRenderEngine implements RenderEngine {
 		Objects.requireNonNull(renderers, "renderers is null");
 
 		for (Renderer renderer : renderers) {
+			this.renderContext.beginRender(renderer);
+
 			renderer.render(this.renderContext);
+
+			this.renderContext.endRender(renderer);
 		}
 	}
 

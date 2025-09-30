@@ -24,7 +24,7 @@ public final class RenderCommand {
 	private byte opCode;
 	private Buffer args;
 
-	private RenderCommand() {
+	private RenderCommand() {   
 		this.reset();
 	}
 

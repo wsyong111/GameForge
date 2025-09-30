@@ -1,5 +1,6 @@
 package io.github.wsyong11.gameforge.framework.system.window;
 
+import io.github.wsyong11.gameforge.framework.system.window.icon.Icon;
 import io.github.wsyong11.gameforge.framework.system.window.listener.WindowInputListener;
 import io.github.wsyong11.gameforge.framework.system.window.listener.WindowListener;
 import org.jetbrains.annotations.NotNull;
@@ -42,6 +43,11 @@ public interface Window extends AutoCloseable {
 	boolean shouldClose();
 
 	void setShouldClose(boolean value);
+
+	void setIcon(@Nullable Icon icon);
+
+	@Nullable
+	Icon getIcon();
 
 	// -------------------------------------------------------------------------------------------------------------- //
 

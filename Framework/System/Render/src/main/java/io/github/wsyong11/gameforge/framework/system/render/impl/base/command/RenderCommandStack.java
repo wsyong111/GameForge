@@ -6,7 +6,6 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.Buffer;
 import java.util.Deque;
 import java.util.LinkedList;
-import java.util.List;
 
 public class RenderCommandStack {
 	private final Deque<RenderCommand> stack;
@@ -26,7 +25,7 @@ public class RenderCommandStack {
 
 	public void reset() {
 		RenderCommand command;
-		while ((command= this.stack.pop())!=null)
+		while ((command = this.stack.poll()) != null)
 			RenderCommand.release(command);
 	}
 }
