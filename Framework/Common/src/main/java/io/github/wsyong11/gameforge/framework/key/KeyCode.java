@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 /*
 
  */
-public enum KeyCode {
+public enum KeyCode  {
 	UNKNOWN(0x0000, '\0', "unknown"),
 
 	// 字母键 (0x00FF)
@@ -132,7 +132,7 @@ public enum KeyCode {
 	// 特殊键 (0x06FF)
 	PRINT_SCREEN(0x0600, '\0', "PrintScreen"),
 	SCROLL_LOCK (0x0601, '\0', "ScrollLock"),
-	PAUSE       (0x0602, '\0', "Pause")
+	PAUSE       (0x0602, '\0', "Pause"),
 	;//@formatter:on
 
 	static {

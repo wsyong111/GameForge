@@ -465,6 +465,8 @@ public class GLFWWindow implements Window {
 		long handler = this.handler;
 		this.handler = NULL;
 
+		this.listenerList.clear();
+
 		this.graphicContext.close();
 		this.graphicContext = null;
 

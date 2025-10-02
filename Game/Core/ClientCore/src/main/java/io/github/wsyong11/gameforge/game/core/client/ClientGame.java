@@ -3,8 +3,8 @@ package io.github.wsyong11.gameforge.game.core.client;
 import io.github.wsyong11.gameforge.framework.Identifier;
 import io.github.wsyong11.gameforge.framework.lifecycle.ILifecycle;
 import io.github.wsyong11.gameforge.framework.lifecycle.LifecycleState;
-import io.github.wsyong11.gameforge.framework.system.input.DefaultInputManager;
-import io.github.wsyong11.gameforge.framework.system.input.InputManager;
+import io.github.wsyong11.gameforge.framework.system.input.impl.DefaultInputManagerOld;
+import io.github.wsyong11.gameforge.framework.system.input.ProcessInputManager;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.render.RenderSystem;
@@ -31,7 +31,7 @@ public class ClientGame extends AbstractGame {
 	private static final Logger LOGGER = Log.getLogger();
 
 	private RenderThread renderThread;
-	private InputManager inputManager;
+	private ProcessInputManager inputManager;
 
 	public ClientGame(@NotNull StartupConfig config) {
 		super(config, ResourcePath.of("assets"));
@@ -117,7 +117,7 @@ public class ClientGame extends AbstractGame {
 	}
 
 	private void initInputManager() {
-		this.inputManager = new DefaultInputManager();
+		this.inputManager = new DefaultInputManagerOld();
 
 		Window window = this.renderThread.getWindow();
 		window.addWindowListener(new WindowListener() {
@@ -126,6 +126,7 @@ public class ClientGame extends AbstractGame {
 				requireStop();
 			}
 		});
+		window.addInputListener(new InputManagerWindowListener(this.inputManager));
 	}
 
 	@Override

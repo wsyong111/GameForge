@@ -5,21 +5,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a72e7484-598a-40d2-8080-c72fd6c580c8" name="更改" comment="Updated code">
-      <change afterPath="$PROJECT_DIR$/Assets/src/main/resources/assets/game/texture/icon.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/System/Window/src/main/java/io/github/wsyong11/gameforge/framework/system/window/icon/Icon.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/System/Window/src/main/java/io/github/wsyong11/gameforge/framework/system/window/icon/IconIO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/System/Window/src/main/java/io/github/wsyong11/gameforge/framework/system/window/icon/STBSingleIcon.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/Common/src/main/kotlin/io/github/wsyong11/gameforge/framework/key/InputKey.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/InputManagerOld.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/KeyBindManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/KeyMap.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/ProcessInputManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/impl/AbstractInputManager.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/impl/base/command/CommandRenderContext.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/impl/base/command/CommandRenderContext.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/impl/base/command/RenderCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/impl/base/command/RenderCommand.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/impl/base/command/RenderCommandStack.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/impl/base/command/RenderCommandStack.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/impl/opengl/OpenGLRenderEngine.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/impl/opengl/OpenGLRenderEngine.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/impl/opengl/RendererContext.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/ResourceProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/ResourceProvider.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Window/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Window/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Window/src/main/java/io/github/wsyong11/gameforge/framework/system/window/Window.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Window/src/main/java/io/github/wsyong11/gameforge/framework/system/window/Window.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Common/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Common/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Common/src/main/java/io/github/wsyong11/gameforge/framework/key/KeyCode.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Common/src/main/java/io/github/wsyong11/gameforge/framework/key/KeyCode.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/DefaultInputManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/impl/DefaultInputManagerOld.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/InputManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/InputManager.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Framework/System/Window/src/main/java/io/github/wsyong11/gameforge/framework/system/window/impl/glfw/GLFWWindow.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Window/src/main/java/io/github/wsyong11/gameforge/framework/system/window/impl/glfw/GLFWWindow.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Game/Core/ClientCore/src/main/java/io/github/wsyong11/gameforge/game/core/client/ClientGame.java" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Core/ClientCore/src/main/java/io/github/wsyong11/gameforge/game/core/client/ClientGame.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Game/Core/ClientCore/src/main/java/io/github/wsyong11/gameforge/game/core/client/InputManagerWindowListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Core/ClientCore/src/main/java/io/github/wsyong11/gameforge/game/core/client/InputManagerWindowListener.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,7 +64,6 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Kotlin Interface" />
         <option value="Kotlin Annotation" />
         <option value="Python Script" />
         <option value="package-info" />
@@ -75,8 +73,9 @@
         <option value="Kotlin File" />
         <option value="Kotlin Class" />
         <option value="JavaMain" />
-        <option value="Interface" />
         <option value="Class" />
+        <option value="Interface" />
+        <option value="Kotlin Interface" />
       </list>
     </option>
   </component>
@@ -486,7 +485,9 @@
       <workItem from="1758863934201" duration="13470000" />
       <workItem from="1758961847626" duration="17384000" />
       <workItem from="1759133652860" duration="13798000" />
-      <workItem from="1759214481595" duration="13270000" />
+      <workItem from="1759214481595" duration="13495000" />
+      <workItem from="1759302977817" duration="12394000" />
+      <workItem from="1759394140233" duration="9916000" />
     </task>
     <task id="LOCAL-00001" summary="Removed gradle.properties in .gitignore">
       <option name="closed" value="true" />
@@ -680,7 +681,15 @@
       <option name="project" value="LOCAL" />
       <updated>1759151387013</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="Updated code">
+      <option name="closed" value="true" />
+      <created>1759237616383</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1759237616383</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
