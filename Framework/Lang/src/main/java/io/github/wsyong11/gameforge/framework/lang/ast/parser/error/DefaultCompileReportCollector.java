@@ -1,8 +1,8 @@
 package io.github.wsyong11.gameforge.framework.lang.ast.parser.error;
 
 import io.github.wsyong11.gameforge.framework.lang.ast.SourceInfo;
-import io.github.wsyong11.gameforge.util.collection.BoundedArrayList;
-import io.github.wsyong11.gameforge.util.collection.BoundedList;
+import io.github.wsyong11.gameforge.util.collection.list.BoundedArrayList;
+import io.github.wsyong11.gameforge.util.collection.list.BoundedList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 

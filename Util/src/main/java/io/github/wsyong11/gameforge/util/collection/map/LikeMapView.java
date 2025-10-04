@@ -1,4 +1,4 @@
-package io.github.wsyong11.gameforge.util.collection;
+package io.github.wsyong11.gameforge.util.collection.map;
 
 import org.jetbrains.annotations.NotNull;
 

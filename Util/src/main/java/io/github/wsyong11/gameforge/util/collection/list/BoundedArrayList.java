@@ -1,4 +1,4 @@
-package io.github.wsyong11.gameforge.util.collection;
+package io.github.wsyong11.gameforge.util.collection.list;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;

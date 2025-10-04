@@ -2,10 +2,10 @@ package io.github.wsyong11.gameforge.framework.key
 
 import java.util.concurrent.ConcurrentHashMap
 
-abstract class InputKey {
-	data class Keyboard(override val value: KeyCode) : InputKey()
+abstract class InputKey protected constructor() {
+	data class Keyboard internal constructor(override val value: KeyCode) : InputKey()
 
-	data class Mouse(override val value: MouseButton) : InputKey()
+	data class Mouse internal constructor(override val value: MouseButton) : InputKey()
 
 
 	protected abstract val value: Any
@@ -13,11 +13,17 @@ abstract class InputKey {
 	override fun toString(): String =
 		"${this.javaClass.simpleName}[${this.value}]"
 
-	override fun equals(other: Any?) =
-		this.value == other
+	override fun equals(other: Any?): Boolean {
+		if (this === other) return true
+		if (this.javaClass != other?.javaClass) return false
+
+		other as InputKey
+		return this.value == other.value
+	}
 
 	override fun hashCode() =
 		this.value.hashCode()
+
 
 	companion object {
 		private val INSTANCES: MutableMap<Class<*>, MutableMap<Any, Any>> = ConcurrentHashMap()

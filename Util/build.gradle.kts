@@ -11,5 +11,3 @@ artifactId = "Util"
 dependencies {
 
 }
-
-junit()

@@ -4,7 +4,7 @@ import io.github.wsyong11.gameforge.framework.event.IEventBus;
 import io.github.wsyong11.gameforge.framework.lifecycle.LifecycleProvider;
 import io.github.wsyong11.gameforge.framework.system.resource.manage.ResourceManager;
 import io.github.wsyong11.gameforge.game.common.registry.RegistryManager;
-import io.github.wsyong11.gameforge.game.common.tick.TickManager;
+import io.github.wsyong11.gameforge.framework.tick.TickManager;
 import io.github.wsyong11.gameforge.game.common.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;

@@ -16,4 +16,5 @@ dependencies {
 	implementation(project(":Framework:System:Resource"))
 	implementation(project(":Framework:System:Log"))
 	implementation(project(":Framework:Annotation"))
+	implementation(project(":Framework:Tick"))
 }

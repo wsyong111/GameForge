@@ -9,7 +9,7 @@ import io.github.wsyong11.gameforge.game.common.Game;
 import io.github.wsyong11.gameforge.game.common.GameContext;
 import io.github.wsyong11.gameforge.game.common.GameSide;
 import io.github.wsyong11.gameforge.game.common.registry.RegistryManager;
-import io.github.wsyong11.gameforge.game.common.tick.TickManager;
+import io.github.wsyong11.gameforge.framework.tick.TickManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;

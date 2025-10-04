@@ -44,6 +44,7 @@
             <option value="$PROJECT_DIR$/Framework/System/Resource" />
             <option value="$PROJECT_DIR$/Framework/System/Security" />
             <option value="$PROJECT_DIR$/Framework/System/Window" />
+            <option value="$PROJECT_DIR$/Framework/Tick" />
             <option value="$PROJECT_DIR$/Game" />
             <option value="$PROJECT_DIR$/Game/Client" />
             <option value="$PROJECT_DIR$/Game/Common" />

@@ -7,11 +7,11 @@ import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.manage.DefaultResourceManager;
 import io.github.wsyong11.gameforge.framework.system.resource.manage.ResourceManager;
 import io.github.wsyong11.gameforge.framework.system.resource.pack.AssetsResourcePack;
+import io.github.wsyong11.gameforge.framework.tick.TickManager;
 import io.github.wsyong11.gameforge.game.common.Game;
 import io.github.wsyong11.gameforge.game.common.GameContext;
 import io.github.wsyong11.gameforge.game.common.GameEnvConfig;
 import io.github.wsyong11.gameforge.game.common.core.tick.RootTickManager;
-import io.github.wsyong11.gameforge.game.common.tick.TickManager;
 import io.github.wsyong11.gameforge.util.concurrent.TaskHandler;
 import io.github.wsyong11.gameforge.util.concurrent.executor.TaskQueueExecutor;
 import io.github.wsyong11.gameforge.util.exception.ExceptionHandler;
@@ -19,7 +19,6 @@ import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
-import java.util.concurrent.locks.LockSupport;
 
 /**
  * 游戏的基本抽象实现，实现了基本的资源管理系统
@@ -145,7 +144,9 @@ public abstract class AbstractGame extends Application implements Game {
 		super.onStarting();
 		Thread.setDefaultUncaughtExceptionHandler(this::onUncaughtException);
 
-		this.tickManager.register(Integer.MAX_VALUE, this::tick);
+		this.tickManager.buildTask(this::tick)
+		                .priority(Integer.MAX_VALUE)
+		                .build();
 
 		LOGGER.debug("Setting up the resource system");
 		this.resourceManager.addPack(new AssetsResourcePack("game"));
@@ -158,13 +159,17 @@ public abstract class AbstractGame extends Application implements Game {
 			LOGGER.error("Exception in logic executor", ex));
 	}
 
-	protected void tick() {
+	protected void tick(long currentTick) {
 		this.executeTask();
 	}
 
 	protected void mainLoop() {
 		this.thread.setName("LogicThread");
-		this.gameLoop.run();
+
+		boolean normalExit = this.gameLoop.run();
+		if (!normalExit)
+			LOGGER.warn("Game loop returns abnormally");
+
 		this.stop();
 	}
 

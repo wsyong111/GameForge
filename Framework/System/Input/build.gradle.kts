@@ -8,4 +8,5 @@ dependencies {
 	implementation(project(":Util"))
 	implementation(project(":Framework:Listener"))
 	implementation(project(":Framework:System:Log"))
+	implementation(project(":Framework:Tick"))
 }

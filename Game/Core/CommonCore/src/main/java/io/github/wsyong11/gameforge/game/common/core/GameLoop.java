@@ -3,7 +3,8 @@ package io.github.wsyong11.gameforge.game.common.core;
 import io.github.wsyong11.gameforge.framework.annotation.ThreadSensitive;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
-import io.github.wsyong11.gameforge.game.common.tick.Tickable;
+import io.github.wsyong11.gameforge.framework.tick.TickManager;
+import io.github.wsyong11.gameforge.framework.tick.Tickable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -13,7 +14,7 @@ import java.util.concurrent.locks.LockSupport;
 public class GameLoop {
 	private static final Logger LOGGER = Log.getLogger();
 
-	private final Tickable tickable;
+	private final TickManager tickManager;
 
 	private final Watchdog watchdog;
 
@@ -23,10 +24,10 @@ public class GameLoop {
 	private volatile boolean stopping;
 	private volatile Thread thread;
 
-	public GameLoop(int tps, @NotNull Tickable tickable) {
-		Objects.requireNonNull(tickable, "tickable is null");
+	public GameLoop(int tps, @NotNull TickManager tickManager) {
+		Objects.requireNonNull(tickManager, "tickManager is null");
 
-		this.tickable = tickable;
+		this.tickManager = tickManager;
 
 		this.watchdog = new Watchdog(
 			this::processTimeout,
@@ -98,7 +99,7 @@ public class GameLoop {
 				long startNs = System.nanoTime();
 
 				try {
-					this.tickable.tick();
+					this.tickManager.tick();
 				} catch (Throwable t) {
 					LOGGER.error("Tick error", t);
 					return false;

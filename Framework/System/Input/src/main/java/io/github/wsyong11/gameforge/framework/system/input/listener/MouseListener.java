@@ -9,7 +9,5 @@ import org.joml.Vector2dc;
 public interface MouseListener extends IListener {
 	void onMouseMove(@NotNull Vector2dc position);
 
-	void onMouseClick(@NotNull MouseButton button, @NotNull KeyAction action, @NotNull Vector2dc position);
-
 	void onMouseFocusChange(boolean entered);
 }
