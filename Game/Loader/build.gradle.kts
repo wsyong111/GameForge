@@ -11,7 +11,6 @@ dependencies {
 	implementation(project(":Game:Core:ClientCore"))
 	implementation(project(":Game:Core:ServerCore"))
 
-	implementation(project(":Framework:Application"))
+	implementation(project(":Framework:App"))
 	implementation(project(":Framework:System:Log"))
-	implementation(project(":Framework:Bootstrap"))
 }

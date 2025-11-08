@@ -24,7 +24,7 @@ public class GameLoop {
 	private volatile boolean stopping;
 	private volatile Thread thread;
 
-	public GameLoop(int tps, @NotNull TickManager tickManager) {
+	public GameLoop(int initialTps, @NotNull TickManager tickManager) {
 		Objects.requireNonNull(tickManager, "tickManager is null");
 
 		this.tickManager = tickManager;
@@ -36,7 +36,7 @@ public class GameLoop {
 			TimeUnit.SECONDS
 		);
 
-		this.setTps(tps);
+		this.setTps(initialTps);
 
 		this.stopping = false;
 		this.thread = null;

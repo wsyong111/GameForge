@@ -3,6 +3,7 @@ package io.github.wsyong11.gameforge.framework.env;
 import io.github.wsyong11.gameforge.util.StreamUtils;
 import io.github.wsyong11.gameforge.util.debug.MapDebugPrinter;
 import lombok.experimental.UtilityClass;
+import org.apache.commons.lang3.ClassUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -45,9 +46,52 @@ public class EnvConfig {
 		return inited;
 	}
 
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	private static void applySystemProperties() {
+		Properties properties = System.getProperties();
+		for (Map.Entry<String, ConfigItem<?>> entry : configItems.entrySet()) {
+			String key = entry.getKey();
+			ConfigItem item = entry.getValue();
+
+			String propertyKey = EnvConfig.class.getName() + "." + key;
+			String propertyValue = properties.getProperty(propertyKey);
+			if (propertyValue == null)
+				continue;
+
+			try {
+				Class<?> itemType = Objects.requireNonNullElse(ClassUtils.wrapperToPrimitive(item.getType()), item.getType());
+				if (itemType == boolean.class) {
+					item.setValue(Boolean.valueOf(propertyValue.toLowerCase(Locale.ROOT)));
+				} else if (itemType == byte.class) {
+					item.setValue(Byte.valueOf(propertyValue));
+				} else if (itemType == char.class) {
+					item.setValue(propertyValue.isEmpty() ? 0 : propertyValue.charAt(0));
+				} else if (itemType == short.class) {
+					item.setValue(Short.valueOf(propertyValue));
+				} else if (itemType == int.class) {
+					item.setValue(Integer.valueOf(propertyValue));
+				} else if (itemType == long.class) {
+					item.setValue(Long.valueOf(propertyValue));
+				} else if (itemType == double.class) {
+					item.setValue(Double.valueOf(propertyValue));
+				} else if (itemType == float.class) {
+					item.setValue(Float.valueOf(propertyValue));
+				} else if (itemType == String.class) {
+					item.setValue(propertyValue);
+				} else {
+					System.err.println("Failed to apply env config " + key + ", can't find method to convert String to " + itemType.getName());
+				}
+			} catch (Exception e) {
+				System.err.println("Failed to apply env config " + key);
+				e.printStackTrace();
+			}
+		}
+	}
+
 	private static void init() {
 		if (inited) return;
 
+		applySystemProperties();
 		invokeConfigurator();
 
 		inited = true;

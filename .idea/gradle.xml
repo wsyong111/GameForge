@@ -25,8 +25,7 @@
             <option value="$PROJECT_DIR$/BuildInfo" />
             <option value="$PROJECT_DIR$/Framework" />
             <option value="$PROJECT_DIR$/Framework/Annotation" />
-            <option value="$PROJECT_DIR$/Framework/Application" />
-            <option value="$PROJECT_DIR$/Framework/Bootstrap" />
+            <option value="$PROJECT_DIR$/Framework/App" />
             <option value="$PROJECT_DIR$/Framework/Common" />
             <option value="$PROJECT_DIR$/Framework/Config" />
             <option value="$PROJECT_DIR$/Framework/DataFlow" />

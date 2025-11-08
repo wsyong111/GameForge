@@ -17,9 +17,6 @@ public interface KeyMap {
 	// 没有按下时就是0
 	long getPressedTick(@NotNull InputKey key);
 
-	// 没有按下时就是0
-	long getPressTimeMs(@NotNull InputKey key);
-
 	/**
 	 * 获取所有已激活的按键集合，该集合包含所有按键除了 {@link KeyAction#UP} 状态的按键
 	 * 返回的集合将会随着用户输入更新

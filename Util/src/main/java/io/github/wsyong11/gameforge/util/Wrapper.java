@@ -8,7 +8,7 @@ import java.util.Objects;
 
 public abstract class Wrapper<T> {
 	@UnknownNullability
-	private T delegate;
+	private volatile T delegate;
 
 	public Wrapper() { /* no-op */ }
 
@@ -27,7 +27,13 @@ public abstract class Wrapper<T> {
 
 	protected void assertDelegate() {
 		if (this.delegate == null)
-			throw new NullPointerException("Implementation instance is not set");
+			throw new NullPointerException(this.getClass().getSimpleName() + " delegate instance is not set");
+	}
+
+	@NotNull
+	protected T delegate() {
+		this.assertDelegate();
+		return this.delegate;
 	}
 
 	@Override
@@ -52,11 +58,5 @@ public abstract class Wrapper<T> {
 		return this.delegate != null
 			? name + "[" + this.delegate + "]"
 			: name + "[null]";
-	}
-
-	@NotNull
-	protected T delegate() {
-		this.assertDelegate();
-		return this.delegate;
 	}
 }

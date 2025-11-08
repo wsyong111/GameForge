@@ -11,8 +11,8 @@ dependencies {
 	implementation(project(":Game:Client"))
 	implementation(project(":Game:Common"))
 
-	implementation(project(":Framework:Application"))
 	implementation(project(":Framework:Lifecycle"))
+	implementation(project(":Framework:Event"))
 	implementation(project(":Framework:System:Resource"))
 	implementation(project(":Framework:System:Render"))
 	implementation(project(":Framework:System:Window"))
@@ -21,4 +21,5 @@ dependencies {
 	implementation(project(":Framework:System:Input"))
 	implementation(project(":Framework:Common"))
 	implementation(project(":Framework:System:Log"))
+	implementation(project(":Framework:App"))
 }

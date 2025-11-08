@@ -20,7 +20,7 @@ public interface Game extends LifecycleProvider {
 	/**
 	 * 获取当前的游戏上下文对象
 	 *
-	 * @return 当前游戏的上下文对象，将会随着游戏状态切换而返回不同的对象
+	 * @return 当前游戏的上下文对象
 	 * @see GameContext
 	 */
 	@NotNull

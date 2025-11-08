@@ -33,6 +33,7 @@ public class SimpleTickManager extends AbstractTickManager {
 
 	@Override
 	public void tick() {
+		TickInfoImpl tickInfo = new TickInfoImpl(this.currentTick, 0); // TODO: 2025/11/8 Calculate delta time
 		synchronized (this.taskQueue) {
 			while (!this.taskQueue.isEmpty()) {
 				SimpleTickingTask task = this.taskQueue.peek();
@@ -45,7 +46,7 @@ public class SimpleTickManager extends AbstractTickManager {
 				if (task.isCanceled() || task.isPaused())
 					continue;
 
-				task.tick(this.currentTick);
+				task.tick(tickInfo);
 
 				task.updateNextTick(this.currentTick);
 				if (!task.isCanceled()) {
@@ -124,9 +125,9 @@ public class SimpleTickManager extends AbstractTickManager {
 		}
 
 		@Override
-		public void tick(long currentTick) {
+		public void tick(@NotNull TickInfo info) {
 			try {
-				this.task.tick(currentTick);
+				this.task.tick(info);
 			} catch (Throwable e) {
 				LOGGER.error("Uncaught exception occurred while running Tickable: {}", this.task, e);
 			}

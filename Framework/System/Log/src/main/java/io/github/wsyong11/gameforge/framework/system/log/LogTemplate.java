@@ -13,4 +13,9 @@ public class LogTemplate {
 		Objects.requireNonNull(supplier, "supplier is null");
 		return supplier;
 	}
+
+	@NotNull
+	public static TemplateValueProvider lazy(@NotNull Object object) {
+		return lazy(() -> object);
+	}
 }

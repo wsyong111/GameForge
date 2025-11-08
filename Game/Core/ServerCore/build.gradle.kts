@@ -9,10 +9,11 @@ artifactId = "ServerCore"
 dependencies {
 	implementation(project, JLINE)
 	implementation(project(":Framework:System:Resource"))
+	implementation(project(":Framework:App"))
 	runtimeOnly(project, JANSI)
 
-	implementation(project(":Framework:Application"))
 	implementation(project(":Framework:Lifecycle"))
+	implementation(project(":Framework:Event"))
 	implementation(project(":Framework:System:Log"))
 	implementation(project(":Game:Core:CommonCore"))
 	implementation(project(":Game:Common"))

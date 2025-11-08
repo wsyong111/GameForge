@@ -33,7 +33,7 @@ subprojects {
 dependencies {
 	implementation(project(":Game:Loader"))
 
-	implementation(project(":Framework:Bootstrap"))
+	implementation(project(":Framework:App"))
 	implementation(project(":Framework:System:Log"))
 }
 

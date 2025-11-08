@@ -3,6 +3,7 @@ package io.github.wsyong11.gameforge.framework.system.resource.manage;
 import io.github.wsyong11.gameforge.framework.Identifier;
 import io.github.wsyong11.gameforge.framework.listener.ListenerList;
 import io.github.wsyong11.gameforge.framework.listener.ex.ListenerExceptionCallback;
+import io.github.wsyong11.gameforge.framework.platform.Platform;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.resource.Resource;
@@ -17,28 +18,45 @@ import org.jetbrains.annotations.UnmodifiableView;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.*;
 
 public class DefaultResourceManager implements ResourceManager {
 	private static final Logger LOGGER = Log.getLogger();
 
 	private final ResourcePath basePath;
 
+	private final ExecutorService reloadThreadPool;
+	private final List<Runnable> reloadCallbacks;
+
 	private final ListenerList listenerList;
 
 	private final List<ResourcePack> resourcePacks;
 	private final Map<Identifier, ResourceConflictHandler> conflictHandlerMap;
-	private Map<Identifier, Resource> resourceMap;
+
+	private volatile boolean closed;
+
+	private volatile Map<Identifier, Resource> resourceMap;
 
 	public DefaultResourceManager(@NotNull ResourcePath basePath) {
 		Objects.requireNonNull(basePath, "basePath is null");
 		this.basePath = basePath;
 
+		this.reloadThreadPool = new ThreadPoolExecutor(
+			1,
+			Platform.CPU_COUNT,
+			30,
+			TimeUnit.SECONDS,
+			new LinkedBlockingQueue<>()
+		);
+		this.reloadCallbacks = new CopyOnWriteArrayList<>();
+
 		this.listenerList = ListenerList.sync();
 
 		this.resourcePacks = new CopyOnWriteArrayList<>();
 		this.conflictHandlerMap = new ConcurrentHashMap<>();
+
+		this.closed = false;
+
 		this.resourceMap = Map.of();
 	}
 
@@ -160,9 +178,32 @@ public class DefaultResourceManager implements ResourceManager {
 			ReloadListener::onReload,
 			ListenerExceptionCallback.log(LOGGER));
 
+		this.runReloadCallbacks();
+
 		long tookTimeNs = System.nanoTime() - startTimeNs;
 		LOGGER.debug("Reload complete took {} ms", tookTimeNs / 1000L / 1000L);
 	}
+
+	private void runReloadCallbacks() {
+		List<? extends Future<?>> futures = new ArrayList<>(this.reloadCallbacks)
+			.stream()
+			.map(this.reloadThreadPool::submit)
+			.toList();
+
+		for (Future<?> future : futures) {
+			try {
+				future.get();
+			} catch (InterruptedException e) {
+				LOGGER.warn("Interrupted exception appears when waiting to reload callback complete", e);
+				Thread.currentThread().interrupt();
+				break;
+			} catch (ExecutionException e) {
+				LOGGER.error("Reload callback execution exception {}", future, e.getCause());
+			}
+		}
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
 
 	@Override
 	public void unregisterReloadListener(@NotNull ReloadListener listener) {
@@ -176,6 +217,20 @@ public class DefaultResourceManager implements ResourceManager {
 		this.listenerList.add(ReloadListener.class, listener);
 	}
 
+	@Override
+	public void registerReloadCallback(@NotNull Runnable callback) {
+		Objects.requireNonNull(callback, "callback is null");
+		this.reloadCallbacks.add(callback);
+	}
+
+	@Override
+	public void unregisterReloadCallback(@NotNull Runnable callback) {
+		Objects.requireNonNull(callback, "callback is null");
+		this.reloadCallbacks.remove(callback);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
 	@Nullable
 	@Override
 	public Resource getResource(@NotNull Identifier name) {
@@ -183,7 +238,18 @@ public class DefaultResourceManager implements ResourceManager {
 		return this.resourceMap.get(name);
 	}
 
-	public void clean() {
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	@Override
+	public void close() {
+		if (this.closed)
+			return;
+		this.closed=true;
+
+		this.listenerList.clear();
+		this.reloadCallbacks.clear();
+		this.reloadThreadPool.shutdownNow();
+
 		List<ResourcePack> resourcePacks = List.copyOf(this.resourcePacks);
 		for (ResourcePack resourcePack : resourcePacks) {
 			try {

@@ -10,8 +10,9 @@ dependencies {
 	implementation(project(":Game:Common"))
 	implementation(project(":Util"))
 
-	implementation(project(":Framework:Application"))
+	implementation(project(":Framework:App"))
 	implementation(project(":Framework:Lifecycle"))
+	implementation(project(":Framework:Common"))
 	implementation(project(":Framework:Event"))
 	implementation(project(":Framework:System:Resource"))
 	implementation(project(":Framework:System:Log"))

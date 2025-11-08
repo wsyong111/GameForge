@@ -4,6 +4,7 @@ import com.google.auto.service.AutoService;
 import io.github.wsyong11.gameforge.framework.annotation.Internal;
 import io.github.wsyong11.gameforge.framework.env.EnvConfig;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
+import io.github.wsyong11.gameforge.framework.system.log.adapter.log4j2.plugin.LogDirContextProvider;
 import io.github.wsyong11.gameforge.framework.system.log.core.adapter.LogSystemAdapter;
 import io.github.wsyong11.gameforge.framework.system.log.core.config.LogConfigManager;
 import io.github.wsyong11.gameforge.framework.system.log.core.logger.LoggerFactory;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Internal
 @AutoService(LogSystemAdapter.class)
 public class Log4jAdapter implements LogSystemAdapter {
-	private static final String CONFIG_NAME = "log4j2-isolation.xml";
+	private static final String CONFIG_NAME = "log4j2.xml";
 
 	private static final Logger LOGGER = EnvConfig.DEBUG.getValue()
 		? new Log4jLogger(StatusLogger.getLogger())
@@ -44,8 +46,11 @@ public class Log4jAdapter implements LogSystemAdapter {
 
 	private final Map<ClassLoader, Context> contextMap;
 
+	private Path logDir;
+
 	public Log4jAdapter() {
 		this.contextMap = new ConcurrentHashMap<>();
+		this.logDir=Path.of("log");
 	}
 
 	@NotNull
@@ -103,6 +108,27 @@ public class Log4jAdapter implements LogSystemAdapter {
 	@Override
 	public void setDefaultStderr(@NotNull PrintStream stderr) {
 		LOGGER.debug("Set default stderr to {}", stderr);
+	}
+
+	@Override
+	public void init() {
+		LogDirContextProvider.setAdapter(this);
+	}
+
+	@Override
+	public void destroy() {
+		LogDirContextProvider.setAdapter(null);
+	}
+
+	@Override
+	public void setLogDir(@NotNull Path logDir) {
+		Objects.requireNonNull(logDir, "logDir is null");
+		this.logDir = logDir;
+	}
+
+	@NotNull
+	public String getLogDir() {
+		return this.logDir.toAbsolutePath().toString();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //

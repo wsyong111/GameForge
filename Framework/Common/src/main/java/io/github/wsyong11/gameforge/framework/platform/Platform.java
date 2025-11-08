@@ -4,6 +4,8 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class Platform {
+	public static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
+
 	public static final OS os;
 
 	static {

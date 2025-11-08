@@ -9,11 +9,13 @@ import io.github.wsyong11.gameforge.framework.event.EventPriority;
 import io.github.wsyong11.gameforge.framework.event.IEventListener;
 import io.github.wsyong11.gameforge.util.collection.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
 
 /**
  * 事件总线的基本抽象类，实现了事件监听器的注册逻辑，并通过缓存提升查找监听器的速度
@@ -26,6 +28,9 @@ public abstract class AbstractEventBus implements EventBus {
 
 	private final Map<Class<? extends Event>, List<ListenerItem<?>>> listenerMap;
 	private final LoadingCache<Class<? extends Event>, List<ListenerItem<?>>> listenerCache;
+
+	@Nullable
+	private ExecutorService defaultExecutor;
 
 	/**
 	 * 使用默认缓存大小实例化
@@ -49,6 +54,21 @@ public abstract class AbstractEventBus implements EventBus {
 			.newBuilder()
 			.maximumSize(cacheSize)
 			.build(new EventBusCacheLoader());
+
+		this.defaultExecutor = null;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	@Override
+	public void setDefaultExecutor(@Nullable ExecutorService executorService) {
+		this.defaultExecutor = executorService;
+	}
+
+	@Nullable
+	@Override
+	public ExecutorService getDefaultExecutor() {
+		return this.defaultExecutor;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //

@@ -1,11 +1,11 @@
 package io.github.wsyong11.gameforge.game.loader;
 
-import io.github.wsyong11.gameforge.framework.bootstrap.Bootstrap;
+import io.github.wsyong11.gameforge.framework.app.Bootstrap;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.log.core.LogLevel;
 import io.github.wsyong11.gameforge.framework.system.log.core.LogManager;
-import io.github.wsyong11.gameforge.game.common.core.StartupConfig;
+import io.github.wsyong11.gameforge.game.common.core.AbstractGame;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -79,26 +79,19 @@ public class MainLoader {
 
 		boolean safeMode = commandLine.hasOption(CommandLineOptions.SAFE_MODE);
 
-		try (Bootstrap<StartupConfig> bootstrap = Bootstrap
-			.<StartupConfig>builder()
-			.mainClass(gameType.getFactory())
-			.logDir(logDir)
-			.enableDebug(debug)
-			.logLevel(logLevel)
-			.config(new StartupConfig(
-				logDir,
-				tempDir,
-				modDir,
-				configDir,
-				crashReportDir,
-				debug,
-				modJarPaths,
-				safeMode
-			))
-			.build()
-		) {
-			bootstrap.start();
-		} catch (Exception e) {
+		try {
+			System.exit(new Bootstrap(context -> gameType.getFactory().get().apply(context))
+				.logDir(logDir)
+				.logLevel(logLevel)
+				.debug(debug)
+				.config(AbstractGame.CONFIG_TEMP_DIR, tempDir)
+				.config(AbstractGame.CONFIG_MOD_DIR, modDir)
+				.config(AbstractGame.CONFIG_CRASH_REPORT_DIR, crashReportDir)
+				.config(AbstractGame.CONFIG_MOD_JAR_PATHS, modJarPaths)
+				.config(AbstractGame.CONFIG_CONFIG_DIR, configDir)
+				.config(AbstractGame.CONFIG_SAFE_MODE, safeMode)
+				.start());
+		} catch (Throwable e) {
 			LOGGER.error("Fatal error", e);
 		}
 	}

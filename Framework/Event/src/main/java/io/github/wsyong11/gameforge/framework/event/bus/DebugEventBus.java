@@ -7,6 +7,7 @@ import io.github.wsyong11.gameforge.framework.event.ex.EventListenerExceptionCal
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -64,9 +65,23 @@ public class DebugEventBus extends EventBusWrapper {
 
 	@NotNull
 	@Override
+	public <T extends Event> Future<Boolean> postAsync(@NotNull T event) {
+		LOGGER.trace("Post async event in bus {}, default executor {}: {}", this.debugName, this.getDefaultExecutor(), event);
+		return super.postAsync(event);
+	}
+
+	@NotNull
+	@Override
 	public <T extends Event> Future<Boolean> postAsync(@NotNull ExecutorService executor, @NotNull T event) {
 		LOGGER.trace("Post async event in bus {}, executor {}: {}", this.debugName, executor, event);
 		return super.postAsync(executor, event);
+	}
+
+	@NotNull
+	@Override
+	public <T extends Event> Future<Boolean> postAsync(@NotNull T event, @NotNull EventListenerExceptionCallback exceptionCallback) {
+		LOGGER.trace("Post async event in bus {}, default executor {}: {}", this.debugName, this.getDefaultExecutor(), event);
+		return super.postAsync(event, exceptionCallback);
 	}
 
 	@NotNull

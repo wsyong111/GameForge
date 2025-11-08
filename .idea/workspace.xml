@@ -5,54 +5,100 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a72e7484-598a-40d2-8080-c72fd6c580c8" name="更改" comment="Updated code">
-      <change afterPath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/impl/SimpleKeyMap.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/Tick/build.gradle.kts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/Tick/src/main/java/io/github/wsyong11/gameforge/framework/tick/AbstractTickManager.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/Tick/src/main/java/io/github/wsyong11/gameforge/framework/tick/SimpleTickManager.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/Tick/src/main/java/io/github/wsyong11/gameforge/framework/tick/TickSourceProvider.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/DeferredValue.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/collection/list/ListTransform.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/collection/list/ListWrapper.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/collection/map/MapWrapper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/App/build.gradle.kts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/App/src/main/java/io/github/wsyong11/gameforge/framework/app/Application.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/App/src/main/java/io/github/wsyong11/gameforge/framework/app/ApplicationFactory.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/App/src/main/java/io/github/wsyong11/gameforge/framework/app/Bootstrap.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/App/src/main/java/io/github/wsyong11/gameforge/framework/app/BootstrapConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/App/src/main/kotlin/io/github/wsyong11/gameforge/framework/app/BootstrapContext.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/Event/src/main/java/io/github/wsyong11/gameforge/framework/event/manager/EventBusManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/Event/src/main/java/io/github/wsyong11/gameforge/framework/event/manager/IEventBusManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/Event/src/main/java/io/github/wsyong11/gameforge/framework/event/manager/SimpleEventBusManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/IInputManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/System/Log/src/main/java/io/github/wsyong11/gameforge/framework/system/log/adapter/log4j2/plugin/LogDirContextProvider.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/manage/IResourceManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/Tick/src/main/java/io/github/wsyong11/gameforge/framework/tick/TickInfo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Game/Common/src/main/java/io/github/wsyong11/gameforge/game/common/event/StopEvent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Game/Common/src/main/java/io/github/wsyong11/gameforge/game/common/service/EventBusService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Game/Common/src/main/java/io/github/wsyong11/gameforge/game/common/service/IService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Game/Common/src/main/java/io/github/wsyong11/gameforge/game/common/service/ResourceManagerService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Game/Common/src/main/java/io/github/wsyong11/gameforge/game/common/service/ServiceProvider.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Game/Common/src/main/java/io/github/wsyong11/gameforge/game/common/service/ServiceRegistry.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Game/Common/src/main/java/io/github/wsyong11/gameforge/game/common/service/StubService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Game/Core/ClientCore/src/main/java/io/github/wsyong11/gameforge/game/core/client/ClientGameContext.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Game/Core/CommonCore/src/main/java/io/github/wsyong11/gameforge/game/common/core/service/EventBusServiceStub.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Game/Core/CommonCore/src/main/java/io/github/wsyong11/gameforge/game/common/core/service/ResourceManagerServiceStub.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Game/Core/CommonCore/src/main/java/io/github/wsyong11/gameforge/game/common/core/service/ServiceRegistryImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Game/Core/ServerCore/src/main/java/io/github/wsyong11/gameforge/game/core/server/ServerGameContext.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/concurrent/ThreadMark.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/concurrent/ThreadUtils.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/exception/ExceptionIntSupplier.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/exception/ExceptionRunnable.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/exception/RuntimeInterruptedException.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/runConfigurations/RunClient.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/runConfigurations/RunClient.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/Common/src/main/kotlin/io/github/wsyong11/gameforge/framework/key/InputKey.kt" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Common/src/main/kotlin/io/github/wsyong11/gameforge/framework/key/InputKey.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/parser/error/DefaultCompileReportCollector.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ast/parser/error/DefaultCompileReportCollector.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Input/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Input/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/InputManagerOld.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Application/build.gradle.kts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Application/src/main/java/io/github/wsyong11/gameforge/framework/app/Application.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Bootstrap/build.gradle.kts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Bootstrap/src/main/java/io/github/wsyong11/gameforge/framework/bootstrap/Bootstrap.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Bootstrap/src/main/java/io/github/wsyong11/gameforge/framework/bootstrap/BootstrapBuilder.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Bootstrap/src/main/kotlin/io/github/wsyong11/gameforge/framework/bootstrap/BootstrapConfiguration.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Common/src/main/java/io/github/wsyong11/gameforge/framework/platform/Platform.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Common/src/main/java/io/github/wsyong11/gameforge/framework/platform/Platform.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/EnvConfig/src/main/java/io/github/wsyong11/gameforge/framework/env/EnvConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/EnvConfig/src/main/java/io/github/wsyong11/gameforge/framework/env/EnvConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Event/src/main/java/io/github/wsyong11/gameforge/framework/event/EventBus.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Event/src/main/java/io/github/wsyong11/gameforge/framework/event/EventBus.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Event/src/main/java/io/github/wsyong11/gameforge/framework/event/bus/AbstractEventBus.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Event/src/main/java/io/github/wsyong11/gameforge/framework/event/bus/AbstractEventBus.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Event/src/main/java/io/github/wsyong11/gameforge/framework/event/bus/DebugEventBus.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Event/src/main/java/io/github/wsyong11/gameforge/framework/event/bus/DebugEventBus.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Event/src/main/java/io/github/wsyong11/gameforge/framework/event/bus/EventBusWrapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Event/src/main/java/io/github/wsyong11/gameforge/framework/event/bus/EventBusWrapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Event/src/main/java/io/github/wsyong11/gameforge/framework/event/bus/SimpleEventBus.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Event/src/main/java/io/github/wsyong11/gameforge/framework/event/bus/SimpleEventBus.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/InputManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/InputManager.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/KeyMap.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/KeyMap.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/ProcessInputManager.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/impl/AbstractInputManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/impl/SimpleInputManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/impl/DefaultInputManagerOld.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/listener/KeyListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/listener/KeyListener.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/listener/MouseListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/listener/MouseListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/event/raw/InputEvent.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/event/raw/KeyInputEvent.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/event/raw/KeyboardInputEvent.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/event/raw/MouseClickEvent.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/event/raw/MouseFocusEvent.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/event/raw/MouseMoveEvent.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/impl/SimpleInputManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/impl/SimpleInputManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/impl/SimpleKeyMap.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Log/src/main/java/io/github/wsyong11/gameforge/framework/system/log/LogTemplate.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Log/src/main/java/io/github/wsyong11/gameforge/framework/system/log/LogTemplate.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Log/src/main/java/io/github/wsyong11/gameforge/framework/system/log/adapter/log4j2/Log4jAdapter.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Log/src/main/java/io/github/wsyong11/gameforge/framework/system/log/adapter/log4j2/Log4jAdapter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Log/src/main/java/io/github/wsyong11/gameforge/framework/system/log/core/LogManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Log/src/main/java/io/github/wsyong11/gameforge/framework/system/log/core/LogManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Log/src/main/java/io/github/wsyong11/gameforge/framework/system/log/core/adapter/LogSystemAdapter.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Log/src/main/java/io/github/wsyong11/gameforge/framework/system/log/core/adapter/LogSystemAdapter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Log/src/main/resources/log4j2-isolation.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Log/src/main/resources/log4j2.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Log/src/main/resources/log4j2.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/manage/DefaultResourceManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/manage/DefaultResourceManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/manage/ResourceManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/manage/ResourceManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Tick/src/main/java/io/github/wsyong11/gameforge/framework/tick/AbstractTickManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Tick/src/main/java/io/github/wsyong11/gameforge/framework/tick/AbstractTickManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Tick/src/main/java/io/github/wsyong11/gameforge/framework/tick/SimpleTickManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Tick/src/main/java/io/github/wsyong11/gameforge/framework/tick/SimpleTickManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Tick/src/main/java/io/github/wsyong11/gameforge/framework/tick/Tickable.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Tick/src/main/java/io/github/wsyong11/gameforge/framework/tick/Tickable.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Game/Common/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Common/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Game/Common/src/main/java/io/github/wsyong11/gameforge/game/common/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Common/src/main/java/io/github/wsyong11/gameforge/game/common/Game.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Game/Common/src/main/java/io/github/wsyong11/gameforge/game/common/GameContext.java" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Common/src/main/java/io/github/wsyong11/gameforge/game/common/GameContext.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Game/Common/src/main/java/io/github/wsyong11/gameforge/game/common/tick/TickManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Tick/src/main/java/io/github/wsyong11/gameforge/framework/tick/TickManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Game/Common/src/main/java/io/github/wsyong11/gameforge/game/common/tick/Tickable.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Tick/src/main/java/io/github/wsyong11/gameforge/framework/tick/Tickable.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Game/Common/src/main/java/io/github/wsyong11/gameforge/game/common/tick/TickingTask.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Tick/src/main/java/io/github/wsyong11/gameforge/framework/tick/TickingTask.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Game/Common/src/main/java/io/github/wsyong11/gameforge/game/common/world/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Common/src/main/java/io/github/wsyong11/gameforge/game/common/world/World.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Game/Core/ClientCore/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Core/ClientCore/build.gradle.kts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Game/Core/ClientCore/src/main/java/io/github/wsyong11/gameforge/game/core/client/ClientGame.java" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Core/ClientCore/src/main/java/io/github/wsyong11/gameforge/game/core/client/ClientGame.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Game/Core/ClientCore/src/main/java/io/github/wsyong11/gameforge/game/core/client/InputManagerWindowListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Core/ClientCore/src/main/java/io/github/wsyong11/gameforge/game/core/client/InputManagerWindowListener.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Game/Core/CommonCore/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Core/CommonCore/build.gradle.kts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Game/Core/CommonCore/src/main/java/io/github/wsyong11/gameforge/game/common/core/AbstractGame.java" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Core/CommonCore/src/main/java/io/github/wsyong11/gameforge/game/common/core/AbstractGame.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Game/Core/CommonCore/src/main/java/io/github/wsyong11/gameforge/game/common/core/AbstractGameContext.java" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Core/CommonCore/src/main/java/io/github/wsyong11/gameforge/game/common/core/AbstractGameContext.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Game/Core/CommonCore/src/main/java/io/github/wsyong11/gameforge/game/common/core/GameLoop.java" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Core/CommonCore/src/main/java/io/github/wsyong11/gameforge/game/common/core/GameLoop.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Game/Core/CommonCore/src/main/java/io/github/wsyong11/gameforge/game/common/core/tick/RootTickManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Core/CommonCore/src/main/java/io/github/wsyong11/gameforge/game/common/core/tick/RootTickManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Util/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/Util/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/Nameable.java" beforeDir="false" afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/Nameable.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Game/Core/ServerCore/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Core/ServerCore/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Game/Core/ServerCore/src/main/java/io/github/wsyong11/gameforge/game/core/server/ServerGame.java" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Core/ServerCore/src/main/java/io/github/wsyong11/gameforge/game/core/server/ServerGame.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Game/Loader/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Loader/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Game/Loader/src/main/java/io/github/wsyong11/gameforge/game/loader/GameType.java" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Loader/src/main/java/io/github/wsyong11/gameforge/game/loader/GameType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Game/Loader/src/main/java/io/github/wsyong11/gameforge/game/loader/MainLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Loader/src/main/java/io/github/wsyong11/gameforge/game/loader/MainLoader.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/Wrapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/Wrapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/collection/AbstractMultiTree.java" beforeDir="false" afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/collection/map/AbstractMultiTree.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/collection/BoundedArrayList.java" beforeDir="false" afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/collection/list/BoundedArrayList.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/collection/BoundedList.java" beforeDir="false" afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/collection/list/BoundedList.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/collection/LikeMapView.java" beforeDir="false" afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/collection/map/LikeMapView.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Util/src/test/java/io/github/wsyong11/gameforge/util/collection/MultiTreeTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/collection/list/ListTransform.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DependenciesAnalyzeManager">
+    <option name="forwardDirection" value="false" />
   </component>
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
@@ -100,11 +146,11 @@
         <option value="AnnotationType" />
         <option value="Enum" />
         <option value="Kotlin File" />
-        <option value="Kotlin Class" />
         <option value="JavaMain" />
         <option value="Kotlin Interface" />
-        <option value="Interface" />
+        <option value="Kotlin Class" />
         <option value="Class" />
+        <option value="Interface" />
       </list>
     </option>
   </component>
@@ -169,73 +215,76 @@
     <option name="showMembers" value="true" />
     <option name="showVisibilityIcons" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Gradle.DebugFatJar.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.GameForge [:Game:Core:Common:dependencies].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.GameForge [:Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.GameForge [:aggregateJavadoc].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.GameForge [:build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.GameForge [:cleanAll].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.GameForge [:clean].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.GameForge [:shadowJar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.GameForge:Framework:DataFlow [:Framework:DataFlow:MimeType.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.GameForge:Framework:Lang [:Framework:Lang:Main.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.GameForge:Framework:Lang [:Framework:Lang:Tokenizer.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.GameForge:Framework:System:Resource [:Framework:System:Resource:DefaultResourceManager.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.GameForge:Framework:System:Resource [:Framework:System:Resource:DirResourcePack.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.GameForge:Framework:System:Resource [:Framework:System:Resource:ResourcePath.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.GameForge:Framework:System:Resource [:Framework:System:Resource:ZipResourcePack.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.MultiTreeTest.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.ReleaseFatJar.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.SimpleEventBusTest.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.加载 Gradle 依赖项.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.构建 GameForge.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.正在构建 Gradle 依赖项.executor&quot;: &quot;Run&quot;,
-    &quot;Kotlin 脚本(测试版).build.gradle.kts.executor&quot;: &quot;Debug&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_directory_selection&quot;: &quot;D:/Projects/Java/GameForge/Util/src/test/java/io/github/wsyong11/gameforge/util/collection&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/Projects/Java/Game&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;onboarding.tips.debug.path&quot;: &quot;D:/Projects/Java/GameForge/Util/src/main/java/com/gameforge/util/Main.java&quot;,
-    &quot;org.rust.cargo.project.model.impl.CargoExternalSystemProjectAware.subscribe.first.balloon&quot;: &quot;&quot;,
-    &quot;org.rust.first.attach.projects&quot;: &quot;true&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;模块&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;editing.templates&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;,
-    &quot;应用程序.Main.executor&quot;: &quot;Profiler#1&quot;,
-    &quot;远程 JVM 调试.RemoteDebug.executor&quot;: &quot;Debug&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Gradle.DebugFatJar.executor": "Run",
+    "Gradle.GameForge [:Framework:Bootstrap:dependencies].executor": "Run",
+    "Gradle.GameForge [:Game:Core:Common:dependencies].executor": "Run",
+    "Gradle.GameForge [:Main.main()].executor": "Run",
+    "Gradle.GameForge [:aggregateJavadoc].executor": "Run",
+    "Gradle.GameForge [:build -Xextended-compiler-checks].executor": "Run",
+    "Gradle.GameForge [:build].executor": "Run",
+    "Gradle.GameForge [:cleanAll].executor": "Run",
+    "Gradle.GameForge [:clean].executor": "Run",
+    "Gradle.GameForge [:shadowJar].executor": "Run",
+    "Gradle.GameForge [clean build].executor": "Run",
+    "Gradle.GameForge:Framework:DataFlow [:Framework:DataFlow:MimeType.main()].executor": "Run",
+    "Gradle.GameForge:Framework:Lang [:Framework:Lang:Main.main()].executor": "Run",
+    "Gradle.GameForge:Framework:Lang [:Framework:Lang:Tokenizer.main()].executor": "Run",
+    "Gradle.GameForge:Framework:System:Resource [:Framework:System:Resource:DefaultResourceManager.main()].executor": "Run",
+    "Gradle.GameForge:Framework:System:Resource [:Framework:System:Resource:DirResourcePack.main()].executor": "Run",
+    "Gradle.GameForge:Framework:System:Resource [:Framework:System:Resource:ResourcePath.main()].executor": "Run",
+    "Gradle.GameForge:Framework:System:Resource [:Framework:System:Resource:ZipResourcePack.main()].executor": "Run",
+    "Gradle.MultiTreeTest.executor": "Run",
+    "Gradle.ReleaseFatJar.executor": "Run",
+    "Gradle.SimpleEventBusTest.executor": "Run",
+    "Gradle.加载 Gradle 依赖项.executor": "Run",
+    "Gradle.构建 GameForge.executor": "Run",
+    "Gradle.正在构建 Gradle 依赖项.executor": "Run",
+    "Kotlin 脚本(测试版).build.gradle.kts.executor": "Debug",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "kotlin-language-version-configured": "true",
+    "last_directory_selection": "D:/Projects/Java/GameForge/Util/src/test/java/io/github/wsyong11/gameforge/util/collection",
+    "last_opened_file_path": "D:/Projects/Java/GameForge/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/impl",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "onboarding.tips.debug.path": "D:/Projects/Java/GameForge/Util/src/main/java/com/gameforge/util/Main.java",
+    "org.rust.cargo.project.model.impl.CargoExternalSystemProjectAware.subscribe.first.balloon": "",
+    "org.rust.first.attach.projects": "true",
+    "project.structure.last.edited": "模块",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
+    "settings.editor.selected.configurable": "preferences.sourceCode.Java",
+    "vue.rearranger.settings.migration": "true",
+    "应用程序.Main.executor": "Profiler#1",
+    "远程 JVM 调试.RemoteDebug.executor": "Debug"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File&quot;: [
-      &quot;TEXT&quot;
+  "keyToStringList": {
+    "com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File": [
+      "TEXT"
     ],
-    &quot;kotlin-gradle-user-dirs&quot;: [
-      &quot;D:\\Projects\\.IntellijIdea\\Gradle&quot;
+    "kotlin-gradle-user-dirs": [
+      "D:\\Projects\\.IntellijIdea\\Gradle"
     ]
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CreateClassDialog.RecentsKey">
+      <recent name="io.github.wsyong11.gameforge.framework.app" />
       <recent name="io.github.wsyong11.gameforge.framework.system.render.impl.opengl" />
       <recent name="io.github.wsyong11.gameforge.framework.lang.ast.node" />
       <recent name="com.gameforge.framework.lang.token" />
       <recent name="com.gameforge.framework.event.bus" />
-      <recent name="com.gameforge.framework.lifecycle" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Projects\Java\GameForge\Framework\System\Input\src\main\java\io\github\wsyong11\gameforge\framework\system\input\impl" />
+      <recent name="D:\Projects\Java\GameForge\Framework\System\Input\src\main\java\io\github\wsyong11\gameforge\framework\system\input" />
       <recent name="D:\Projects\Java\GameForge\Framework\System" />
       <recent name="D:\Projects\Java\GameForge\run\resource_pack\Minecraft" />
       <recent name="D:\Projects\Java\GameForge\run\resource_pack\MyPack\assets\game" />
-      <recent name="D:\Projects\Java\GameForge\Framework\DataFlow" />
-      <recent name="D:\Projects\Java\GameForge\Framework\System\Resource\src\main\resources\assets\game\texture" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\Projects\Java\GameForge\Assets\src\main\resources\data\game" />
@@ -254,6 +303,7 @@
       <recent name="com.gameforge.dependencies" />
     </key>
     <key name="ExtractSuperBase.RECENT_KEYS">
+      <recent name="io.github.wsyong11.gameforge.game.common.service" />
       <recent name="com.gameforge.framework.event" />
       <recent name="com.gameforge.framework.system.log.core.dispatcher" />
       <recent name="com.gameforge.framework.system.log.core.config" />
@@ -309,6 +359,9 @@
       <command value="gradle :shadowJar -PbuildType=RELEASE" />
       <command value="gradle :build" />
       <command value="gradle :aggregateJavadoc" />
+      <command value="gradlew :Framework:Bootstrap:dependencies" />
+      <command value="gradle :build  -Xextended-compiler-checks" />
+      <command value="gradle clean build " />
     </option>
   </component>
   <component name="RunManager" selected="应用程序.RunClient">
@@ -369,6 +422,29 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
+    <configuration name="GameForge [:build -Xextended-compiler-checks]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":build" />
+            <option value="-Xextended-compiler-checks" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <method v="2" />
+    </configuration>
     <configuration name="GameForge [:build]" type="GradleRunConfiguration" factoryName="Gradle">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -403,6 +479,29 @@
         <option name="taskNames">
           <list>
             <option value=":build" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <configuration name="GameForge [clean build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="clean" />
+            <option value="build" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -431,6 +530,8 @@
       <item itemvalue="Gradle.GameForge [:build]" />
       <item itemvalue="Gradle.DebugFatJar" />
       <item itemvalue="Gradle.ReleaseFatJar" />
+      <item itemvalue="Gradle.GameForge [:build -Xextended-compiler-checks]" />
+      <item itemvalue="Gradle.GameForge [clean build]" />
       <item itemvalue="Gradle.GameForge [:aggregateJavadoc]" />
       <item itemvalue="应用程序.RunClient" />
       <item itemvalue="应用程序.RunServer" />
@@ -439,6 +540,8 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.GameForge [clean build]" />
+        <item itemvalue="Gradle.GameForge [:build -Xextended-compiler-checks]" />
         <item itemvalue="Gradle.GameForge [:aggregateJavadoc]" />
       </list>
     </recent_temporary>
@@ -518,7 +621,18 @@
       <workItem from="1759394140233" duration="9979000" />
       <workItem from="1759466384196" duration="1325000" />
       <workItem from="1759468473274" duration="14193000" />
-      <workItem from="1759548900549" duration="3455000" />
+      <workItem from="1759548900549" duration="3519000" />
+      <workItem from="1759738195345" duration="2391000" />
+      <workItem from="1759742601653" duration="6818000" />
+      <workItem from="1759835367689" duration="1304000" />
+      <workItem from="1760000641901" duration="1233000" />
+      <workItem from="1760003956277" duration="1847000" />
+      <workItem from="1761207759991" duration="3077000" />
+      <workItem from="1761286548083" duration="105000" />
+      <workItem from="1762333784680" duration="6576000" />
+      <workItem from="1762421103033" duration="12373000" />
+      <workItem from="1762499505488" duration="10379000" />
+      <workItem from="1762586783156" duration="21947000" />
     </task>
     <task id="LOCAL-00001" summary="Removed gradle.properties in .gitignore">
       <option name="closed" value="true" />
@@ -728,7 +842,15 @@
       <option name="project" value="LOCAL" />
       <updated>1759414010312</updated>
     </task>
-    <option name="localTasksCounter" value="27" />
+    <task id="LOCAL-00027" summary="Updated code">
+      <option name="closed" value="true" />
+      <created>1759552461371</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1759552461371</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

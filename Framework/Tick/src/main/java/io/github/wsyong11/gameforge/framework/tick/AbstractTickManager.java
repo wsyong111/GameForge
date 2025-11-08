@@ -15,6 +15,26 @@ public abstract class AbstractTickManager implements TickManager {
 		return new DefaultTaskBuilder(tickable, this);
 	}
 
+	protected static class TickInfoImpl implements TickInfo {
+		private final long currentTick;
+		private final double deltaTimeMs;
+
+		protected TickInfoImpl(long currentTick, double deltaTimeMs) {
+			this.currentTick = currentTick;
+			this.deltaTimeMs = deltaTimeMs;
+		}
+
+		@Override
+		public long getCurrentTick() {
+			return this.currentTick;
+		}
+
+		@Override
+		public double getDeltaTimeMs() {
+			return this.deltaTimeMs;
+		}
+	}
+
 	protected static class DefaultTaskBuilder implements TaskBuilder {
 		private final Tickable tickable;
 		private final AbstractTickManager manager;

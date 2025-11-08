@@ -34,10 +34,33 @@ public class EventBusWrapper extends Wrapper<EventBus> implements EventBus {
 		return this.delegate().post(event, exceptionCallback);
 	}
 
+	@Override
+	public void setDefaultExecutor(@Nullable ExecutorService executorService) {
+		this.delegate().setDefaultExecutor(executorService);
+	}
+
+	@Nullable
+	@Override
+	public ExecutorService getDefaultExecutor() {
+		return this.delegate().getDefaultExecutor();
+	}
+
+	@NotNull
+	@Override
+	public <T extends Event> Future<Boolean> postAsync(@NotNull T event) {
+		return this.delegate().postAsync(event);
+	}
+
 	@NotNull
 	@Override
 	public <T extends Event> Future<Boolean> postAsync(@NotNull ExecutorService executor, @NotNull T event) {
 		return this.delegate().postAsync(executor, event);
+	}
+
+	@NotNull
+	@Override
+	public <T extends Event> Future<Boolean> postAsync(@NotNull T event, @NotNull EventListenerExceptionCallback exceptionCallback) {
+		return this.delegate().postAsync(event, exceptionCallback);
 	}
 
 	@NotNull

@@ -1,24 +1,37 @@
 package io.github.wsyong11.gameforge.game.common.core;
 
 import io.github.wsyong11.gameforge.framework.app.Application;
+import io.github.wsyong11.gameforge.framework.app.BootstrapConfig;
+import io.github.wsyong11.gameforge.framework.app.BootstrapContext;
+import io.github.wsyong11.gameforge.framework.event.EventBus;
+import io.github.wsyong11.gameforge.framework.event.manager.EventBusManager;
+import io.github.wsyong11.gameforge.framework.event.manager.SimpleEventBusManager;
+import io.github.wsyong11.gameforge.framework.lifecycle.ILifecycle;
+import io.github.wsyong11.gameforge.framework.lifecycle.Lifecycle;
+import io.github.wsyong11.gameforge.framework.lifecycle.LifecycleState;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.manage.DefaultResourceManager;
 import io.github.wsyong11.gameforge.framework.system.resource.manage.ResourceManager;
-import io.github.wsyong11.gameforge.framework.system.resource.pack.AssetsResourcePack;
-import io.github.wsyong11.gameforge.framework.tick.TickManager;
 import io.github.wsyong11.gameforge.game.common.Game;
 import io.github.wsyong11.gameforge.game.common.GameContext;
 import io.github.wsyong11.gameforge.game.common.GameEnvConfig;
-import io.github.wsyong11.gameforge.game.common.core.tick.RootTickManager;
-import io.github.wsyong11.gameforge.util.concurrent.TaskHandler;
-import io.github.wsyong11.gameforge.util.concurrent.executor.TaskQueueExecutor;
-import io.github.wsyong11.gameforge.util.exception.ExceptionHandler;
-import org.jetbrains.annotations.MustBeInvokedByOverriders;
+import io.github.wsyong11.gameforge.game.common.core.service.EventBusServiceStub;
+import io.github.wsyong11.gameforge.game.common.core.service.ResourceManagerServiceStub;
+import io.github.wsyong11.gameforge.game.common.core.service.ServiceRegistryImpl;
+import io.github.wsyong11.gameforge.game.common.event.StopEvent;
+import io.github.wsyong11.gameforge.game.common.service.EventBusService;
+import io.github.wsyong11.gameforge.game.common.service.ResourceManagerService;
+import io.github.wsyong11.gameforge.game.common.service.ServiceRegistry;
+import io.github.wsyong11.gameforge.util.exception.ExceptionRunnable;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
+
+import static io.github.wsyong11.gameforge.framework.system.log.LogTemplate.lazy;
 
 /**
  * 游戏的基本抽象实现，实现了基本的资源管理系统
@@ -26,217 +39,176 @@ import java.util.Objects;
 public abstract class AbstractGame extends Application implements Game {
 	private static final Logger LOGGER = Log.getLogger();
 
-	private final StartupConfig config;
-	private final Thread thread;
-	private final DefaultResourceManager resourceManager;
-	private final TickManager tickManager;
+	public static final BootstrapConfig<Path> CONFIG_TEMP_DIR = BootstrapConfig.create("tempDir", Path.class);
+	public static final BootstrapConfig<Path> CONFIG_MOD_DIR = BootstrapConfig.create("modDir", Path.class);
+	public static final BootstrapConfig<Path> CONFIG_CONFIG_DIR = BootstrapConfig.create("configDir", Path.class);
+	public static final BootstrapConfig<Path> CONFIG_CRASH_REPORT_DIR = BootstrapConfig.create("crashReportDir", Path.class);
+	public static final BootstrapConfig<List<Path>> CONFIG_MOD_JAR_PATHS = BootstrapConfig.create("modJarPaths", List.class);
+	public static final BootstrapConfig<Boolean> CONFIG_SAFE_MODE = BootstrapConfig.create("safeMode", Boolean.class);
 
-	private final GameLoop gameLoop;
+	private final StartupConfig startupConfig;
 
-	private final TaskQueueExecutor taskExecutor;
-	private final TaskHandler handler;
+	private final Lifecycle lifecycle;
 
-	private volatile boolean cleaned;
+	private final EventBusManager eventBusManager;
+	private final EventBus systemEventBus;
+
+	private final ServiceRegistry serviceRegistry;
+
+	private final ResourceManager resourceManager;
+
+	private volatile GameContext context;
 
 	/**
 	 * 实例化对象
 	 *
-	 * @param config           启动配置
+	 * @param bootstrapContext 启动信息
 	 * @param resourceBasePath 基础资源路径
 	 */
-	public AbstractGame(@NotNull StartupConfig config, @NotNull ResourcePath resourceBasePath) {
-		Objects.requireNonNull(config, "config is null");
+	public AbstractGame(@NotNull BootstrapContext bootstrapContext, @NotNull ResourcePath resourceBasePath) {
+		Objects.requireNonNull(bootstrapContext, "bootstrapContext is null");
 		Objects.requireNonNull(resourceBasePath, "resourceBasePath is null");
 
-		this.config = config;
+		this.startupConfig = new StartupConfig(
+			bootstrapContext.getLogDir(),
+			bootstrapContext.getConfigRequire(CONFIG_TEMP_DIR),
+			bootstrapContext.getConfigRequire(CONFIG_MOD_DIR),
+			bootstrapContext.getConfigRequire(CONFIG_CONFIG_DIR),
+			bootstrapContext.getConfigRequire(CONFIG_CRASH_REPORT_DIR),
+			bootstrapContext.isDebug(),
+			bootstrapContext.getConfigRequire(CONFIG_MOD_JAR_PATHS),
+			bootstrapContext.getConfigRequire(CONFIG_SAFE_MODE)
+		);
 
-		this.thread = Thread.currentThread();
+		this.lifecycle = Lifecycle.debug(Lifecycle.create(), this.getClass().getSimpleName());
+
+		this.serviceRegistry = new ServiceRegistryImpl();
+
+		this.eventBusManager = new SimpleEventBusManager();
+		this.systemEventBus = EventBus.simple();
+
 		this.resourceManager = new DefaultResourceManager(resourceBasePath);
-		this.tickManager = new RootTickManager();
 
-		this.gameLoop = new GameLoop(DEFAULT_TPS, this.tickManager);
-
-		this.taskExecutor = new TaskQueueExecutor();
-		this.handler = new TaskHandler(this.taskExecutor);
-
-		this.cleaned = false;
-	}
-
-	public void requireStop() {
-		this.gameLoop.stop();
-	}
-
-	// -------------------------------------------------------------------------------------------------------------- //
-
-	/**
-	 * 获取资源管理器实例
-	 *
-	 * @return 资源管理器实例
-	 */
-	@NotNull
-	public ResourceManager getResourceManager() {
-		return this.resourceManager;
-	}
-
-	@NotNull
-	public TickManager getTickManager() {
-		return this.tickManager;
-	}
-
-	// TODO: 2025/9/2 Impl game context
-	@NotNull
-	@Override
-	public GameContext getContext() {
-		return null;
+		this.context = null;
 	}
 
 	@NotNull
 	@Override
 	public GameEnvConfig getEnvConfig() {
-		return this.config;
+		return this.startupConfig;
 	}
 
 	@NotNull
-	public TaskHandler getHandler() {
-		return this.handler;
+	@Override
+	public ILifecycle getLifecycle() {
+		return this.lifecycle;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
-	/**
-	 * 获取启动配置
-	 *
-	 * @return 当前游戏实例的启动配置对象
-	 */
 	@NotNull
-	public StartupConfig getConfig() {
-		return this.config;
-	}
-
-	/**
-	 * 获取当前类加载器
-	 *
-	 * @return 将返回加载当前类的类加载器
-	 */
-	@NotNull
-	public ClassLoader getClassLoader() {
-		return this.getClass().getClassLoader();
+	protected ResourceManager getResourceManager() {
+		return this.resourceManager;
 	}
 
 	@NotNull
-	protected Thread getThread() {
-		return this.thread;
+	protected EventBus getSystemEventBus() {
+		return this.systemEventBus;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
-	@Override
-	public void start() {
-		if (Thread.currentThread() != this.thread)
-			throw new IllegalThreadStateException("Can only start in the main thread");
-
-		super.start();
-	}
-
-	@MustBeInvokedByOverriders
-	@Override
 	protected void onStarting() throws Throwable {
-		super.onStarting();
-		Thread.setDefaultUncaughtExceptionHandler(this::onUncaughtException);
+		// 注册自己以便允许外部通过 getService 获取服务注册表
+		this.serviceRegistry.register(ServiceRegistry.class, this.serviceRegistry);
 
-		this.tickManager.buildTask(this::tick)
-		                .priority(Integer.MAX_VALUE)
-		                .build();
+		this.serviceRegistry.register(EventBusService.class, new EventBusServiceStub(this.eventBusManager));
+		this.serviceRegistry.register(ResourceManagerService.class, new ResourceManagerServiceStub(this.resourceManager));
 
-		LOGGER.debug("Setting up the resource system");
-		this.resourceManager.addPack(new AssetsResourcePack("game"));
+		this.eventBusManager.registerEventBus(EventBusService.SYSTEM, this.systemEventBus);
 	}
 
-	// -------------------------------------------------------------------------------------------------------------- //
-
-	protected void executeTask() {
-		this.taskExecutor.run(ex ->
-			LOGGER.error("Exception in logic executor", ex));
-	}
-
-	protected void tick(long currentTick) {
-		this.executeTask();
-	}
-
-	protected void mainLoop() {
-		this.thread.setName("LogicThread");
-
-		boolean normalExit = this.gameLoop.run();
-		if (!normalExit)
-			LOGGER.warn("Game loop returns abnormally");
-
-		this.stop();
-	}
-
-	@MustBeInvokedByOverriders
-	@Override
 	protected void onRunning() throws Throwable {
-		super.onRunning();
+		LOGGER.debug("Create game context");
+		this.context = this.createGameContext(this.serviceRegistry);
+		if (this.context == null)
+			throw new IllegalStateException("Failed to create game context");
+		LOGGER.debug("Current game context: {}", lazy(this.context));
+
 		this.resourceManager.reload();
 	}
 
-	// -------------------------------------------------------------------------------------------------------------- //
-
-	@MustBeInvokedByOverriders
-	@Override
 	protected void onStopping() throws Throwable {
-		super.onStopping();
-
-		LOGGER.info("Stopping");
-		this.requireStop();
+		this.systemEventBus.postAsync(new StopEvent(StopEvent.Type.NORMAL));
 	}
 
-	@MustBeInvokedByOverriders
-	@Override
-	protected void onDestroy() {
-		try {
-			super.onDestroy();
-		} finally {
-			this.clean();
-		}
+	protected void onDestroyed() throws Throwable {
+		this.resourceManager.close();
+		this.eventBusManager.close();
+		this.context = null;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
-	protected void onUncaughtException(@NotNull Thread thread, @NotNull Throwable exception) {
-		Objects.requireNonNull(thread, "thread is null");
-		Objects.requireNonNull(exception, "exception is null");
+	@NotNull
+	protected abstract GameContext createGameContext(@NotNull ServiceRegistry serviceRegistry);
 
-		LOGGER.error("Uncaught exception in thread {}", thread, exception);
-		this.processError(exception);
+	@NotNull
+	@Override
+	public GameContext getContext() {
+		this.lifecycle.assertState(LifecycleState.RUNNING, LifecycleState.STOPPING);
+
+		GameContext context = this.context;
+
+		if (context == null)
+			throw new IllegalStateException("Game context doesn't create");
+		return context;
 	}
 
-	@Override
-	protected void onError(@NotNull Throwable exception) {
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	protected void tick() {
+
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	protected void processError(@NotNull Throwable exception) throws Throwable {
+		Objects.requireNonNull(exception, "exception is null");
+		LOGGER.error("Runtime uncaught exception", exception);
+		throw exception;
+	}
+
+	private boolean lifecycleChange(@NotNull LifecycleState oldState, @NotNull LifecycleState newState, @NotNull ExceptionRunnable<Throwable> runnable) throws Throwable {
+		Objects.requireNonNull(oldState, "oldState is null");
+		Objects.requireNonNull(newState, "newState is null");
+		Objects.requireNonNull(runnable, "runnable is null");
+
+		this.lifecycle.assertState(oldState);
 		try {
-			super.onError(exception);
-		} finally {
-			this.clean();
+			this.lifecycle.setState(newState);
+			runnable.run();
+			return false;
+		} catch (Throwable e) {
+			try {
+				this.processError(e);
+				return true;
+			} finally {
+				this.lifecycle.setState(LifecycleState.ERROR);
+			}
 		}
 	}
 
-	/**
-	 * 退出前的清理函数，将在 {@link #onDestroy()} 或 {@link #onError(Throwable)} 后调用
-	 *
-	 * @implNote 应始终假定初始化不完整，以避免访问字段时的空指针异常
-	 */
-	@MustBeInvokedByOverriders
-	protected void clean() {
-		if (this.cleaned)
-			return;
-		this.cleaned = true;
+	@Override
+	public int main() throws Throwable {
+		if (this.lifecycleChange(LifecycleState.CREATED, LifecycleState.STARTING, this::onStarting)) return 1;
+		if (this.lifecycleChange(LifecycleState.STARTING, LifecycleState.RUNNING, this::onRunning)) return 1;
+		if (this.lifecycleChange(LifecycleState.RUNNING, LifecycleState.STOPPING, this::onStopping)) return 1;
+		if (this.lifecycleChange(LifecycleState.STOPPING, LifecycleState.DESTROYED, this::onDestroyed)) return 1;
+		return 0;
+	}
 
-		ExceptionHandler handler = new ExceptionHandler();
-
-		LOGGER.info("Cleaning resources");
-		handler.run(this.resourceManager::clean);
-
-		handler.pickAllEach(exception ->
-			LOGGER.warn("An exception occurred during cleaning", exception));
+	protected boolean isDebug() {
+		return this.startupConfig.isDebug();
 	}
 }

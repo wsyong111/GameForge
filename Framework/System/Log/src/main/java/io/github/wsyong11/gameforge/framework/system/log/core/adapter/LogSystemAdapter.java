@@ -5,6 +5,7 @@ import io.github.wsyong11.gameforge.framework.system.log.core.logger.LoggerFacto
 import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintStream;
+import java.nio.file.Path;
 
 public interface LogSystemAdapter {
 	@NotNull
@@ -23,4 +24,10 @@ public interface LogSystemAdapter {
 	void setDefaultStdout(PrintStream stdout);
 
 	void setDefaultStderr(PrintStream stderr);
+
+	void init();
+
+	void destroy();
+
+	void setLogDir(@NotNull Path logDir);
 }

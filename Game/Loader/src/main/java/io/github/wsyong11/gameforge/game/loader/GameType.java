@@ -1,6 +1,7 @@
 package io.github.wsyong11.gameforge.game.loader;
 
 import io.github.wsyong11.gameforge.framework.app.Application;
+import io.github.wsyong11.gameforge.framework.app.BootstrapContext;
 import io.github.wsyong11.gameforge.game.common.core.StartupConfig;
 import io.github.wsyong11.gameforge.game.core.client.ClientGame;
 import io.github.wsyong11.gameforge.game.core.server.ServerGame;
@@ -14,8 +15,8 @@ import java.util.function.Supplier;
 @SuppressWarnings("Convert2MethodRef")
 public enum GameType {
 	// !! Do not replace it with the method ref, this will load class !!
-	CLIENT("client", () -> config -> new ClientGame(config)),
-	SERVER("server", () -> config -> new ServerGame(config));
+	CLIENT("client", () -> context -> new ClientGame(context)),
+	SERVER("server", () -> context -> new ServerGame(context));
 
 	@Nullable
 	public static GameType parse(@Nullable String id) {
@@ -29,9 +30,9 @@ public enum GameType {
 	}
 
 	private final String id;
-	private final Supplier<Function<StartupConfig, Application>> factory;
+	private final Supplier<Function<BootstrapContext, Application>> factory;
 
-	GameType(@NotNull String id, @NotNull Supplier<Function<StartupConfig, Application>> factory) {
+	GameType(@NotNull String id, @NotNull Supplier<Function<BootstrapContext, Application>> factory) {
 		Objects.requireNonNull(id, "id is null");
 		Objects.requireNonNull(factory, "factory is null");
 
@@ -45,7 +46,7 @@ public enum GameType {
 	}
 
 	@NotNull
-	public Supplier<Function<StartupConfig, Application>> getFactory() {
+	public Supplier<Function<BootstrapContext, Application>> getFactory() {
 		return this.factory;
 	}
 

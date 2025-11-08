@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.PrintStream;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ServiceLoader;
@@ -42,8 +43,14 @@ public final class LogManager {
 
 	public static void setAdapter(@Nullable LogSystemAdapter adapter) {
 		if (adapter == currentAdapter) return;
+
+		if (currentAdapter != null)
+			uninitAdapter();
+
 		currentAdapter = adapter;
-		initAdapter();
+
+		if (currentAdapter != null)
+			initAdapter();
 	}
 
 	@NotNull
@@ -59,8 +66,15 @@ public final class LogManager {
 
 	private static void initAdapter() {
 		assertAdapter();
+		currentAdapter.init();
 		currentAdapter.setDefaultStdout(defaultStdout);
 		currentAdapter.setDefaultStderr(defaultStderr);
+		currentAdapter.setLogDir(logDir);
+	}
+
+	private static void uninitAdapter() {
+		assertAdapter();
+		currentAdapter.destroy();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
@@ -100,6 +114,22 @@ public final class LogManager {
 	@NotNull
 	public static PrintStream getDefaultStderr() {
 		return defaultStderr;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	private static Path logDir = Path.of("log");
+
+	public static void setLogDir(@NotNull Path dir) {
+		Objects.requireNonNull(dir, "dir is null");
+		logDir = dir;
+		if (currentAdapter != null)
+			currentAdapter.setLogDir(dir);
+	}
+
+	@NotNull
+	public static Path getLogDir() {
+		return logDir;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
@@ -144,10 +174,6 @@ public final class LogManager {
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
-
-	private static void hookJavaLogger() {
-
-	}
 
 	static {
 		Thread cleanerThread = new Thread(LogManager::unbindAll);

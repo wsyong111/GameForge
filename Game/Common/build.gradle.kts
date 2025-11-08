@@ -5,6 +5,7 @@ artifactId = "Common"
 dependencies {
 	implementation(project(":Framework:Lifecycle"))
 	implementation(project(":Framework:Event"))
+	implementation(project(":Framework:Common"))
 	implementation(project(":Framework:Annotation"))
 	implementation(project(":Framework:System:Resource"))
 	implementation(project(":Framework:Tick"))
