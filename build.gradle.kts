@@ -1,3 +1,4 @@
+import com.github.jengelman.gradle.plugins.shadow.transformers.AppendingTransformer
 import io.github.wsyong11.gameforge.project.ignoreDefaultConfig
 import io.github.wsyong11.gameforge.project.includeDebug
 import io.github.wsyong11.gameforge.project.includeRelease
@@ -52,6 +53,10 @@ tasks.jar {
 tasks.shadowJar {
 	mergeServiceFiles()
 
+    from("LICENSE") {
+        into("META-INF")
+    }
+
 	exclude("META-INF/DEPENDENCIES")
 	exclude("META-INF/*LICENSE*")
 	exclude("META-INF/*NOTICE*")
@@ -62,6 +67,8 @@ tasks.shadowJar {
 		"META-INF/gradle/**",
 		"META-INF/proguard/**"
 	)
+
+	// TODO: Merge license and notice to one file
 }
 
 

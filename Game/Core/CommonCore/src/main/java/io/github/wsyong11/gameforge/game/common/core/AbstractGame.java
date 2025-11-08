@@ -14,16 +14,21 @@ import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.manage.DefaultResourceManager;
 import io.github.wsyong11.gameforge.framework.system.resource.manage.ResourceManager;
+import io.github.wsyong11.gameforge.framework.tick.TickInfo;
+import io.github.wsyong11.gameforge.framework.tick.TickManager;
 import io.github.wsyong11.gameforge.game.common.Game;
 import io.github.wsyong11.gameforge.game.common.GameContext;
 import io.github.wsyong11.gameforge.game.common.GameEnvConfig;
 import io.github.wsyong11.gameforge.game.common.core.service.EventBusServiceStub;
 import io.github.wsyong11.gameforge.game.common.core.service.ResourceManagerServiceStub;
 import io.github.wsyong11.gameforge.game.common.core.service.ServiceRegistryImpl;
+import io.github.wsyong11.gameforge.game.common.core.service.TickServiceStub;
+import io.github.wsyong11.gameforge.game.common.core.tick.RootTickManager;
 import io.github.wsyong11.gameforge.game.common.event.StopEvent;
 import io.github.wsyong11.gameforge.game.common.service.EventBusService;
 import io.github.wsyong11.gameforge.game.common.service.ResourceManagerService;
 import io.github.wsyong11.gameforge.game.common.service.ServiceRegistry;
+import io.github.wsyong11.gameforge.game.common.service.TickService;
 import io.github.wsyong11.gameforge.util.exception.ExceptionRunnable;
 import org.jetbrains.annotations.NotNull;
 
@@ -55,7 +60,10 @@ public abstract class AbstractGame extends Application implements Game {
 
 	private final ServiceRegistry serviceRegistry;
 
+	private final TickManager tickManager;
 	private final ResourceManager resourceManager;
+
+	private final GameLoop gameLoop;
 
 	private volatile GameContext context;
 
@@ -87,7 +95,10 @@ public abstract class AbstractGame extends Application implements Game {
 		this.eventBusManager = new SimpleEventBusManager();
 		this.systemEventBus = EventBus.simple();
 
+		this.tickManager = new RootTickManager();
 		this.resourceManager = new DefaultResourceManager(resourceBasePath);
+
+		this.gameLoop = new GameLoop(DEFAULT_TPS, this.tickManager);
 
 		this.context = null;
 	}
@@ -112,23 +123,67 @@ public abstract class AbstractGame extends Application implements Game {
 	}
 
 	@NotNull
+	protected EventBusManager getEventBusManager() {
+		return this.eventBusManager;
+	}
+
+	@NotNull
+	protected TickManager getTickManager() {
+		return this.tickManager;
+	}
+
+	@NotNull
 	protected EventBus getSystemEventBus() {
 		return this.systemEventBus;
 	}
 
+	@NotNull
+	protected ServiceRegistry getServiceRegistry() {
+		return this.serviceRegistry;
+	}
+
 	// -------------------------------------------------------------------------------------------------------------- //
 
+	protected void requireStop(){
+		this.lifecycle.assertState(LifecycleState.RUNNING);
+		this.gameLoop.stop();
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	protected void onPreStarting() throws Throwable {
+	}
+
 	protected void onStarting() throws Throwable {
+		this.onPreStarting();
+
 		// 注册自己以便允许外部通过 getService 获取服务注册表
 		this.serviceRegistry.register(ServiceRegistry.class, this.serviceRegistry);
 
 		this.serviceRegistry.register(EventBusService.class, new EventBusServiceStub(this.eventBusManager));
+		this.serviceRegistry.register(TickService.class, new TickServiceStub(this.tickManager));
 		this.serviceRegistry.register(ResourceManagerService.class, new ResourceManagerServiceStub(this.resourceManager));
 
 		this.eventBusManager.registerEventBus(EventBusService.SYSTEM, this.systemEventBus);
+
+		this.tickManager.buildTask(this::tick)
+		                .priority(Integer.MAX_VALUE)
+		                .build();
+
+		this.onPostStarting();
+	}
+
+	protected void onPostStarting() throws Throwable {
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	protected void onPreRunning() throws Throwable {
 	}
 
 	protected void onRunning() throws Throwable {
+		this.onPreRunning();
+
 		LOGGER.debug("Create game context");
 		this.context = this.createGameContext(this.serviceRegistry);
 		if (this.context == null)
@@ -136,16 +191,46 @@ public abstract class AbstractGame extends Application implements Game {
 		LOGGER.debug("Current game context: {}", lazy(this.context));
 
 		this.resourceManager.reload();
+
+		this.onPostRunning();
+	}
+
+	protected void onPostRunning() throws Throwable {
+		this.gameLoop.run();
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	protected void onPreStopping() throws Throwable {
 	}
 
 	protected void onStopping() throws Throwable {
+		this.onPreStopping();
+
 		this.systemEventBus.postAsync(new StopEvent(StopEvent.Type.NORMAL));
+
+		this.onPostStopping();
+	}
+
+	protected void onPostStopping() throws Throwable {
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	protected void onPreDestroyed() throws Throwable {
 	}
 
 	protected void onDestroyed() throws Throwable {
+		this.onPreDestroyed();
+
 		this.resourceManager.close();
 		this.eventBusManager.close();
 		this.context = null;
+
+		this.onPostDestroyed();
+	}
+
+	protected void onPostDestroyed() throws Throwable {
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
@@ -167,8 +252,7 @@ public abstract class AbstractGame extends Application implements Game {
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
-	protected void tick() {
-
+	protected void tick(@NotNull TickInfo info) {
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //

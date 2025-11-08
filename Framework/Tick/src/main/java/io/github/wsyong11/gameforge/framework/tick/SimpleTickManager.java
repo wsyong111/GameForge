@@ -48,8 +48,8 @@ public class SimpleTickManager extends AbstractTickManager {
 
 				task.tick(tickInfo);
 
-				task.updateNextTick(this.currentTick);
-				if (!task.isCanceled()) {
+				task.updateNextTick(this.currentTick + task.getCurrentFrequencyTick());
+				if (!task.isCanceled() && !task.isTickOnce()) {
 					task.updateValue();
 					this.taskQueue.offer(task);
 				}

@@ -8,6 +8,7 @@ import io.github.wsyong11.gameforge.framework.tick.Tickable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
@@ -79,12 +80,12 @@ public class GameLoop {
 	}
 
 	@ThreadSensitive
-	public boolean run() {
+	public void run() throws ExecutionException {
 		if (this.thread != null)
 			throw new IllegalStateException("Game loop is running");
 
 		if (this.stopping)
-			return false;
+			return;
 
 		this.thread = Thread.currentThread();
 
@@ -102,7 +103,7 @@ public class GameLoop {
 					this.tickManager.tick();
 				} catch (Throwable t) {
 					LOGGER.error("Tick error", t);
-					return false;
+					throw new ExecutionException(t);
 				}
 
 				long elapsedNs = System.nanoTime() - startNs;
@@ -115,7 +116,5 @@ public class GameLoop {
 			this.watchdog.exit();
 			LOGGER.info("Game loop stopped");
 		}
-
-		return true;
 	}
 }
