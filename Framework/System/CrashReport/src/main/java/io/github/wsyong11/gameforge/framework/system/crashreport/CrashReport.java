@@ -127,6 +127,11 @@ Additional Notes: {$ADDITIONAL_NOTES$}
 
 import io.github.wsyong11.gameforge.framework.system.crashreport.detail.CrashReportDetail;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnmodifiableView;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 public interface CrashReport {
 	@NotNull
@@ -136,5 +141,13 @@ public interface CrashReport {
 	String getDescription();
 
 	@NotNull
-	CrashReport addDetail(@NotNull CrashReportDetail detail);
+	LocalDateTime getTime();
+
+	@NotNull
+	@UnmodifiableView
+	List<String> getComments();
+
+	@NotNull
+	@UnmodifiableView
+	List<CrashReportDetail> getDetail();
 }

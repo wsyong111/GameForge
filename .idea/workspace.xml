@@ -5,22 +5,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a72e7484-598a-40d2-8080-c72fd6c580c8" name="更改" comment="重构了部分类和核心代码">
-      <change afterPath="$PROJECT_DIR$/Framework/System/CrashReport/build.gradle.kts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/System/CrashReport/src/main/java/io/github/wsyong11/gameforge/framework/system/crashreport/CrashReport.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/System/CrashReport/src/main/java/io/github/wsyong11/gameforge/framework/system/crashreport/CrashReportManager.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/System/CrashReport/src/main/java/io/github/wsyong11/gameforge/framework/system/crashreport/detail/CrashReportDetail.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/System/CrashReport/src/main/java/io/github/wsyong11/gameforge/framework/system/crashreport/detail/CrashReportDetailBuilder.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/System/CrashReport/src/main/java/io/github/wsyong11/gameforge/framework/system/crashreport/detail/ReportDetailProvider.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/System/CrashReport/src/main/java/io/github/wsyong11/gameforge/framework/system/crashreport/ex/CrashReportException.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Game/Common/src/main/java/io/github/wsyong11/gameforge/game/common/service/TickService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Game/Core/CommonCore/src/main/java/io/github/wsyong11/gameforge/game/common/core/service/TickServiceStub.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/System/CrashReport/src/main/java/io/github/wsyong11/gameforge/framework/system/crashreport/CrashReportComments.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/System/CrashReport/src/main/kotlin/io/github/wsyong11/gameforge/framework/system/crashreport/ThreadSnapshot.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/exception/ExceptionSupplier.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/exception/ExceptionUtils.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/Tick/src/main/java/io/github/wsyong11/gameforge/framework/tick/SimpleTickManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Tick/src/main/java/io/github/wsyong11/gameforge/framework/tick/SimpleTickManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Game/Core/CommonCore/src/main/java/io/github/wsyong11/gameforge/game/common/core/AbstractGame.java" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Core/CommonCore/src/main/java/io/github/wsyong11/gameforge/game/common/core/AbstractGame.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Game/Core/CommonCore/src/main/java/io/github/wsyong11/gameforge/game/common/core/GameLoop.java" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Core/CommonCore/src/main/java/io/github/wsyong11/gameforge/game/common/core/GameLoop.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/CrashReport/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/CrashReport/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/CrashReport/src/main/java/io/github/wsyong11/gameforge/framework/system/crashreport/CrashReport.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/CrashReport/src/main/java/io/github/wsyong11/gameforge/framework/system/crashreport/CrashReport.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/CrashReport/src/main/java/io/github/wsyong11/gameforge/framework/system/crashreport/CrashReportManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/CrashReport/src/main/java/io/github/wsyong11/gameforge/framework/system/crashreport/CrashReportManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/CrashReport/src/main/java/io/github/wsyong11/gameforge/framework/system/crashreport/detail/CrashReportDetail.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/CrashReport/src/main/java/io/github/wsyong11/gameforge/framework/system/crashreport/detail/CrashReportDetail.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/CrashReport/src/main/java/io/github/wsyong11/gameforge/framework/system/crashreport/detail/CrashReportDetailBuilder.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/System/CrashReport/src/main/java/io/github/wsyong11/gameforge/framework/system/crashreport/detail/ReportDetailProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/CrashReport/src/main/java/io/github/wsyong11/gameforge/framework/system/crashreport/detail/ReportDetailProvider.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/exception/ExceptionIntSupplier.java" beforeDir="false" afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/exception/ExceptionIntSupplier.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/exception/ExceptionRunnable.java" beforeDir="false" afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/exception/ExceptionRunnable.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/buildSrc/src/main/kotlin/io/github/wsyong11/gameforge/dependencies/DependenciesVersionRegistry.kt" beforeDir="false" afterPath="$PROJECT_DIR$/buildSrc/src/main/kotlin/io/github/wsyong11/gameforge/dependencies/DependenciesVersionRegistry.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -72,15 +72,15 @@
         <option value="Kotlin Annotation" />
         <option value="Python Script" />
         <option value="package-info" />
-        <option value="Kotlin Data Class" />
         <option value="AnnotationType" />
         <option value="Enum" />
         <option value="Kotlin File" />
         <option value="JavaMain" />
         <option value="Kotlin Interface" />
         <option value="Kotlin Class" />
-        <option value="Class" />
         <option value="Interface" />
+        <option value="Class" />
+        <option value="Kotlin Data Class" />
       </list>
     </option>
   </component>
@@ -128,7 +128,7 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="jar://C:/Program Files/Eclipse Adoptium/jdk-17.0.15.6-hotspot/lib/src.zip!/java.base/java/lang/String.java" root0="SKIP_INSPECTION" />
+    <setting file="jar://$PROJECT_DIR$/../../../../Program Files/Eclipse Adoptium/jdk-17.0.15.6-hotspot/lib/src.zip!/java.base/java/lang/String.java" root0="SKIP_INSPECTION" />
   </component>
   <component name="MacroExpansionManager">
     <option name="directoryName" value="twmjurfw" />
@@ -145,62 +145,63 @@
     <option name="showMembers" value="true" />
     <option name="showVisibilityIcons" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Gradle.DebugFatJar.executor": "Run",
-    "Gradle.GameForge [:Framework:Bootstrap:dependencies].executor": "Run",
-    "Gradle.GameForge [:Game:Core:Common:dependencies].executor": "Run",
-    "Gradle.GameForge [:Main.main()].executor": "Run",
-    "Gradle.GameForge [:aggregateJavadoc].executor": "Run",
-    "Gradle.GameForge [:build -Xextended-compiler-checks].executor": "Run",
-    "Gradle.GameForge [:build].executor": "Run",
-    "Gradle.GameForge [:cleanAll].executor": "Run",
-    "Gradle.GameForge [:clean].executor": "Run",
-    "Gradle.GameForge [:shadowJar].executor": "Run",
-    "Gradle.GameForge [clean build].executor": "Run",
-    "Gradle.GameForge:Framework:DataFlow [:Framework:DataFlow:MimeType.main()].executor": "Run",
-    "Gradle.GameForge:Framework:Lang [:Framework:Lang:Main.main()].executor": "Run",
-    "Gradle.GameForge:Framework:Lang [:Framework:Lang:Tokenizer.main()].executor": "Run",
-    "Gradle.GameForge:Framework:System:Resource [:Framework:System:Resource:DefaultResourceManager.main()].executor": "Run",
-    "Gradle.GameForge:Framework:System:Resource [:Framework:System:Resource:DirResourcePack.main()].executor": "Run",
-    "Gradle.GameForge:Framework:System:Resource [:Framework:System:Resource:ResourcePath.main()].executor": "Run",
-    "Gradle.GameForge:Framework:System:Resource [:Framework:System:Resource:ZipResourcePack.main()].executor": "Run",
-    "Gradle.MultiTreeTest.executor": "Run",
-    "Gradle.ReleaseFatJar.executor": "Run",
-    "Gradle.SimpleEventBusTest.executor": "Run",
-    "Gradle.加载 Gradle 依赖项.executor": "Run",
-    "Gradle.构建 GameForge.executor": "Run",
-    "Gradle.正在构建 Gradle 依赖项.executor": "Run",
-    "Kotlin 脚本(测试版).build.gradle.kts.executor": "Debug",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "kotlin-language-version-configured": "true",
-    "last_directory_selection": "D:/Projects/Java/GameForge/Util/src/test/java/io/github/wsyong11/gameforge/util/collection",
-    "last_opened_file_path": "D:/Projects/Java/GameForge/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/impl",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "onboarding.tips.debug.path": "D:/Projects/Java/GameForge/Util/src/main/java/com/gameforge/util/Main.java",
-    "org.rust.cargo.project.model.impl.CargoExternalSystemProjectAware.subscribe.first.balloon": "",
-    "org.rust.first.attach.projects": "true",
-    "project.structure.last.edited": "模块",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0",
-    "settings.editor.selected.configurable": "preferences.sourceCode.Java",
-    "vue.rearranger.settings.migration": "true",
-    "应用程序.Main.executor": "Profiler#1",
-    "远程 JVM 调试.RemoteDebug.executor": "Debug"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Gradle.DebugFatJar.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.GameForge [:Framework:Bootstrap:dependencies].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.GameForge [:Game:Core:Common:dependencies].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.GameForge [:Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.GameForge [:aggregateJavadoc].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.GameForge [:build -Xextended-compiler-checks].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.GameForge [:build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.GameForge [:cleanAll].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.GameForge [:clean].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.GameForge [:shadowJar].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.GameForge [clean build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.GameForge:Framework:DataFlow [:Framework:DataFlow:MimeType.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.GameForge:Framework:Lang [:Framework:Lang:Main.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.GameForge:Framework:Lang [:Framework:Lang:Tokenizer.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.GameForge:Framework:System:Resource [:Framework:System:Resource:DefaultResourceManager.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.GameForge:Framework:System:Resource [:Framework:System:Resource:DirResourcePack.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.GameForge:Framework:System:Resource [:Framework:System:Resource:ResourcePath.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.GameForge:Framework:System:Resource [:Framework:System:Resource:ZipResourcePack.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MultiTreeTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.ReleaseFatJar.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SimpleEventBusTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.加载 Gradle 依赖项.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.构建 GameForge.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.正在构建 Gradle 依赖项.executor&quot;: &quot;Run&quot;,
+    &quot;Kotlin 脚本(测试版).build.gradle.kts.executor&quot;: &quot;Debug&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_directory_selection&quot;: &quot;D:/Projects/Java/GameForge/Util/src/test/java/io/github/wsyong11/gameforge/util/collection&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/wsyong11/Desktop/GameForge&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;onboarding.tips.debug.path&quot;: &quot;D:/Projects/Java/GameForge/Util/src/main/java/com/gameforge/util/Main.java&quot;,
+    &quot;org.rust.cargo.project.model.impl.CargoExternalSystemProjectAware.subscribe.first.balloon&quot;: &quot;&quot;,
+    &quot;org.rust.first.attach.projects&quot;: &quot;true&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;模块&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;,
+    &quot;应用程序.Main.executor&quot;: &quot;Profiler#1&quot;,
+    &quot;远程 JVM 调试.RemoteDebug.executor&quot;: &quot;Debug&quot;
   },
-  "keyToStringList": {
-    "com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File": [
-      "TEXT"
+  &quot;keyToStringList&quot;: {
+    &quot;com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File&quot;: [
+      &quot;TEXT&quot;
     ],
-    "kotlin-gradle-user-dirs": [
-      "D:\\Projects\\.IntellijIdea\\Gradle"
+    &quot;kotlin-gradle-user-dirs&quot;: [
+      &quot;C:\\Users\\wsyong11\\.gradle&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CreateClassDialog.RecentsKey">
       <recent name="io.github.wsyong11.gameforge.framework.system.crashreport.detail" />
@@ -294,7 +295,7 @@
       <command value="gradle clean build " />
     </option>
   </component>
-  <component name="RunManager" selected="Gradle.DebugFatJar">
+  <component name="RunManager" selected="应用程序.RunClient">
     <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="io.github.wsyong11.gameforge.framework.lang.Main" />
       <module name="GameForge.Framework.Lang.main" />
@@ -476,14 +477,6 @@
       </list>
     </recent_temporary>
   </component>
-  <component name="SharedIndexes">
-    <attachedChunks>
-      <set>
-        <option value="bundled-jdk-9f38398b9061-18abd8497189-intellij.indexing.shared.core-IU-241.14494.240" />
-        <option value="bundled-js-predefined-1d06a55b98c1-74d2a5396914-JavaScript-IU-241.14494.240" />
-      </set>
-    </attachedChunks>
-  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="应用程序级" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="默认任务">
@@ -563,6 +556,8 @@
       <workItem from="1762421103033" duration="12373000" />
       <workItem from="1762499505488" duration="10379000" />
       <workItem from="1762586783156" duration="32194000" />
+      <workItem from="1762685299095" duration="2865000" />
+      <workItem from="1762688296093" duration="8312000" />
     </task>
     <task id="LOCAL-00001" summary="Removed gradle.properties in .gitignore">
       <option name="closed" value="true" />
