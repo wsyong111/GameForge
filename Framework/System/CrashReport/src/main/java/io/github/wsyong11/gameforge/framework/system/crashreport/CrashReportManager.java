@@ -16,4 +16,13 @@ public interface CrashReportManager {
 	@ThreadSensitive
 	@NotNull
 	Future<CrashReport> dump();
+
+	void formatReport(@NotNull StringBuilder builder);
+
+	@NotNull
+	default String formatReport() {
+		StringBuilder builder = new StringBuilder();
+		this.formatReport(builder);
+		return builder.toString();
+	}
 }

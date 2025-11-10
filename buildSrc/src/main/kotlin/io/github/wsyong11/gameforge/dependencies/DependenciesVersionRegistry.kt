@@ -137,4 +137,6 @@ val JACKSON_XML  = "com.fasterxml.jackson.dataformat" dependsOn "jackson-datafor
 val JSON_PATH = ("com.jayway.jsonpath" dependsOn "json-path" version "2.9.0") {
 	exclude("org.slf4j" dependsOn "slf4j-api")
 }
+
+val OSHI = "com.github.oshi" dependsOn "oshi-core" version "6.9.1"
 //@formatter:on
