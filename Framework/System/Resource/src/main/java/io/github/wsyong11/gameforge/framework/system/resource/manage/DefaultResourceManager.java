@@ -14,11 +14,13 @@ import io.github.wsyong11.gameforge.framework.system.resource.pack.ResourcePack;
 import io.github.wsyong11.gameforge.util.collection.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 public class DefaultResourceManager implements ResourceManager {
 	private static final Logger LOGGER = Log.getLogger();
@@ -238,13 +240,27 @@ public class DefaultResourceManager implements ResourceManager {
 		return this.resourceMap.get(name);
 	}
 
+	@NotNull
+	@Unmodifiable
+	@Override
+	public List<Resource> getResources(@NotNull Identifier name) {
+		Objects.requireNonNull(name, "name is null");
+
+		ResourcePath path = ResourcePath.of(name.getPath());
+		return this.resourceMap
+			.values()
+			.stream()
+			.filter(resource -> resource.getPath().startsWith(path))
+			.toList();
+	}
+
 	// -------------------------------------------------------------------------------------------------------------- //
 
 	@Override
 	public void close() {
 		if (this.closed)
 			return;
-		this.closed=true;
+		this.closed = true;
 
 		this.listenerList.clear();
 		this.reloadCallbacks.clear();

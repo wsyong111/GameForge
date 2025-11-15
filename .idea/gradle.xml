@@ -32,6 +32,7 @@
             <option value="$PROJECT_DIR$/Framework/Debug" />
             <option value="$PROJECT_DIR$/Framework/EnvConfig" />
             <option value="$PROJECT_DIR$/Framework/Event" />
+            <option value="$PROJECT_DIR$/Framework/I18n" />
             <option value="$PROJECT_DIR$/Framework/Lang" />
             <option value="$PROJECT_DIR$/Framework/Lifecycle" />
             <option value="$PROJECT_DIR$/Framework/Listener" />

@@ -22,4 +22,5 @@ dependencies {
 	implementation(project(":Framework:Common"))
 	implementation(project(":Framework:System:Log"))
 	implementation(project(":Framework:App"))
+	implementation(project(":Framework:I18n"))
 }

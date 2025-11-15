@@ -1,5 +1,6 @@
 package io.github.wsyong11.gameforge.framework.system.resource;
 
+import io.github.wsyong11.gameforge.framework.Identifier;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

@@ -2,18 +2,27 @@ package io.github.wsyong11.gameforge.game.core.client;
 
 import io.github.wsyong11.gameforge.framework.Identifier;
 import io.github.wsyong11.gameforge.framework.app.BootstrapContext;
+import io.github.wsyong11.gameforge.framework.i18n.I18nManager;
+import io.github.wsyong11.gameforge.framework.i18n.SimpleI18nManager;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
+import io.github.wsyong11.gameforge.framework.system.resource.manage.ResourceManager;
+import io.github.wsyong11.gameforge.game.client.service.I18nService;
 import io.github.wsyong11.gameforge.game.common.GameContext;
 import io.github.wsyong11.gameforge.game.common.core.AbstractGame;
 import io.github.wsyong11.gameforge.game.common.service.ServiceRegistry;
+import io.github.wsyong11.gameforge.game.core.client.service.I18nServiceStub;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Locale;
 
 public class ClientGame extends AbstractGame {
 	private static final Logger LOGGER = Log.getLogger();
 
 	private static final Identifier ICON_PATH = Identifier.withDefaultNamespace("texture/icon.png");
+
+	private final I18nManager i18nManager;
 
 	private RenderThread renderThread;
 
@@ -24,6 +33,8 @@ public class ClientGame extends AbstractGame {
 	 */
 	public ClientGame(@NotNull BootstrapContext bootstrapContext) {
 		super(bootstrapContext, ResourcePath.of("assets"));
+
+		this.i18nManager = new SimpleI18nManager(Locale.ENGLISH);
 
 		this.renderThread = null;
 	}
@@ -38,10 +49,13 @@ public class ClientGame extends AbstractGame {
 	protected void onStarting() throws Throwable {
 		super.onStarting();
 
-		this.renderThread=new RenderThread(this.getResourceManager(), this.isDebug());
+		ServiceRegistry serviceRegistry = this.getServiceRegistry();
+		serviceRegistry.register(I18nService.class, new I18nServiceStub(this.i18nManager));
+
+		this.renderThread = new RenderThread(this.getResourceManager(), this.isDebug());
 		this.renderThread.setUncaughtExceptionHandler((ignored, e) -> {
 			LOGGER.error("Fatal error! Rendering thread throw uncaught exception", e);
-//			this.stop();
+			this.requireStop();
 		});
 	}
 
@@ -49,8 +63,7 @@ public class ClientGame extends AbstractGame {
 	protected void onRunning() throws Throwable {
 		super.onRunning();
 
-		this.renderThread.start();
-		this.renderThread.join();
+		this.i18nManager.reload();
 	}
 
 	//

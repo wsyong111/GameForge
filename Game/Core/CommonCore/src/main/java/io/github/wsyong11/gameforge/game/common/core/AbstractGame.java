@@ -35,6 +35,7 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 import static io.github.wsyong11.gameforge.framework.system.log.LogTemplate.lazy;
 
@@ -144,9 +145,13 @@ public abstract class AbstractGame extends Application implements Game {
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
-	protected void requireStop(){
+	protected void requireStop() {
 		this.lifecycle.assertState(LifecycleState.RUNNING);
 		this.gameLoop.stop();
+	}
+
+	protected void mainLoop() throws ExecutionException {
+		this.gameLoop.run();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
@@ -155,8 +160,6 @@ public abstract class AbstractGame extends Application implements Game {
 	}
 
 	protected void onStarting() throws Throwable {
-		this.onPreStarting();
-
 		// 注册自己以便允许外部通过 getService 获取服务注册表
 		this.serviceRegistry.register(ServiceRegistry.class, this.serviceRegistry);
 
@@ -169,8 +172,6 @@ public abstract class AbstractGame extends Application implements Game {
 		this.tickManager.buildTask(this::tick)
 		                .priority(Integer.MAX_VALUE)
 		                .build();
-
-		this.onPostStarting();
 	}
 
 	protected void onPostStarting() throws Throwable {
@@ -182,8 +183,6 @@ public abstract class AbstractGame extends Application implements Game {
 	}
 
 	protected void onRunning() throws Throwable {
-		this.onPreRunning();
-
 		LOGGER.debug("Create game context");
 		this.context = this.createGameContext(this.serviceRegistry);
 		if (this.context == null)
@@ -191,12 +190,9 @@ public abstract class AbstractGame extends Application implements Game {
 		LOGGER.debug("Current game context: {}", lazy(this.context));
 
 		this.resourceManager.reload();
-
-		this.onPostRunning();
 	}
 
 	protected void onPostRunning() throws Throwable {
-		this.gameLoop.run();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
@@ -205,11 +201,7 @@ public abstract class AbstractGame extends Application implements Game {
 	}
 
 	protected void onStopping() throws Throwable {
-		this.onPreStopping();
-
 		this.systemEventBus.postAsync(new StopEvent(StopEvent.Type.NORMAL));
-
-		this.onPostStopping();
 	}
 
 	protected void onPostStopping() throws Throwable {
@@ -221,13 +213,9 @@ public abstract class AbstractGame extends Application implements Game {
 	}
 
 	protected void onDestroyed() throws Throwable {
-		this.onPreDestroyed();
-
 		this.resourceManager.close();
 		this.eventBusManager.close();
 		this.context = null;
-
-		this.onPostDestroyed();
 	}
 
 	protected void onPostDestroyed() throws Throwable {
@@ -263,7 +251,13 @@ public abstract class AbstractGame extends Application implements Game {
 		throw exception;
 	}
 
-	private boolean lifecycleChange(@NotNull LifecycleState oldState, @NotNull LifecycleState newState, @NotNull ExceptionRunnable<Throwable> runnable) throws Throwable {
+	private boolean lifecycleChange(
+		@NotNull LifecycleState oldState,
+		@NotNull LifecycleState newState,
+		@NotNull ExceptionRunnable<Throwable> pre,
+		@NotNull ExceptionRunnable<Throwable> runnable,
+		@NotNull ExceptionRunnable<Throwable> post
+	) throws Throwable {
 		Objects.requireNonNull(oldState, "oldState is null");
 		Objects.requireNonNull(newState, "newState is null");
 		Objects.requireNonNull(runnable, "runnable is null");
@@ -271,7 +265,9 @@ public abstract class AbstractGame extends Application implements Game {
 		this.lifecycle.assertState(oldState);
 		try {
 			this.lifecycle.setState(newState);
+			pre.run();
 			runnable.run();
+			post.run();
 			return false;
 		} catch (Throwable e) {
 			try {
@@ -285,10 +281,38 @@ public abstract class AbstractGame extends Application implements Game {
 
 	@Override
 	public int main() throws Throwable {
-		if (this.lifecycleChange(LifecycleState.CREATED, LifecycleState.STARTING, this::onStarting)) return 1;
-		if (this.lifecycleChange(LifecycleState.STARTING, LifecycleState.RUNNING, this::onRunning)) return 1;
-		if (this.lifecycleChange(LifecycleState.RUNNING, LifecycleState.STOPPING, this::onStopping)) return 1;
-		if (this.lifecycleChange(LifecycleState.STOPPING, LifecycleState.DESTROYED, this::onDestroyed)) return 1;
+		if (this.lifecycleChange(
+			LifecycleState.CREATED,
+			LifecycleState.STARTING,
+			this::onPreStarting,
+			this::onStarting,
+			this::onPostStarting)
+		) return 1;
+
+		if (this.lifecycleChange(
+			LifecycleState.STARTING,
+			LifecycleState.RUNNING,
+			this::onPreRunning,
+			this::onRunning,
+			this::onPostRunning)
+		) return 1;
+
+		if (this.lifecycleChange(
+			LifecycleState.RUNNING,
+			LifecycleState.STOPPING,
+			this::onPreStopping,
+			this::onStopping,
+			this::onPostStopping)
+		) return 1;
+
+		if (this.lifecycleChange(
+			LifecycleState.STOPPING,
+			LifecycleState.DESTROYED,
+			this::onPreDestroyed,
+			this::onDestroyed,
+			this::onPostDestroyed)
+		) return 1;
+
 		return 0;
 	}
 

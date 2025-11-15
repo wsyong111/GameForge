@@ -4,4 +4,7 @@ artifactId = "Client"
 
 dependencies {
 
+	implementation(project(":Game:Common"))
+	implementation(project(":Framework:I18n"))
+	implementation(project(":Framework:System:Resource"))
 }

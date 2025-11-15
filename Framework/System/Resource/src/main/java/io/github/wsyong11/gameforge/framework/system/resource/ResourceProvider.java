@@ -3,13 +3,20 @@ package io.github.wsyong11.gameforge.framework.system.resource;
 import io.github.wsyong11.gameforge.framework.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
+import org.jetbrains.annotations.UnmodifiableView;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 public interface ResourceProvider {
 	@Nullable
 	Resource getResource(@NotNull Identifier name);
+
+	@NotNull
+	@Unmodifiable
+	List<Resource> getResources(@NotNull Identifier name);
 
 	@NotNull
 	default Optional<Resource> getResourceOptional(@NotNull Identifier name) {

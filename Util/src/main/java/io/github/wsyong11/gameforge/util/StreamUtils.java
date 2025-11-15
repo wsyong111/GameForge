@@ -3,6 +3,7 @@ package io.github.wsyong11.gameforge.util;
 import lombok.experimental.UtilityClass;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -49,5 +50,12 @@ public class StreamUtils {
 		Objects.requireNonNull(startText, "startText is null");
 		Objects.requireNonNull(endText, "endText is null");
 		return text -> startText + text + endText;
+	}
+
+	@NotNull
+	public static <T, K, V> Function<T, Map.Entry<K, V>> entryMap(@NotNull Function<T, K> keyMapper, @NotNull Function<T, V> valueMapper) {
+		Objects.requireNonNull(keyMapper, "keyMapper is null");
+		Objects.requireNonNull(valueMapper, "valueMapper is null");
+		return value -> Map.entry(keyMapper.apply(value), valueMapper.apply(value));
 	}
 }

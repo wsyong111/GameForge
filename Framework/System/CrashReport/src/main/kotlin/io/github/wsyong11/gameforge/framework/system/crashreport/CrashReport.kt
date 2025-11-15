@@ -125,29 +125,16 @@ Additional Notes: {$ADDITIONAL_NOTES$}
 ----------------------------------------
  */
 
-import io.github.wsyong11.gameforge.framework.system.crashreport.detail.CrashReportDetail;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnmodifiableView;
+// TODO: Crash report manager
 
-import java.time.LocalDateTime;
-import java.util.List;
+import io.github.wsyong11.gameforge.framework.system.crashreport.detail.CrashReportDetail
+import java.time.LocalDateTime
 
-public interface CrashReport {
-	@NotNull
-	Throwable getException();
-
-	@NotNull
-	String getDescription();
-
-	@NotNull
-	LocalDateTime getTime();
-
-	@NotNull
-	@UnmodifiableView
-	List<String> getComments();
-
-	@NotNull
-	@UnmodifiableView
-	List<CrashReportDetail> getDetail();
+class CrashReport internal constructor(
+	val description: String,
+	val exception: Throwable,
+	val time: LocalDateTime,
+	val comment: String,
+	val detail: List<CrashReportDetail>,
+) {
 }

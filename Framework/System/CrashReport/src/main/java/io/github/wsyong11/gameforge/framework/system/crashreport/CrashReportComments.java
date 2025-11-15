@@ -11,7 +11,13 @@ public class CrashReportComments {
 	private static final Set<String> COMMENTS = new HashSet<>(Set.of(
 		":(",
 		":L",
-		">.<"
+		">.<",
+		"This is not fun :L",
+		"114514",
+		"Ouch!",
+		"Hmm, there seems to be something wrong",
+		"Who made Creeper explode?",
+		"A moth appears in the code"
 	));
 
 	private static final String EMPTY_COMMENT = "Comment not found :(";

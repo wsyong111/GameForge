@@ -10,6 +10,7 @@ import io.github.wsyong11.gameforge.game.common.service.ResourceManagerService;
 import io.github.wsyong11.gameforge.util.Wrapper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.List;
@@ -52,6 +53,13 @@ public class ResourceManagerServiceStub extends Wrapper<ResourceManager> impleme
 	@Override
 	public Resource getResource(@NotNull Identifier name) {
 		return this.delegate().getResource(name);
+	}
+
+	@NotNull
+	@Unmodifiable
+	@Override
+	public List<Resource> getResources(@NotNull Identifier name) {
+		return this.delegate().getResources(name);
 	}
 
 	@Override
