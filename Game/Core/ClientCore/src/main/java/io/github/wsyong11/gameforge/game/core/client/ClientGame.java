@@ -4,16 +4,25 @@ import io.github.wsyong11.gameforge.framework.Identifier;
 import io.github.wsyong11.gameforge.framework.app.BootstrapContext;
 import io.github.wsyong11.gameforge.framework.i18n.I18nManager;
 import io.github.wsyong11.gameforge.framework.i18n.SimpleI18nManager;
+import io.github.wsyong11.gameforge.framework.key.KeyAction;
+import io.github.wsyong11.gameforge.framework.key.KeyCode;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
+import io.github.wsyong11.gameforge.framework.system.render.RenderSystem;
+import io.github.wsyong11.gameforge.framework.system.render.impl.opengl.OpenGL330RenderEngine;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.manage.ResourceManager;
+import io.github.wsyong11.gameforge.framework.system.window.Window;
+import io.github.wsyong11.gameforge.framework.system.window.impl.glfw.GLFWWindowManager;
+import io.github.wsyong11.gameforge.framework.system.window.listener.WindowInputListener;
+import io.github.wsyong11.gameforge.framework.system.window.listener.WindowListener;
 import io.github.wsyong11.gameforge.game.client.service.I18nService;
 import io.github.wsyong11.gameforge.game.common.GameContext;
 import io.github.wsyong11.gameforge.game.common.core.AbstractGame;
 import io.github.wsyong11.gameforge.game.common.service.ServiceRegistry;
 import io.github.wsyong11.gameforge.game.core.client.service.I18nServiceStub;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector2i;
 
 import java.util.Locale;
 
@@ -24,7 +33,7 @@ public class ClientGame extends AbstractGame {
 
 	private final I18nManager i18nManager;
 
-	private RenderThread renderThread;
+//	private RenderThread renderThread;
 
 	/**
 	 * 实例化对象
@@ -36,7 +45,7 @@ public class ClientGame extends AbstractGame {
 
 		this.i18nManager = new SimpleI18nManager(Locale.ENGLISH);
 
-		this.renderThread = null;
+//		this.renderThread = null;
 	}
 
 	@NotNull
@@ -52,18 +61,55 @@ public class ClientGame extends AbstractGame {
 		ServiceRegistry serviceRegistry = this.getServiceRegistry();
 		serviceRegistry.register(I18nService.class, new I18nServiceStub(this.i18nManager));
 
-		this.renderThread = new RenderThread(this.getResourceManager(), this.isDebug());
-		this.renderThread.setUncaughtExceptionHandler((ignored, e) -> {
-			LOGGER.error("Fatal error! Rendering thread throw uncaught exception", e);
-			this.requireStop();
-		});
+		// TODO: 2025/11/19 I18n keys load
+//		ResourceManager resourceManager = this.getResourceManager();
+//		resourceManager.registerReloadListener(this.i18nManager::reload);
+
+//		this.renderThread = new RenderThread(resourceManager, new Vector2i(800, 600), this.isDebug());
+//		this.renderThread.setUncaughtExceptionHandler((ignored, e) -> {
+//			LOGGER.error("Fatal error! Rendering thread throw uncaught exception", e);
+//			this.requireStop();
+//		});
+	}
+
+	@Override
+	protected void onPostStarting() throws Throwable {
+		super.onPostStarting();
 	}
 
 	@Override
 	protected void onRunning() throws Throwable {
 		super.onRunning();
 
-		this.i18nManager.reload();
+		ResourceManager resourceManager = this.getResourceManager();
+
+		RenderSystem renderSystem = RenderSystem.init(
+			resourceManager,
+			new Vector2i(800, 600),
+			true,
+			() -> OpenGL330RenderEngine::new,
+			() -> GLFWWindowManager::new
+		);
+
+		Window window = renderSystem.getWindow();
+		window.addInputListener(new WindowInputListener() {
+			@Override
+			public void onKeyInput(@NotNull KeyCode code, int mods, @NotNull KeyAction action) {
+				if (code == KeyCode.E) {
+					renderSystem.runOnUIThread(RenderSystem::shutdown);
+				}
+			}
+		});
+		window.addWindowListener(new WindowListener() {
+			@Override
+			public void onClose() {
+				renderSystem.runOnUIThread(RenderSystem::shutdown);
+			}
+		});
+
+		renderSystem.registerRenderer(new TestRenderer());
+
+		RenderSystem.loop();
 	}
 
 	//

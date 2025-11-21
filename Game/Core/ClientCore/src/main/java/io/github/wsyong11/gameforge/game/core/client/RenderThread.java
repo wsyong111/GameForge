@@ -15,6 +15,7 @@ import io.github.wsyong11.gameforge.framework.system.window.impl.glfw.GLFWWindow
 import io.github.wsyong11.gameforge.util.concurrent.signal.ThreadSignal;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2i;
+import org.joml.Vector2ic;
 
 import java.util.Objects;
 
@@ -22,6 +23,7 @@ public class RenderThread extends Thread implements AutoCloseable, LifecycleProv
 	private static final Logger LOGGER = Log.getLogger();
 
 	private final ResourceProvider resourceProvider;
+	private final Vector2ic logicSize;
 	private final boolean debug;
 
 	private final Lifecycle lifecycle;
@@ -32,10 +34,12 @@ public class RenderThread extends Thread implements AutoCloseable, LifecycleProv
 	private volatile RenderSystem renderSystem;
 	private volatile RenderSystemInitiationException initException;
 
-	public RenderThread(@NotNull ResourceProvider resourceProvider, boolean debug) {
+	public RenderThread(@NotNull ResourceProvider resourceProvider, @NotNull Vector2ic logicSize, boolean debug) {
 		Objects.requireNonNull(resourceProvider, "resourceProvider is null");
+		Objects.requireNonNull(logicSize, "logicSize is null");
 
 		this.resourceProvider = resourceProvider;
+		this.logicSize=logicSize;
 		this.debug = debug;
 
 		this.lifecycle = Lifecycle.debug(Lifecycle.create(), "RenderThread");
@@ -70,7 +74,7 @@ public class RenderThread extends Thread implements AutoCloseable, LifecycleProv
 		try {
 			this.renderSystem = RenderSystem.init(
 				this.resourceProvider,
-				new Vector2i(800, 600),
+				this.logicSize,
 				this.debug,
 				() -> OpenGL330RenderEngine::new,
 				() -> GLFWWindowManager::new

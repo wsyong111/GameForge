@@ -18,6 +18,11 @@ public class ThreadMark {
 		this.thread = Thread.currentThread();
 	}
 
+	@NotNull
+	public Thread getThread() {
+		return this.thread;
+	}
+
 	public void checkAssert() {
 		Thread current = Thread.currentThread();
 		if (current != this.thread)

@@ -8,6 +8,8 @@ public interface ILifecycle {
 	@NotNull
 	LifecycleState getState();
 
+	void waitState(@NotNull LifecycleState state)throws InterruptedException;
+
 	void addListener(@NotNull LifecycleListener listener);
 
 	void removeListener(@NotNull LifecycleListener listener);

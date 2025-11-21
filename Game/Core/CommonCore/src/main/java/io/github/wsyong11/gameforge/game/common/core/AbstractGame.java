@@ -14,6 +14,7 @@ import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.manage.DefaultResourceManager;
 import io.github.wsyong11.gameforge.framework.system.resource.manage.ResourceManager;
+import io.github.wsyong11.gameforge.framework.system.resource.pack.AssetsResourcePack;
 import io.github.wsyong11.gameforge.framework.tick.TickInfo;
 import io.github.wsyong11.gameforge.framework.tick.TickManager;
 import io.github.wsyong11.gameforge.game.common.Game;
@@ -168,6 +169,8 @@ public abstract class AbstractGame extends Application implements Game {
 		this.serviceRegistry.register(ResourceManagerService.class, new ResourceManagerServiceStub(this.resourceManager));
 
 		this.eventBusManager.registerEventBus(EventBusService.SYSTEM, this.systemEventBus);
+
+		this.resourceManager.addPack(new AssetsResourcePack("game"));
 
 		this.tickManager.buildTask(this::tick)
 		                .priority(Integer.MAX_VALUE)

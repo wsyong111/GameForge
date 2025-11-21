@@ -1,0 +1,47 @@
+{
+	"program": {
+		"vertex": "test/vertex.glsl",
+		"fragment": "test/fragment.glsl"
+	},
+	"attribute": [
+		{
+			"name": "a_position",
+			"type": "vec3"
+		},
+		{
+			"name": "a_color",
+			"type": "vec4",
+			"default": [0.0, 0.0, 0.0, 1.0]
+		}
+	],
+	"uniform": {
+		"u_model": {
+			"system": true,
+			"type": "mat4x4"
+		},
+		"u_view": {
+			"system": true,
+			"type": "mat4x4"
+		},
+		"u_projection": {
+			"system": true,
+			"type": "mat4x4"
+		},
+		"u_MVP": {
+			"system": true,
+			"type": "mat4x4"
+		},
+		"u_time": {
+			"system": true,
+			"type": "float"
+		},
+		"u_color": {
+			"type": "vec4",
+			"default": [0.0, 0.0, 0.0, 1.0]
+		},
+		"u_screenSize": {
+			"system": true,
+			"type": "vec2"
+		}
+	}
+}

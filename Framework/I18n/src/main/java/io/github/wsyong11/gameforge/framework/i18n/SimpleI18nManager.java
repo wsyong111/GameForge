@@ -136,11 +136,13 @@ public class SimpleI18nManager implements I18nManager {
 				}
 			}
 		} else {
-			LanguagePack availableLanguagePack = Objects.requireNonNullElse(languagePack, defaultLanguagePack);
-			for (String key : availableLanguagePack.getKeys()) {
-				String text = availableLanguagePack.getValue(key);
-				if (text != null)
-					localeTexts.put(key, text);
+			LanguagePack availableLanguagePack = languagePack == null ? defaultLanguagePack : languagePack;
+			if (availableLanguagePack != null) {
+				for (String key : availableLanguagePack.getKeys()) {
+					String text = availableLanguagePack.getValue(key);
+					if (text != null)
+						localeTexts.put(key, text);
+				}
 			}
 		}
 

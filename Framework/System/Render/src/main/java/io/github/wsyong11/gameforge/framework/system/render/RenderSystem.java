@@ -16,9 +16,11 @@ import io.github.wsyong11.gameforge.framework.system.render.listener.RenderEngin
 import io.github.wsyong11.gameforge.framework.system.render.listener.RendererListener;
 import io.github.wsyong11.gameforge.framework.system.render.provider.RenderEngineProvider;
 import io.github.wsyong11.gameforge.framework.system.render.provider.WindowManagerProvider;
+import io.github.wsyong11.gameforge.framework.system.render.renderer.Renderer;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourceProvider;
 import io.github.wsyong11.gameforge.framework.system.window.*;
 import io.github.wsyong11.gameforge.util.concurrent.TaskHandler;
+import io.github.wsyong11.gameforge.util.concurrent.ThreadMark;
 import io.github.wsyong11.gameforge.util.concurrent.executor.TaskQueueExecutor;
 import io.github.wsyong11.gameforge.util.exception.ExceptionHandler;
 import org.jetbrains.annotations.NotNull;
@@ -53,9 +55,9 @@ public final class RenderSystem {
 		if (INSTANCE.get() != null)
 			throw new IllegalThreadStateException("This thread is bound to RenderSystem");
 
-		Thread thread = Thread.currentThread();
+		ThreadMark thread = ThreadMark.get();
 
-		LOGGER.debug("RenderSystem bound to thread {}", thread);
+		LOGGER.debug("RenderSystem bound to thread {}", thread.getThread());
 
 		RenderSystem renderSystem = new RenderSystem(resourceProvider, engineProvider, windowManagerProvider, logicSize, debug, thread);
 
@@ -97,7 +99,7 @@ public final class RenderSystem {
 
 	private final boolean debug;
 	private final Vector2i logicSize;
-	private final Thread thread;
+	private final ThreadMark thread;
 
 	private final List<Renderer> renderers;
 
@@ -120,7 +122,7 @@ public final class RenderSystem {
 		@NotNull WindowManagerProvider windowManagerProvider,
 		@NotNull Vector2ic logicSize,
 		boolean debug,
-		@NotNull Thread thread
+		@NotNull ThreadMark thread
 	) throws RenderSystemInitiationException {
 		Objects.requireNonNull(resourceProvider, "resourceProvider is null");
 		Objects.requireNonNull(provider, "provider is null");
@@ -218,7 +220,7 @@ public final class RenderSystem {
 	public void runOnUIThread(@NotNull Runnable action) {
 		Objects.requireNonNull(action, "action is null");
 
-		if (Thread.currentThread() == this.thread)
+		if (this.thread.check())
 			action.run();
 		else
 			this.taskHandler.run(action);

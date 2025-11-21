@@ -6,13 +6,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface ShaderManager {
+	void preload(@NotNull Identifier id);
+
 	@Nullable
 	Shader getShader(@NotNull Identifier id);
 
-	void reloadShader(@NotNull Shader shader);
+	void reloadShaders();
 
 	int getShaderCount();
-
-	@UnsafeAPI
-	long getNativeHandle(@NotNull Shader shader);
 }

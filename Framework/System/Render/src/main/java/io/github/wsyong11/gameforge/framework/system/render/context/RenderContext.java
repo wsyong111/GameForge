@@ -1,6 +1,7 @@
 package io.github.wsyong11.gameforge.framework.system.render.context;
 
 import io.github.wsyong11.gameforge.framework.Identifier;
+import io.github.wsyong11.gameforge.framework.system.render.mesh.Mesh;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -53,47 +54,49 @@ public interface RenderContext {
 	RenderContext shader(@NotNull Identifier id);
 
 	// -------------------------------------------------------------------------------------------------------------- //
+//
+//	/**
+//	 * 开始定义一个新的网格。
+//	 *
+//	 * <p>在 {@link #endMesh()} 调用之前，所有通过
+//	 * {@link #vertex(double, double, double)} 添加的顶点都会属于该网格。</p>
+//	 *
+//	 * @return 当前上下文对象，用于链式调用
+//	 * @throws IllegalStateException 在上一个网格尚未结束时抛出
+//	 */
+//	@NotNull
+//	RenderContext beginMesh();
+//
+//	/**
+//	 * 结束当前网格定义。
+//	 *
+//	 * <p>结束后，网格会被缓存，直到调用 {@link #beginMesh()} 开始新的定义。
+//	 * 在调用 {@link #draw()} 前可以重复绑定不同的实例化数据。</p>
+//	 *
+//	 * @return 当前上下文对象，用于链式调用
+//	 * @throws IllegalStateException 在没有开始网格定义时调用抛出
+//	 */
+//	@NotNull
+//	RenderContext endMesh();
 
-	/**
-	 * 开始定义一个新的网格。
-	 *
-	 * <p>在 {@link #endMesh()} 调用之前，所有通过
-	 * {@link #vertex(double, double, double)} 添加的顶点都会属于该网格。</p>
-	 *
-	 * @return 当前上下文对象，用于链式调用
-	 * @throws IllegalStateException 在上一个网格尚未结束时抛出
-	 */
+//	/**
+//	 * 创建一个顶点构建器对象。
+//	 *
+//	 * <p>顶点的基础位置会自动应用 {@link #poseStack()} 中的变换矩阵。</p>
+//	 *
+//	 * @param x 顶点在模型空间中的 X 坐标
+//	 * @param y 顶点在模型空间中的 Y 坐标
+//	 * @param z 顶点在模型空间中的 Z 坐标
+//	 * @return 顶点构建器对象
+//	 * @apiNote 根据后端实现不同，可能会返回复用对象。
+//	 * 请勿将构建器保存到字段或长期变量中，否则可能导致错误或未定义行为。
+//	 * @see VertexBuilder
+//	 */
+//	@NotNull
+//	VertexBuilder vertex(double x, double y, double z);
+
 	@NotNull
-	RenderContext beginMesh();
-
-	/**
-	 * 结束当前网格定义。
-	 *
-	 * <p>结束后，网格会被缓存，直到调用 {@link #beginMesh()} 开始新的定义。
-	 * 在调用 {@link #draw()} 前可以重复绑定不同的实例化数据。</p>
-	 *
-	 * @return 当前上下文对象，用于链式调用
-	 * @throws IllegalStateException 在没有开始网格定义时调用抛出
-	 */
-	@NotNull
-	RenderContext endMesh();
-
-	/**
-	 * 创建一个顶点构建器对象。
-	 *
-	 * <p>顶点的基础位置会自动应用 {@link #poseStack()} 中的变换矩阵。</p>
-	 *
-	 * @param x 顶点在模型空间中的 X 坐标
-	 * @param y 顶点在模型空间中的 Y 坐标
-	 * @param z 顶点在模型空间中的 Z 坐标
-	 * @return 顶点构建器对象
-	 * @apiNote 根据后端实现不同，可能会返回复用对象。
-	 * 请勿将构建器保存到字段或长期变量中，否则可能导致错误或未定义行为。
-	 * @see VertexBuilder
-	 */
-	@NotNull
-	VertexBuilder vertex(double x, double y, double z);
-
+	RenderContext mesh(@NotNull Mesh mesh);
 
 	/**
 	 * 获取实例化构建器，用于为当前网格添加实例化渲染参数。

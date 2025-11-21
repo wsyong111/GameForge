@@ -60,6 +60,11 @@ public class DebugLifecycle implements Lifecycle {
 	}
 
 	@Override
+	public void waitState(@NotNull LifecycleState state)throws InterruptedException {
+		this.delegate.waitState(state);
+	}
+
+	@Override
 	public void addListener(@NotNull LifecycleListener listener) {
 		this.delegate.addListener(listener);
 	}

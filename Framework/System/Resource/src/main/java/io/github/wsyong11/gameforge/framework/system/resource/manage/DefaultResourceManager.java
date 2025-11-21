@@ -20,7 +20,8 @@ import org.jetbrains.annotations.UnmodifiableView;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.stream.Collectors;
+
+import static io.github.wsyong11.gameforge.framework.system.log.LogTemplate.lazy;
 
 public class DefaultResourceManager implements ResourceManager {
 	private static final Logger LOGGER = Log.getLogger();
@@ -75,13 +76,15 @@ public class DefaultResourceManager implements ResourceManager {
 	@Override
 	public void addPack(@NotNull ResourcePack pack) {
 		Objects.requireNonNull(pack, "pack is null");
+		LOGGER.debug("Add resource pack: {}", lazy(pack));
 		this.resourcePacks.add(pack);
 	}
 
 	@Override
 	public void removePack(@NotNull ResourcePack pack) {
 		Objects.requireNonNull(pack, "pack is null");
-		this.resourcePacks.remove(pack);
+		if (this.resourcePacks.remove(pack))
+			LOGGER.debug("Remove resource pack: {}", lazy(pack));
 	}
 
 	@NotNull

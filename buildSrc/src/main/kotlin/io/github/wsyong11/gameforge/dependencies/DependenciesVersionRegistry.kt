@@ -98,6 +98,7 @@ val COMMONS_COLLECTIONS = "org.apache.commons" dependsOn "commons-collections4" 
 val COMMONS_TEXT        = "org.apache.commons" dependsOn "commons-text"         version "1.14.0"
 val COMMONS_CLI         = "commons-cli"        dependsOn "commons-cli"          version "1.10.0"
 val GUAVA               = "com.google.guava"   dependsOn "guava"                version "3.4.8-jre"
+val FAST_UTIL           = "fastutil"           dependsOn "fastutil"             version "5.0.9"
 
 val GEANTYREF   = "io.leangen.geantyref"     dependsOn "geantyref"  version "2.0.1"
 val JANSI       = "org.fusesource.jansi"     dependsOn "jansi"      version "2.4.2"

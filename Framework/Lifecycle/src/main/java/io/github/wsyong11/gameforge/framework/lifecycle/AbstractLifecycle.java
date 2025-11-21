@@ -4,6 +4,7 @@ import io.github.wsyong11.gameforge.framework.listener.ListenerList;
 import io.github.wsyong11.gameforge.framework.listener.ex.ListenerExceptionCallback;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
+import io.github.wsyong11.gameforge.util.concurrent.signal.Waiter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -13,11 +14,14 @@ public abstract class AbstractLifecycle implements Lifecycle {
 
 	private final ListenerList listeners;
 
-	private LifecycleState state;
+	private final Waiter stateChangeSignal;
+
+	private volatile LifecycleState state;
 
 	public AbstractLifecycle() {
 		this.listeners = ListenerList.sync();
 
+		this.stateChangeSignal = new Waiter();
 		this.state = LifecycleState.CREATED;
 	}
 
@@ -25,6 +29,15 @@ public abstract class AbstractLifecycle implements Lifecycle {
 	@Override
 	public LifecycleState getState() {
 		return this.state;
+	}
+
+	@Override
+	public void waitState(@NotNull LifecycleState state) throws InterruptedException {
+		Objects.requireNonNull(state, "state is null");
+
+		while (this.state != state) {
+			this.stateChangeSignal.await();
+		}
 	}
 
 	@Override
@@ -38,6 +51,7 @@ public abstract class AbstractLifecycle implements Lifecycle {
 			throw new IllegalStateException("Cannot transition state " + this.state + " to " + newState);
 
 		this.state = newState;
+		this.stateChangeSignal.signal();
 		this.onEnterState(newState);
 	}
 
