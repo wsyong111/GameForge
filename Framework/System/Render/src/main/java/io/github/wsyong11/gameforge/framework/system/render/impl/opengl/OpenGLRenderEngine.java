@@ -1,15 +1,14 @@
 package io.github.wsyong11.gameforge.framework.system.render.impl.opengl;
 
 import io.github.wsyong11.gameforge.framework.Identifier;
-import io.github.wsyong11.gameforge.framework.system.render.engine.RenderEngine;
 import io.github.wsyong11.gameforge.framework.system.render.engine.RenderEngineContext;
+import io.github.wsyong11.gameforge.framework.system.render.impl.base.AbstractRenderEngine;
 import io.github.wsyong11.gameforge.framework.system.render.impl.base.SimplePoseStack;
 import io.github.wsyong11.gameforge.framework.system.render.impl.base.SimpleRendererContext;
-import io.github.wsyong11.gameforge.framework.system.render.impl.base.command.CommandRenderContext;
-import io.github.wsyong11.gameforge.framework.system.render.impl.base.command.RenderCommandStack;
-import io.github.wsyong11.gameforge.framework.system.render.listener.RendererListener;
+import io.github.wsyong11.gameforge.framework.system.render.impl.opengl.shader.GLShaderManager;
 import io.github.wsyong11.gameforge.framework.system.render.renderer.Renderer;
 import io.github.wsyong11.gameforge.framework.system.render.renderer.RendererContext;
+import io.github.wsyong11.gameforge.framework.system.render.shader.ShaderManager;
 import io.github.wsyong11.gameforge.framework.system.window.WindowConfigBuilder;
 import io.github.wsyong11.gameforge.framework.system.window.WindowGraphicContext;
 import io.github.wsyong11.gameforge.framework.system.window.WindowGraphicsConfig;
@@ -20,59 +19,39 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public abstract class OpenGLRenderEngine implements RenderEngine {
+public abstract class OpenGLRenderEngine extends AbstractRenderEngine {
 	public static final Identifier ID = Identifier.withDefaultNamespace("opengl");
 
-	private final RenderEngineContext engineContext;
+	private final GLShaderManager shaderManager;
 
 	private final Map<Renderer, RendererContext> rendererContextMap;
 
 	private final SimplePoseStack poseStack;
-	private final RenderCommandStack commandStack;
-	private final CommandRenderContext renderContext;
-
-	private final RendererListener rendererListener;
 
 	protected OpenGLRenderEngine(@NotNull RenderEngineContext engineContext) {
-		Objects.requireNonNull(engineContext, "engineContext is null");
+		super(engineContext);
 
-		this.engineContext = engineContext;
+		this.shaderManager = new GLShaderManager(engineContext, engineContext.getResourceProvider());
 
 		this.rendererContextMap = new IdentityHashMap<>();
 
 		this.poseStack = new SimplePoseStack();
-		this.commandStack = new RenderCommandStack();
-		this.renderContext = new CommandRenderContext();
-
-		this.rendererListener = new RendererListener() {
-			@Override
-			public void onRendererRegister(@NotNull Renderer renderer) {
-				rendererRegister(renderer);
-			}
-
-			@Override
-			public void onRendererUnregister(@NotNull Renderer renderer) {
-				rendererUnregister(renderer);
-			}
-		};
 	}
 
-	protected void rendererRegister(@NotNull Renderer renderer) {
-		Objects.requireNonNull(renderer, "renderer is null");
+	@Override
+	protected void onRendererRegister(@NotNull Renderer renderer) {
+		super.onRendererRegister(renderer);
 
 		SimpleRendererContext context = new SimpleRendererContext();
 		this.rendererContextMap.put(renderer, context);
 		renderer.init(context);
 	}
 
-	protected void rendererUnregister(@NotNull Renderer renderer) {
-		Objects.requireNonNull(renderer, "renderer is null");
-		this.rendererContextMap.remove(renderer);
-	}
+	@Override
+	protected void onRendererUnregister(@NotNull Renderer renderer) {
+		super.onRendererUnregister(renderer);
 
-	@NotNull
-	protected RenderEngineContext getEngineContext() {
-		return this.engineContext;
+		this.rendererContextMap.remove(renderer);
 	}
 
 	@NotNull
@@ -85,6 +64,12 @@ public abstract class OpenGLRenderEngine implements RenderEngine {
 
 	protected abstract int getVersionMajor();
 
+	@NotNull
+	@Override
+	public ShaderManager getShaderManager() {
+		return this.shaderManager;
+	}
+
 	@Override
 	public void buildWindow(@NotNull WindowConfigBuilder builder) {
 		Objects.requireNonNull(builder, "builder is null");
@@ -93,19 +78,13 @@ public abstract class OpenGLRenderEngine implements RenderEngine {
 		builder.graphicsConfig(new WindowGraphicsConfig(
 			this.getVersionMajor(),
 			this.getVersionMinor(),
-			this.engineContext.isDebug()
+			this.getEngineContext().isDebug()
 		));
-	}
-
-	@Override
-	public void init() {
-		this.engineContext.registerRendererListener(this.rendererListener);
 	}
 
 	@Override
 	public void preRender() {
 		this.poseStack.reset();
-		this.commandStack.reset();
 	}
 
 	@Override
@@ -116,7 +95,7 @@ public abstract class OpenGLRenderEngine implements RenderEngine {
 //			this.renderContext.beginRender(renderer);
 //
 			RendererContext context = this.rendererContextMap.get(renderer);
-			renderer.render(context, this.renderContext);
+//			renderer.render(context, this.renderContext);
 //
 //			this.renderContext.endRender(renderer);
 		}
@@ -124,9 +103,9 @@ public abstract class OpenGLRenderEngine implements RenderEngine {
 
 	@Override
 	public void close() {
-		this.commandStack.reset();
+		super.close();
+
 		this.poseStack.reset();
-		this.engineContext.unregisterRendererListener(this.rendererListener);
 		this.rendererContextMap.clear();
 	}
 }

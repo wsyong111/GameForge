@@ -4,55 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a72e7484-598a-40d2-8080-c72fd6c580c8" name="更改" comment="同步代码">
-      <change afterPath="$PROJECT_DIR$/Assets/src/main/resources/assets/game/shader/config/test.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/src/main/resources/assets/game/shader/program/test/fragment.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/src/main/resources/assets/game/shader/program/test/vertex.glsl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/impl/base/SimpleRendererContext.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/impl/opengl/shader/GLShader.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/mesh/Mesh.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/mesh/MeshBuilder.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/mesh/VertexAttribute.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/renderer/RendererContext.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/renderer/StaticRenderer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/shader/ShaderDataType.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/shader/structure/ShaderAttribute.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/shader/structure/ShaderStructure.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/texture/Texture.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Game/Client/src/main/java/io/github/wsyong11/gameforge/game/client/service/RenderService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Game/Core/ClientCore/src/main/java/io/github/wsyong11/gameforge/game/core/client/TestRenderer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/concurrent/FutureThread.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/concurrent/signal/Waiter.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/io/ByteBufferUtils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/Common/src/main/java/io/github/wsyong11/gameforge/framework/Identifier.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Common/src/main/java/io/github/wsyong11/gameforge/framework/Identifier.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/I18n/src/main/java/io/github/wsyong11/gameforge/framework/i18n/SimpleI18nManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/I18n/src/main/java/io/github/wsyong11/gameforge/framework/i18n/SimpleI18nManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/Lifecycle/src/main/java/io/github/wsyong11/gameforge/framework/lifecycle/AbstractLifecycle.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Lifecycle/src/main/java/io/github/wsyong11/gameforge/framework/lifecycle/AbstractLifecycle.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/Lifecycle/src/main/java/io/github/wsyong11/gameforge/framework/lifecycle/DebugLifecycle.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Lifecycle/src/main/java/io/github/wsyong11/gameforge/framework/lifecycle/DebugLifecycle.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/Lifecycle/src/main/java/io/github/wsyong11/gameforge/framework/lifecycle/ILifecycle.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Lifecycle/src/main/java/io/github/wsyong11/gameforge/framework/lifecycle/ILifecycle.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Render/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Render/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/RenderSystem.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/RenderSystem.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/Renderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/renderer/Renderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/context/RenderContext.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/context/RenderContext.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/context/VertexBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/mesh/VertexBuilder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/engine/RenderEngine.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/engine/RenderEngine.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/impl/base/command/CommandRenderContext.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/impl/base/command/RenderCommand.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/impl/base/command/RenderCommandStack.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/impl/opengl/OpenGLRenderEngine.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/impl/opengl/OpenGLRenderEngine.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/listener/RendererListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/listener/RendererListener.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/shader/Shader.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/shader/Shader.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/shader/ShaderManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/shader/ShaderManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/shader/ShaderStructure.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/shader/Uniform.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Render/src/main/java/io/github/wsyong11/gameforge/framework/system/render/uniform/Uniform.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/manage/DefaultResourceManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/System/Resource/src/main/java/io/github/wsyong11/gameforge/framework/system/resource/manage/DefaultResourceManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Game/Core/ClientCore/src/main/java/io/github/wsyong11/gameforge/game/core/client/ClientGame.java" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Core/ClientCore/src/main/java/io/github/wsyong11/gameforge/game/core/client/ClientGame.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Game/Core/ClientCore/src/main/java/io/github/wsyong11/gameforge/game/core/client/RenderThread.java" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Core/ClientCore/src/main/java/io/github/wsyong11/gameforge/game/core/client/RenderThread.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Game/Core/CommonCore/src/main/java/io/github/wsyong11/gameforge/game/common/core/AbstractGame.java" beforeDir="false" afterPath="$PROJECT_DIR$/Game/Core/CommonCore/src/main/java/io/github/wsyong11/gameforge/game/common/core/AbstractGame.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/collection/ArrayUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/collection/ArrayUtils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/concurrent/ThreadMark.java" beforeDir="false" afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/concurrent/ThreadMark.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/buildSrc/src/main/kotlin/io/github/wsyong11/gameforge/dependencies/DependenciesVersionRegistry.kt" beforeDir="false" afterPath="$PROJECT_DIR$/buildSrc/src/main/kotlin/io/github/wsyong11/gameforge/dependencies/DependenciesVersionRegistry.kt" afterDir="false" />
-    </list>
+    <list default="true" id="a72e7484-598a-40d2-8080-c72fd6c580c8" name="更改" comment="同步代码" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -603,7 +555,7 @@
       <workItem from="1763466648293" duration="1700000" />
       <workItem from="1763537534624" duration="23836000" />
       <workItem from="1763705373777" duration="112000" />
-      <workItem from="1763729041090" duration="7025000" />
+      <workItem from="1763729041090" duration="7144000" />
     </task>
     <task id="LOCAL-00001" summary="Removed gradle.properties in .gitignore">
       <option name="closed" value="true" />
@@ -861,7 +813,15 @@
       <option name="project" value="LOCAL" />
       <updated>1763222093913</updated>
     </task>
-    <option name="localTasksCounter" value="33" />
+    <task id="LOCAL-00033" summary="同步代码">
+      <option name="closed" value="true" />
+      <created>1763738280406</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1763738280406</updated>
+    </task>
+    <option name="localTasksCounter" value="34" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

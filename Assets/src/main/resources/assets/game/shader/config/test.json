@@ -27,10 +27,6 @@
 			"system": true,
 			"type": "mat4x4"
 		},
-		"u_MVP": {
-			"system": true,
-			"type": "mat4x4"
-		},
 		"u_time": {
 			"system": true,
 			"type": "float"

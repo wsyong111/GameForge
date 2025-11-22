@@ -1,8 +1,12 @@
 package io.github.wsyong11.gameforge.framework.system.render.shader.structure;
 
+import io.github.wsyong11.gameforge.framework.system.render.shader.ShaderType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.List;
+import java.util.Set;
 
 
 /*
@@ -15,5 +19,17 @@ ShaderStructure
  └─ Outputs (name, type, location)
  */
 public interface ShaderStructure {
+	@NotNull
+	@UnmodifiableView
+	List<ShaderAttribute> getAttributes();
 
+	@NotNull
+	@UnmodifiableView
+	List<ShaderUniform> getUniforms();
+
+	@NotNull
+	Set<ShaderType> getAvailableShaders();
+
+	@Nullable
+	String getSourceCode(@NotNull ShaderType type);
 }

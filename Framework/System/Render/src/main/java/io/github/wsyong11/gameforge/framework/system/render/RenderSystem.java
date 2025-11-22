@@ -144,7 +144,7 @@ public final class RenderSystem {
 		this.running = false;
 
 		try {
-			Context context = new Context(this.listenerList, this.taskHandler, debug);
+			Context context = new Context(thread, this.listenerList, this.taskHandler, debug, resourceProvider);
 
 			this.windowManager = windowManagerProvider.getFactory().get();
 			this.engine = provider.getFactory().apply(context);
@@ -344,17 +344,28 @@ public final class RenderSystem {
 	// -------------------------------------------------------------------------------------------------------------- //
 
 	private static class Context implements RenderSystemContext, RenderEngineContext {
+		private final ThreadMark thread;
 		private final ListenerList listenerList;
 		private final TaskHandler taskHandler;
 		private final boolean debug;
+		private final ResourceProvider resourceProvider;
 
-		public Context(@NotNull ListenerList listenerList, TaskHandler taskHandler, boolean debug) {
+		public Context(
+			@NotNull ThreadMark thread,
+			@NotNull ListenerList listenerList,
+			@NotNull TaskHandler taskHandler,
+			boolean debug,
+			@NotNull ResourceProvider resourceProvider
+		) {
 			Objects.requireNonNull(listenerList, "listenerList is null");
 			Objects.requireNonNull(taskHandler, "taskHandler is null");
+			Objects.requireNonNull(resourceProvider, "resourceProvider is null");
 
+			this.thread = thread;
 			this.listenerList = listenerList;
 			this.taskHandler = taskHandler;
 			this.debug = debug;
+			this.resourceProvider = resourceProvider;
 		}
 
 		@Override
@@ -401,6 +412,17 @@ public final class RenderSystem {
 		@Override
 		public TaskHandler getTaskHandler() {
 			return this.taskHandler;
+		}
+
+		@Override
+		public boolean isRenderThread() {
+			return this.thread.check();
+		}
+
+		@NotNull
+		@Override
+		public ResourceProvider getResourceProvider() {
+			return this.resourceProvider;
 		}
 	}
 

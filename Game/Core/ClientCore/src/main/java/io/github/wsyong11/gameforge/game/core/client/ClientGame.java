@@ -10,9 +10,11 @@ import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.render.RenderSystem;
 import io.github.wsyong11.gameforge.framework.system.render.impl.opengl.OpenGL330RenderEngine;
+import io.github.wsyong11.gameforge.framework.system.resource.Resource;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.manage.ResourceManager;
 import io.github.wsyong11.gameforge.framework.system.window.Window;
+import io.github.wsyong11.gameforge.framework.system.window.icon.IconIO;
 import io.github.wsyong11.gameforge.framework.system.window.impl.glfw.GLFWWindowManager;
 import io.github.wsyong11.gameforge.framework.system.window.listener.WindowInputListener;
 import io.github.wsyong11.gameforge.framework.system.window.listener.WindowListener;
@@ -24,6 +26,8 @@ import io.github.wsyong11.gameforge.game.core.client.service.I18nServiceStub;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2i;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Locale;
 
 public class ClientGame extends AbstractGame {
@@ -92,6 +96,19 @@ public class ClientGame extends AbstractGame {
 		);
 
 		Window window = renderSystem.getWindow();
+//		resourceManager.registerReloadListener(() -> {
+			Resource iconResource = resourceManager.getResource(ICON_PATH);
+			if (iconResource != null) {
+				try (InputStream stream = iconResource.openStream()) {
+					window.setIcon(IconIO.read(stream));
+				} catch (IOException e) {
+					LOGGER.warn("Failed to load window icon from location {}", ICON_PATH, e);
+				}
+			} else {
+				LOGGER.warn("Failed to load window icon from location {}", ICON_PATH);
+			}
+//		});
+
 		window.addInputListener(new WindowInputListener() {
 			@Override
 			public void onKeyInput(@NotNull KeyCode code, int mods, @NotNull KeyAction action) {
