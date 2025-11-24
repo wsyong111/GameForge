@@ -3,7 +3,6 @@ package io.github.wsyong11.gameforge.framework.system.window.icon;
 import lombok.experimental.UtilityClass;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2i;
-import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 

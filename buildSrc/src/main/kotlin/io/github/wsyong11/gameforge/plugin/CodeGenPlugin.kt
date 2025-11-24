@@ -7,9 +7,6 @@ import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginExtension
-import kotlin.collections.forEach
-import kotlin.collections.map
-import kotlin.collections.mutableMapOf
 import kotlin.collections.set
 
 class CodeGenPlugin : Plugin<Project> {

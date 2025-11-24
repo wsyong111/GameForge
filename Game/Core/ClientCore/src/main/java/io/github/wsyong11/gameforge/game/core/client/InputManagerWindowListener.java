@@ -1,10 +1,6 @@
 package io.github.wsyong11.gameforge.game.core.client;
 
-import io.github.wsyong11.gameforge.framework.key.KeyAction;
-import io.github.wsyong11.gameforge.framework.key.KeyCode;
-import io.github.wsyong11.gameforge.framework.key.MouseButton;
 import io.github.wsyong11.gameforge.framework.system.window.listener.WindowInputListener;
-import org.jetbrains.annotations.NotNull;
 
 public class InputManagerWindowListener implements WindowInputListener {
 //	private final ProcessInputManager manager;

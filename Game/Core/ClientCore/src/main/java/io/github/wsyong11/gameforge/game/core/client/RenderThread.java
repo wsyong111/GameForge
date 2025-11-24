@@ -14,7 +14,6 @@ import io.github.wsyong11.gameforge.framework.system.window.Window;
 import io.github.wsyong11.gameforge.framework.system.window.impl.glfw.GLFWWindowManager;
 import io.github.wsyong11.gameforge.util.concurrent.signal.ThreadSignal;
 import org.jetbrains.annotations.NotNull;
-import org.joml.Vector2i;
 import org.joml.Vector2ic;
 
 import java.util.Objects;

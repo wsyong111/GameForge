@@ -4,7 +4,6 @@ import io.github.wsyong11.gameforge.framework.annotation.ThreadSensitive;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.tick.TickManager;
-import io.github.wsyong11.gameforge.framework.tick.Tickable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;

@@ -2,7 +2,6 @@ package io.github.wsyong11.gameforge.framework.system.render.provider;
 
 import io.github.wsyong11.gameforge.framework.system.render.engine.RenderEngine;
 import io.github.wsyong11.gameforge.framework.system.render.engine.RenderEngineContext;
-import io.github.wsyong11.gameforge.framework.system.render.engine.RenderSystemContext;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;

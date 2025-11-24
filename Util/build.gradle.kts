@@ -1,4 +1,3 @@
-import io.github.wsyong11.gameforge.dependencies.junit
 import io.github.wsyong11.gameforge.project.artifactId
 
 plugins {

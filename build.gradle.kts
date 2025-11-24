@@ -1,4 +1,4 @@
-import com.github.jengelman.gradle.plugins.shadow.transformers.AppendingTransformer
+import io.github.wsyong11.gameforge.plugin.project.ProjectConfigExtension
 import io.github.wsyong11.gameforge.project.ignoreDefaultConfig
 import io.github.wsyong11.gameforge.project.includeDebug
 import io.github.wsyong11.gameforge.project.includeRelease
@@ -17,6 +17,12 @@ allprojects {
 	version = "0.0.0-beta"
 
 	apply(plugin = "io.github.wsyong11.gameforge.plugin")
+
+    extensions.findByType(ProjectConfigExtension::class.java)?.apply {
+        javaCompileVersion = JavaVersion.VERSION_17
+        javaSourceVersion = JavaVersion.VERSION_17
+    }
+
 }
 
 subprojects {

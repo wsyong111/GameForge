@@ -2,10 +2,10 @@ package io.github.wsyong11.gameforge.framework.system.crashreport;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadInfo;
-import java.lang.management.ThreadMXBean;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Random;
+import java.util.Set;
 
 public class CrashReportComments {
 	private static final Set<String> COMMENTS = new HashSet<>(Set.of(

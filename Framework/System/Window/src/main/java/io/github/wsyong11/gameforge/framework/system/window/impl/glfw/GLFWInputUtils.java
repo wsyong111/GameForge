@@ -4,7 +4,6 @@ import io.github.wsyong11.gameforge.framework.key.KeyAction;
 import io.github.wsyong11.gameforge.framework.key.KeyCode;
 import io.github.wsyong11.gameforge.framework.key.ModifyKey;
 import io.github.wsyong11.gameforge.framework.key.MouseButton;
-import io.github.wsyong11.gameforge.framework.platform.Platform;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.util.Bit;

@@ -3,7 +3,6 @@ package io.github.wsyong11.gameforge.game.core.client;
 import io.github.wsyong11.gameforge.framework.Identifier;
 import io.github.wsyong11.gameforge.framework.system.render.context.RenderContext;
 import io.github.wsyong11.gameforge.framework.system.render.mesh.Mesh;
-import io.github.wsyong11.gameforge.framework.system.render.renderer.Renderer;
 import io.github.wsyong11.gameforge.framework.system.render.renderer.RendererContext;
 import io.github.wsyong11.gameforge.framework.system.render.renderer.StaticRenderer;
 import org.jetbrains.annotations.NotNull;

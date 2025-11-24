@@ -1,12 +1,8 @@
 package io.github.wsyong11.gameforge.framework.lang.ast.parser.stream;
 
-import io.github.wsyong11.gameforge.framework.lang.ast.parser.error.CompileReportCollector;
 import io.github.wsyong11.gameforge.framework.lang.token.Token;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.UnmodifiableView;
 
-import java.util.List;
-import java.util.Set;
 import java.util.function.Predicate;
 
 public interface TokenStream {

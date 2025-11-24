@@ -1,4 +1,4 @@
-package io.github.wsyong11.gameforge.plugin.configurator
+package io.github.wsyong11.gameforge.plugin.project.configurator
 
 import io.github.wsyong11.gameforge.project.EMPTY_ARTIFACT_ID
 import io.github.wsyong11.gameforge.project.artifactId

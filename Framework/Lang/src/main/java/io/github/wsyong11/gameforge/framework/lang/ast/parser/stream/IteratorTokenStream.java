@@ -1,13 +1,14 @@
 package io.github.wsyong11.gameforge.framework.lang.ast.parser.stream;
 
-import io.github.wsyong11.gameforge.framework.lang.ast.parser.error.CompileReportCollector;
 import io.github.wsyong11.gameforge.framework.lang.token.EOFToken;
 import io.github.wsyong11.gameforge.framework.lang.token.IdentToken;
 import io.github.wsyong11.gameforge.framework.lang.token.Token;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.UnmodifiableView;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 public class IteratorTokenStream implements TokenStream {

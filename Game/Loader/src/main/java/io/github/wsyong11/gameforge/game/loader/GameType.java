@@ -2,7 +2,6 @@ package io.github.wsyong11.gameforge.game.loader;
 
 import io.github.wsyong11.gameforge.framework.app.Application;
 import io.github.wsyong11.gameforge.framework.app.BootstrapContext;
-import io.github.wsyong11.gameforge.game.common.core.StartupConfig;
 import io.github.wsyong11.gameforge.game.core.client.ClientGame;
 import io.github.wsyong11.gameforge.game.core.server.ServerGame;
 import org.jetbrains.annotations.NotNull;

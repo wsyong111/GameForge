@@ -1,6 +1,5 @@
 package io.github.wsyong11.gameforge.framework.dataflow.schema.type;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;

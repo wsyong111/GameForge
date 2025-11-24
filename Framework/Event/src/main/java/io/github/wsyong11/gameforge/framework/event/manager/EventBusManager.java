@@ -7,7 +7,6 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 
 public interface EventBusManager extends IEventBusManager, AutoCloseable {
 	void registerEventBus(@NotNull Identifier id, @NotNull EventBus eventBus);

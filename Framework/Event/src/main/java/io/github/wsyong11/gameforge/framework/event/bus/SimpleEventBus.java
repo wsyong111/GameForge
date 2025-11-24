@@ -9,7 +9,6 @@ import io.github.wsyong11.gameforge.framework.event.ex.ListenerException;
 import io.github.wsyong11.gameforge.framework.event.reflect.ReflectEventBus;
 import io.github.wsyong11.gameforge.util.exception.ExceptionHandler;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;

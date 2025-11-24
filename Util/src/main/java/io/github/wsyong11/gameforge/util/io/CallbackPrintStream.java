@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
 import java.util.Objects;
 
 public class CallbackPrintStream extends PrintStream {

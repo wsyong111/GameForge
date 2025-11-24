@@ -1,4 +1,4 @@
-package io.github.wsyong11.gameforge.plugin.configurator
+package io.github.wsyong11.gameforge.plugin.project.configurator
 
 import io.github.wsyong11.gameforge.dependencies.*
 import org.gradle.api.Project
