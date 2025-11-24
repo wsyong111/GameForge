@@ -5,7 +5,7 @@ import io.github.wsyong11.gameforge.dependencies.implementation
 import io.github.wsyong11.gameforge.project.artifactId
 
 plugins {
-	kotlin("jvm")
+//	kotlin("jvm")
 }
 
 artifactId = "DataFlow"
@@ -19,4 +19,5 @@ dependencies {
 	implementation(project(":Framework:Annotation"))
 	implementation(project(":Util"))
 	implementation(project(":Framework:Common"))
+	implementation(project(":Framework:Lang"))
 }

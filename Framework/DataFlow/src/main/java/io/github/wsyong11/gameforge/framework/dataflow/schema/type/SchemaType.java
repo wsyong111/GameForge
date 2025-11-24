@@ -2,7 +2,6 @@ package io.github.wsyong11.gameforge.framework.dataflow.schema.type;
 
 import io.github.wsyong11.gameforge.framework.dataflow.schema.type.builder.*;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public interface SchemaType {
 	@NotNull
@@ -16,8 +15,8 @@ public interface SchemaType {
 	}
 
 	@NotNull
-	static IntegerSchemaTypeBuilder newInteger() {
-		return new IntegerSchemaTypeBuilder();
+	static NumberSchemaTypeBuilder newNumber() {
+		return new NumberSchemaTypeBuilder();
 	}
 
 	@NotNull
@@ -33,5 +32,10 @@ public interface SchemaType {
 	@NotNull
 	static BooleanSchemaTypeBuilder newBoolean() {
 		return new BooleanSchemaTypeBuilder();
+	}
+
+	@NotNull
+	static AnySchemaType any() {
+		return AnySchemaType.INSTANCE;
 	}
 }

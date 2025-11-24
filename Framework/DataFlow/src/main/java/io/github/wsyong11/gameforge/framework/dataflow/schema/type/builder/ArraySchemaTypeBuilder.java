@@ -1,25 +1,30 @@
 package io.github.wsyong11.gameforge.framework.dataflow.schema.type.builder;
 
+import io.github.wsyong11.gameforge.framework.dataflow.schema.type.AnySchemaType;
 import io.github.wsyong11.gameforge.framework.dataflow.schema.type.ArraySchemaType;
 import io.github.wsyong11.gameforge.framework.dataflow.schema.type.SchemaType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+
 // TODO: 2025/11/22
 public class ArraySchemaTypeBuilder extends SchemaTypeBuilder<ArraySchemaTypeBuilder> {
 	@Nullable
-	private SchemaType itemType = null;
+	private SchemaType itemType = AnySchemaType.INSTANCE;
 	private int minItems = 0;
 	private int maxItems = Integer.MAX_VALUE;
 	private boolean uniqueItems = false;
 
 	@NotNull
-	public ArraySchemaTypeBuilder itemType(@Nullable SchemaTypeBuilder<?> type) {
-		return this.itemType(type == null ? null : type.build());
+	public ArraySchemaTypeBuilder itemType(@NotNull SchemaTypeBuilder<?> type) {
+		Objects.requireNonNull(type, "type is null");
+		return this.itemType(type.build());
 	}
 
 	@NotNull
-	public ArraySchemaTypeBuilder itemType(@Nullable SchemaType type) {
+	public ArraySchemaTypeBuilder itemType(@NotNull SchemaType type) {
+		Objects.requireNonNull(type, "type is null");
 		this.itemType = type;
 		return this;
 	}

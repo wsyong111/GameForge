@@ -49,8 +49,8 @@ class ObjectSchemaTypeDSL : SchemaTypeDSL<ObjectSchemaTypeBuilder>(ObjectSchemaT
 	infix fun String.string(block: StringSchemaTypeDSL.() -> Unit) =
 		this@ObjectSchemaTypeDSL.addField(this, StringSchemaTypeDSL().apply(block))
 
-	infix fun String.integer(block: IntegerSchemaTypeDSL.() -> Unit) =
-		this@ObjectSchemaTypeDSL.addField(this, IntegerSchemaTypeDSL().apply(block))
+	infix fun String.integer(block: NumberSchemaTypeDSL.() -> Unit) =
+		this@ObjectSchemaTypeDSL.addField(this, NumberSchemaTypeDSL().apply(block))
 
 	infix fun String.boolean(block: BooleanSchemaTypeDSL.() -> Unit) =
 		this@ObjectSchemaTypeDSL.addField(this, BooleanSchemaTypeDSL().apply(block))
@@ -72,7 +72,9 @@ class StringSchemaTypeDSL : DefaultSchemaTypeDSL<StringSchemaTypeBuilder, String
 }
 
 @SchemaDSL
-class IntegerSchemaTypeDSL : DefaultSchemaTypeDSL<IntegerSchemaTypeBuilder, Number>(IntegerSchemaTypeBuilder()) {
+class NumberSchemaTypeDSL : DefaultSchemaTypeDSL<NumberSchemaTypeBuilder, Number>(
+	NumberSchemaTypeBuilder()
+) {
 	var minimum: Number? = null
 		set(value) {
 			this.builder.minimum(value ?: Int.MIN_VALUE)

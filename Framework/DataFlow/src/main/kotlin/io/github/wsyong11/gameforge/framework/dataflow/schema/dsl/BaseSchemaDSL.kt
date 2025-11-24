@@ -7,8 +7,8 @@ interface BaseSchemaDSL {
 	fun string(block: StringSchemaTypeDSL.() -> Unit) =
 		StringSchemaTypeDSL().apply(block).get()
 
-	fun integer(block: IntegerSchemaTypeDSL.() -> Unit) =
-		IntegerSchemaTypeDSL().apply(block).get()
+	fun integer(block: NumberSchemaTypeDSL.() -> Unit) =
+		NumberSchemaTypeDSL().apply(block).get()
 
 	fun boolean(block: BooleanSchemaTypeDSL.() -> Unit) =
 		BooleanSchemaTypeDSL().apply(block).get()

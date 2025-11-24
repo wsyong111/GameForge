@@ -4,10 +4,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 import java.util.function.UnaryOperator;
+import java.util.regex.Pattern;
 
 public class Identifier implements Comparable<Identifier> {
 	public static final char NAMESPACE_SEPARATOR = ':';
 	public static final String DEFAULT_NAMESPACE = "game";
+	public static final Pattern MATCH_REGEX = Pattern.compile("^(?:([a-z0-9_.-]+):)?([a-zA-Z0-9_./-]+)$");
 
 	@NotNull
 	public static Identifier of(@NotNull String namespace, @NotNull String path) {
@@ -34,7 +36,8 @@ public class Identifier implements Comparable<Identifier> {
 		Objects.requireNonNull(identifier, "identifier is null");
 
 		int index = identifier.indexOf(NAMESPACE_SEPARATOR);
-		if (index <= 0) throw new IllegalArgumentException("Cannot parse identifier " + identifier);
+		if (index <= 0)
+			throw new IllegalArgumentException("Cannot parse identifier: \"" + identifier + "\", missing or invalid namespace separator");
 
 		return of(
 			identifier.substring(0, index),
@@ -121,10 +124,6 @@ public class Identifier implements Comparable<Identifier> {
 		return this.path;
 	}
 
-	public boolean isValid() {
-		return isValidNamespace(this.getNamespace()) && isValidPath(this.getPath());
-	}
-
 	@NotNull
 	public Identifier transformPath(@NotNull UnaryOperator<String> operator) {
 		Objects.requireNonNull(operator, "operator is null");
@@ -134,7 +133,11 @@ public class Identifier implements Comparable<Identifier> {
 	@NotNull
 	public Identifier withPath(@NotNull String path) {
 		Objects.requireNonNull(path, "path is null");
-		return new Identifier(this.getNamespace(), path);
+
+		if (path.equals(this.path))
+			return this;
+
+		return of(this.getNamespace(), path);
 	}
 
 	@Override

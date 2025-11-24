@@ -1,12 +1,10 @@
 package io.github.wsyong11.gameforge.util;
 
 import lombok.experimental.UtilityClass;
-import org.apache.commons.collections4.IterableUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -37,6 +35,26 @@ public class StringUtils {
 		if (min == max)
 			return String.valueOf(min);
 		else if (max == Long.MAX_VALUE)
+			return min + "+";
+		else
+			return min + ".." + max;
+	}
+
+	@NotNull
+	public static String formatRange(float min, float max) {
+		if (DoubleUtils.equals(min, max))
+			return String.valueOf(min);
+		else if (DoubleUtils.equals(max, Float.MAX_VALUE))
+			return min + "+";
+		else
+			return min + ".." + max;
+	}
+
+	@NotNull
+	public static String formatRange(double min, double max) {
+		if (DoubleUtils.equals(min, max))
+			return String.valueOf(min);
+		else if (DoubleUtils.equals(max, Double.MAX_VALUE))
 			return min + "+";
 		else
 			return min + ".." + max;

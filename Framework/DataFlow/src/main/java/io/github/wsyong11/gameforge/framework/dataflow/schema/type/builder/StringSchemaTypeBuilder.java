@@ -5,12 +5,14 @@ import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.regex.Pattern;
+
 // TODO: 2025/11/22
 public class StringSchemaTypeBuilder extends DefaultSchemaTypeBuilder<StringSchemaTypeBuilder, String> {
 	private int minLength = 0;
 	private int maxLength = Integer.MAX_VALUE;
 	@Nullable
-	private String pattern = null;
+	private Pattern pattern = null;
 
 	@NotNull
 	public StringSchemaTypeBuilder minLength(int length) {
@@ -26,6 +28,11 @@ public class StringSchemaTypeBuilder extends DefaultSchemaTypeBuilder<StringSche
 
 	@NotNull
 	public StringSchemaTypeBuilder pattern(@Nullable @Language("RegExp") String pattern) {
+		return this.pattern(pattern==null?null:Pattern.compile(pattern));
+	}
+
+	@NotNull
+	public StringSchemaTypeBuilder pattern(@Nullable Pattern pattern) {
 		this.pattern = pattern;
 		return this;
 	}

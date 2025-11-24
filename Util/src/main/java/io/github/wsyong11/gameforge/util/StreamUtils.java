@@ -40,8 +40,18 @@ public class StreamUtils {
 	}
 
 	@NotNull
+	public static UnaryOperator<String> wrapStartText(char startText) {
+		return text -> startText + text;
+	}
+
+	@NotNull
 	public static UnaryOperator<String> wrapEndText(@NotNull String endText) {
 		Objects.requireNonNull(endText, "endText is null");
+		return text -> text + endText;
+	}
+
+	@NotNull
+	public static UnaryOperator<String> wrapEndText(char endText) {
 		return text -> text + endText;
 	}
 
@@ -49,6 +59,11 @@ public class StreamUtils {
 	public static UnaryOperator<String> wrapText(@NotNull String startText, @NotNull String endText) {
 		Objects.requireNonNull(startText, "startText is null");
 		Objects.requireNonNull(endText, "endText is null");
+		return text -> startText + text + endText;
+	}
+
+	@NotNull
+	public static UnaryOperator<String> wrapText(char startText, char endText) {
 		return text -> startText + text + endText;
 	}
 

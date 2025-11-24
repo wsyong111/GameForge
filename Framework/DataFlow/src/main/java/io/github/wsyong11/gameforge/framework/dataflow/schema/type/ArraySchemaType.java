@@ -12,7 +12,9 @@ public class ArraySchemaType implements SchemaType {
 	private final int maxItems;
 	private final boolean uniqueItems;
 
-	public ArraySchemaType(@Nullable SchemaType itemType, int minItems, int maxItems, boolean uniqueItems) {
+	public ArraySchemaType(@NotNull SchemaType itemType, int minItems, int maxItems, boolean uniqueItems) {
+		Objects.requireNonNull(itemType, "itemType is null");
+
 		if (minItems < 0)
 			throw new IllegalArgumentException("Min item count cannot be negative");
 
@@ -28,7 +30,6 @@ public class ArraySchemaType implements SchemaType {
 		this.uniqueItems = uniqueItems;
 	}
 
-	@Nullable
 	public SchemaType getItemType() {
 		return this.itemType;
 	}
@@ -67,7 +68,7 @@ public class ArraySchemaType implements SchemaType {
 		return "Array{" + StringUtils.joinNonNull(" ",
 			this.uniqueItems ? "unique" : null,
 			StringUtils.formatRange(this.minItems, this.maxItems),
-			this.itemType != null ? this.itemType.toString() : null
+			this.itemType.toString()
 		) + "}";
 	}
 }
