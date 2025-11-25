@@ -100,6 +100,17 @@ public class TokenRules {
 			while (i < src.length()) {
 				int ch = src.codePointAt(i);
 
+				if (ch == '-') {
+					if (index == i) {
+						sb.appendCodePoint(ch);
+						i += Character.charCount(ch);
+						continue;
+					} else {
+						hasDigit = false;
+						break;
+					}
+				}
+
 				if (Character.isDigit(ch)) {
 					sb.appendCodePoint(ch);
 					i += Character.charCount(ch);
@@ -193,7 +204,7 @@ public class TokenRules {
 				if (!esc && ch == c) {
 					context.setResult(
 						new StringToken(sb.toString(), index),
-						i - index
+						i - index + 1
 					);
 					return;
 				}

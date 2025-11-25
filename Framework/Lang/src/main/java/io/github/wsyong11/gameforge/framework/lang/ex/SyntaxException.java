@@ -16,7 +16,7 @@ public class SyntaxException extends RuntimeException {
 		if (length <= 0)
 			throw new IllegalArgumentException("Length cannot be zero or negative");
 
-		if (index < 0 || index >= text.length() || index + length > text.length())
+		if (index < 0)
 			throw new IndexOutOfBoundsException(index);
 
 		this.text = text;
