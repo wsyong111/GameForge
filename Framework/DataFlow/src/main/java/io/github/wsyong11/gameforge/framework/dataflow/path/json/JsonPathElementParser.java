@@ -7,6 +7,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -118,13 +119,11 @@ public class JsonPathElementParser {
 
 	private boolean processToken(int index, @NotNull Token token, @NotNull TokenIterator tokenIterator, @NotNull List<JsonPathOperation> operations) {
 		if (index == 0) {
-			tokenIterator.putToken(token);
 			this.processRoot(tokenIterator, operations);
 			return true;
 		}
 
 		if (token.equalsToken(OperatorToken.class, ".")) {
-			tokenIterator.putToken(token);
 			return this.processDot(tokenIterator, operations);
 		}
 
@@ -154,7 +153,7 @@ public class JsonPathElementParser {
 	}
 
 	private void processRoot(@NotNull TokenIterator iterator, @NotNull List<JsonPathOperation> operations) {
-		Token token = this.checkToken(iterator.next());
+		Token token = this.checkToken(iterator.getCurrent());
 		if (token.equalsToken(OperatorToken.class)) {
 			if (token.equalsToken("$")) {
 				operations.add(new JsonPathOperation.Root());
@@ -172,7 +171,7 @@ public class JsonPathElementParser {
 	}
 
 	private boolean processDot(@NotNull TokenIterator iterator, @NotNull List<JsonPathOperation> operations) {
-		iterator.next();
+		assert iterator.getCurrent().equalsToken(OperatorToken.class, ".");
 		Token token = this.checkToken(iterator.next());
 		// .field
 		if (token.equalsToken(IdentToken.class)) {
@@ -197,7 +196,9 @@ public class JsonPathElementParser {
 			JsonPathOperation.Predicate predicate;
 			// ..[...]
 			if (nextToken.equalsToken(OperatorToken.class, "[")) {
-				throw new UnsupportedOperationException("..[...]");  // TODO: 2025/11/26 Impl ..[...]
+				predicate = this.processBrackets(iterator);
+				if (predicate == null)
+					return false;
 				// ..field
 			} else if (nextToken.equalsToken(IdentToken.class)) {
 				predicate = JsonPathOperation.Predicate.withField(nextToken.getToken());
@@ -210,6 +211,45 @@ public class JsonPathElementParser {
 		}
 
 		return false;
+	}
+
+	@Nullable
+	private JsonPathOperation.Predicate processBrackets(@NotNull TokenIterator iterator) {
+		Token startToken = iterator.getCurrent();
+		assert startToken.equalsToken(OperatorToken.class, "[");
+
+		Token token = this.checkToken(iterator.next());
+		// ["..."] or [0] or [0:1:1]
+		if (token.equalsToken(StringToken.class) || token.equalsToken(NumberToken.class)) {
+			List<JsonPathOperation.Predicate> predicates = new ArrayList<>();
+			predicates.add(this.processStringAndNumberPredicate(token));
+
+			Token nextToken = this.checkToken(iterator.next());
+			//
+			if (nextToken.equalsToken(OperatorToken.class, ",")) {
+				while ()
+			} else if (!nextToken.equalsToken(OperatorToken.class, "]")) {
+				throw this.newSyntaxError(startToken,
+					"Bracket not closed, '%s' found",
+					nextToken.getToken());
+			}
+
+			if (fields.size() == 1)
+				return JsonPathOperation.Predicate.withField(fields.get(0));
+			else
+				return JsonPathOperation.Predicate.withFields(fields);
+		}
+
+		return null;
+	}
+
+	@NotNull
+	private JsonPathOperation.Predicate processBracketsPredicate(@NotNull Token token) {
+		assert token.equalsToken(StringToken.class) || token.equalsToken(NumberToken.class);
+
+		if (token.equalsToken(StringToken.class)){
+			return
+		}
 	}
 
 	private static class FilterParser {

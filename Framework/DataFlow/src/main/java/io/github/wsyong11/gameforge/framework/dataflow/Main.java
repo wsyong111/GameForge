@@ -144,10 +144,10 @@ public class Main {
 			"c", Element.primitive(3)
 		));
 
-		ElementPath path = ElementPath.compile("$..c");
+		ElementPath path = ElementPath.compile("$..author");
 		System.out.println(path);
 
-		List<Element> result = path.match(element1);
+		List<Element> result = path.match(element);
 		StringBuilder sb = new StringBuilder();
 		for (Element item : result) {
 			print(0, sb, item);
