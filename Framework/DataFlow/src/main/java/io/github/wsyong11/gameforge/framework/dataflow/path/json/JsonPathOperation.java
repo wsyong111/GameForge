@@ -89,6 +89,60 @@ public interface JsonPathOperation {
 		default String getExpression() {
 			return null;
 		}
+
+		@NotNull
+		default Predicate or(@NotNull Predicate other) {
+			Objects.requireNonNull(other, "other is null");
+			return (context) -> this.test(context) || other.test(context);
+		}
+
+		@NotNull
+		default Predicate or(@NotNull Iterable<Predicate> other) {
+			Objects.requireNonNull(other, "other is null");
+			return (context) -> {
+				if (this.test(context))
+					return true;
+
+				for (Predicate predicate : other) {
+					if (predicate.test(context))
+						return true;
+				}
+
+				return false;
+			};
+		}
+
+		@NotNull
+		default Predicate or(@NotNull Predicate... other) {
+			return this.or(List.of(other));
+		}
+
+		@NotNull
+		default Predicate and(@NotNull Predicate other) {
+			Objects.requireNonNull(other, "other is null");
+			return (context) -> this.test(context) && other.test(context);
+		}
+
+		@NotNull
+		default Predicate and(@NotNull Iterable<Predicate> other) {
+			Objects.requireNonNull(other, "other is null");
+			return (context) -> {
+				if (!this.test(context))
+					return false;
+
+				for (Predicate predicate : other) {
+					if (!predicate.test(context))
+						return false;
+				}
+
+				return true;
+			};
+		}
+
+		@NotNull
+		default Predicate and(@NotNull Predicate... other) {
+			return this.and(List.of(other));
+		}
 	}
 
 	interface ElementValue {

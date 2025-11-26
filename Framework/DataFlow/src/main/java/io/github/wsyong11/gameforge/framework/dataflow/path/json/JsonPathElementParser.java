@@ -117,6 +117,23 @@ public class JsonPathElementParser {
 		return token;
 	}
 
+	private int parseInt(@NotNull Token token) {
+		if (!token.equalsToken(NumberToken.class))
+			throw this.newSyntaxError(token,
+				"Excepted number, but '%s' found",
+				token.getToken());
+
+		try {
+			return Integer.parseInt(token.getToken());
+		} catch (NumberFormatException e) {
+			SyntaxException exception = this.newSyntaxError(token,
+				"'%s' cannot parse as integer",
+				token.getToken());
+			exception.initCause(e);
+			throw exception;
+		}
+	}
+
 	private boolean processToken(int index, @NotNull Token token, @NotNull TokenIterator tokenIterator, @NotNull List<JsonPathOperation> operations) {
 		if (index == 0) {
 			this.processRoot(tokenIterator, operations);
@@ -126,28 +143,6 @@ public class JsonPathElementParser {
 		if (token.equalsToken(OperatorToken.class, ".")) {
 			return this.processDot(tokenIterator, operations);
 		}
-
-//		if (token instanceof OperatorToken) {
-//			if (index == 0) {
-//				this.processRoot(token, operations);
-//				return true;
-//			}
-//
-//			if (token.equalsToken(".")) {
-//				this.processDot(token, tokenIterator, operations);
-//				return true;
-//			}
-//
-//			if (token.equalsToken("..")) {
-//				this.processRecursiveDot(token, tokenIterator, operations);
-//				return true;
-//			}
-//
-//			if (token.equalsToken("[")) {
-//				this.processBracket(token, tokenIterator, operations);
-//				return true;
-//			}
-//		}
 
 		return false;
 	}
@@ -221,34 +216,48 @@ public class JsonPathElementParser {
 		Token token = this.checkToken(iterator.next());
 		// ["..."] or [0] or [0:1:1]
 		if (token.equalsToken(StringToken.class) || token.equalsToken(NumberToken.class)) {
-			List<JsonPathOperation.Predicate> predicates = new ArrayList<>();
-			predicates.add(this.processStringAndNumberPredicate(token));
+			// [0] or [0:1:1], 使用 while 来实现 , 解析
+			// 如果为 slice 则直接return
+			while (true) {
+				Token nextToken = this.checkToken(iterator.next());
+				if (currentToken.equalsToken(NumberToken.class)) {
+					// token = Index or slice start
 
-			Token nextToken = this.checkToken(iterator.next());
-			//
-			if (nextToken.equalsToken(OperatorToken.class, ",")) {
-				while ()
-			} else if (!nextToken.equalsToken(OperatorToken.class, "]")) {
-				throw this.newSyntaxError(startToken,
-					"Bracket not closed, '%s' found",
-					nextToken.getToken());
+					// [0]
+
+					if (nextToken.equalsToken(OperatorToken.class, "]"))
+						return JsonPathOperation.Predicate.withIndex(this.parseInt(token));
+				}
+
+				if (nextToken.equalsToken(OperatorToken.class, ","))
+					continue;
+
+				return null;
 			}
-
-			if (fields.size() == 1)
-				return JsonPathOperation.Predicate.withField(fields.get(0));
-			else
-				return JsonPathOperation.Predicate.withFields(fields);
+//			List<JsonPathOperation.Predicate> predicates = new ArrayList<>();
+//			predicates.add(this.processStringAndNumberPredicate(token));
+//
+//			Token nextToken = this.checkToken(iterator.next());
+//			//
+//			if (nextToken.equalsToken(OperatorToken.class, ",")) {
+//				while ()
+//			} else if (!nextToken.equalsToken(OperatorToken.class, "]")) {
+//				throw this.newSyntaxError(startToken,
+//					"Bracket not closed, '%s' found",
+//					nextToken.getToken());
+//			}
+//
+//			return
 		}
 
 		return null;
 	}
 
-	@NotNull
-	private JsonPathOperation.Predicate processBracketsPredicate(@NotNull Token token) {
-		assert token.equalsToken(StringToken.class) || token.equalsToken(NumberToken.class);
-
-		if (token.equalsToken(StringToken.class)){
-			return
+	private void checkBracketEnd(@NotNull Token startBracketToken, @NotNull Token token) {
+		if (!token.equalsToken(OperatorToken.class, "]")) {
+			throw this.newSyntaxError(startBracketToken,
+				"Bracket not closed, '%s' found",
+				token.getToken());
 		}
 	}
 
