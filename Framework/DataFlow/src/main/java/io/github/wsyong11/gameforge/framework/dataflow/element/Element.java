@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.SortedMap;
 
 public interface Element {
 	@NotNull
@@ -17,6 +18,12 @@ public interface Element {
 	static ArrayElement array(@NotNull Element... elements) {
 		Objects.requireNonNull(elements, "elements is null");
 		return new ArrayElement(List.of(elements));
+	}
+
+	@NotNull
+	static ObjectElement object(@NotNull SortedMap<String, Element> map) {
+		Objects.requireNonNull(map, "map is null");
+		return new ObjectElement(map);
 	}
 
 	@NotNull

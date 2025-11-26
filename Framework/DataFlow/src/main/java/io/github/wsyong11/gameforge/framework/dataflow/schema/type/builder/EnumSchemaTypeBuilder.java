@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-// TODO: 2025/11/22
 public class EnumSchemaTypeBuilder extends DefaultSchemaTypeBuilder<EnumSchemaTypeBuilder, String> {
 	private boolean ignoreCase = false;
 	private final List<String> enumValues = new ArrayList<>();

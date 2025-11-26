@@ -180,7 +180,7 @@ public class JsonPathElementParser {
 			if (!JSON_FIELD_REGEX.matcher(fieldName).matches())
 				throw new AssertionError();
 
-			operations.add(new JsonPathOperation.AccessField(fieldName));
+			operations.add(new JsonPathOperation.AccessField(JsonPathOperation.Predicate.withField(fieldName)));
 			return true;
 		}
 
@@ -194,26 +194,18 @@ public class JsonPathElementParser {
 		if (token.equalsToken(OperatorToken.class, ".")) {
 			Token nextToken = this.checkToken(iterator.next());
 
-			String fieldName;
-			// ..["field"]
+			JsonPathOperation.Predicate predicate;
+			// ..[...]
 			if (nextToken.equalsToken(OperatorToken.class, "[")) {
-				Token bracketNextToken = this.checkToken(iterator.next());
-				if (!bracketNextToken.equalsToken(StringToken.class))
-					throw this.newSyntaxError(token, "Property name after '..[' must be quoted");
-
-				fieldName = bracketNextToken.getToken();
-
-				Token bracketCloseToken = this.checkToken(iterator.next());
-				if (!bracketCloseToken.equalsToken(OperatorToken.class, "]"))
-					throw this.newSyntaxError(bracketCloseToken, "missing closing ']' for bracket");
+				throw new UnsupportedOperationException("..[...]");  // TODO: 2025/11/26 Impl ..[...]
 				// ..field
 			} else if (nextToken.equalsToken(IdentToken.class)) {
-				fieldName = nextToken.getToken();
+				predicate = JsonPathOperation.Predicate.withField(nextToken.getToken());
 			} else {
 				throw this.newSyntaxError(nextToken, "Expected field name or '[' after '..'");
 			}
 
-			operations.add(new JsonPathOperation.AccessField.RecursiveField(fieldName));
+			operations.add(new JsonPathOperation.RecursiveAccessField(predicate));
 			return true;
 		}
 

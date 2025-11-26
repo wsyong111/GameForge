@@ -8,7 +8,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-// TODO: 2025/11/22
 public class ArraySchemaTypeBuilder extends SchemaTypeBuilder<ArraySchemaTypeBuilder> {
 	@Nullable
 	private SchemaType itemType = AnySchemaType.INSTANCE;

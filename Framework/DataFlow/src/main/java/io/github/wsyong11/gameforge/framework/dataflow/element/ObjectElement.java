@@ -3,14 +3,16 @@ package io.github.wsyong11.gameforge.framework.dataflow.element;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public final class ObjectElement implements Element, Iterable<Map.Entry<String, Element>> {
 	private final Map<String, Element> map;
+
+	public ObjectElement(@NotNull SortedMap<String, Element> map) {
+		Objects.requireNonNull(map, "map is null");
+		this.map = Collections.unmodifiableMap(new LinkedHashMap<>(map));
+	}
 
 	public ObjectElement(@NotNull Map<String, Element> map) {
 		Objects.requireNonNull(map, "map is null");

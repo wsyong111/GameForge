@@ -7,7 +7,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.regex.Pattern;
 
-// TODO: 2025/11/22
 public class StringSchemaTypeBuilder extends DefaultSchemaTypeBuilder<StringSchemaTypeBuilder, String> {
 	private int minLength = 0;
 	private int maxLength = Integer.MAX_VALUE;

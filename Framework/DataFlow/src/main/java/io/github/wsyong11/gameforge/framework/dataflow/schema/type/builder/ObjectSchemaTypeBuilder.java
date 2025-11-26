@@ -8,7 +8,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.regex.Pattern;
 
-// TODO: 2025/11/22
 public class ObjectSchemaTypeBuilder extends SchemaTypeBuilder<ObjectSchemaTypeBuilder> {
 	private final Map<String, SchemaType> fields = new HashMap<>();
 	private final Set<String> requireFields = new HashSet<>();
