@@ -5,11 +5,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-class SimpleJsonPathContext implements JsonPathOperation.Context {
+public class SimpleJsonPathContext implements JsonPathOperation.Context {
 	private final Element root;
 	private final JsonPathOperation.ElementValue current;
 
-	SimpleJsonPathContext(@NotNull Element root, @NotNull JsonPathOperation.ElementValue current) {
+	public SimpleJsonPathContext(@NotNull Element root, @NotNull JsonPathOperation.ElementValue current) {
 		Objects.requireNonNull(root, "root is null");
 		Objects.requireNonNull(current, "current is null");
 

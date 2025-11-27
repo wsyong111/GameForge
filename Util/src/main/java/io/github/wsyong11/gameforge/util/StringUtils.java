@@ -66,4 +66,10 @@ public class StringUtils {
 		             .filter(Objects::nonNull)
 		             .collect(Collectors.joining(delimiter));
 	}
+
+	@NotNull
+	public static String wrapWithQuotes(@NotNull String t) {
+		Objects.requireNonNull(t, "t is null");
+		return t.length() > 1 ? "\"" + t + "\"" : "'" + t + "'";
+	}
 }

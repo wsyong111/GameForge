@@ -5,20 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a72e7484-598a-40d2-8080-c72fd6c580c8" name="更改" comment="同步代码">
-      <change afterPath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/path/json/SimpleJsonPathContext.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/parser/AbstractLineTokenParser.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/element/ObjectElement.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/element/ObjectElement.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/path/json/ElementPredicate.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/path/json/JsonPathElementParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/path/json/JsonPathElementParser.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/path/json/JsonPathElementPath.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/path/json/JsonPathElementPath.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/path/json/JsonPathOperation.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/path/json/JsonPathOperation.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/schema/type/builder/ArraySchemaTypeBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/schema/type/builder/ArraySchemaTypeBuilder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/schema/type/builder/BooleanSchemaTypeBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/schema/type/builder/BooleanSchemaTypeBuilder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/schema/type/builder/DefaultSchemaTypeBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/schema/type/builder/DefaultSchemaTypeBuilder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/schema/type/builder/EnumSchemaTypeBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/schema/type/builder/EnumSchemaTypeBuilder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/schema/type/builder/NumberSchemaTypeBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/schema/type/builder/NumberSchemaTypeBuilder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/schema/type/builder/ObjectSchemaTypeBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/schema/type/builder/ObjectSchemaTypeBuilder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/schema/type/builder/StringSchemaTypeBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/schema/type/builder/StringSchemaTypeBuilder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/path/json/SimpleJsonPathContext.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/DataFlow/src/main/java/io/github/wsyong11/gameforge/framework/dataflow/path/json/SimpleJsonPathContext.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ex/SyntaxException.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/ex/SyntaxException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/token/TokenIterator.java" beforeDir="false" afterPath="$PROJECT_DIR$/Framework/Lang/src/main/java/io/github/wsyong11/gameforge/framework/lang/token/TokenIterator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/StringUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/StringUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/collection/RewindableIterator.java" beforeDir="false" afterPath="$PROJECT_DIR$/Util/src/main/java/io/github/wsyong11/gameforge/util/collection/RewindableIterator.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -174,6 +171,7 @@
     "Kotlin 脚本(测试版).build.gradle.kts.executor": "Debug",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "kotlin-language-version-configured": "true",
+    "last.edited.regexp": "adwadawd",
     "last_directory_selection": "D:/Projects/Java/GameForge/Util/src/test/java/io/github/wsyong11/gameforge/util/collection",
     "last_opened_file_path": "D:/Projects/Java/GameForge/Framework/System/Input/src/main/java/io/github/wsyong11/gameforge/framework/system/input/impl",
     "node.js.detected.package.eslint": "true",
@@ -187,7 +185,7 @@
     "project.structure.last.edited": "模块",
     "project.structure.proportion": "0.0",
     "project.structure.side.proportion": "0.0",
-    "settings.editor.selected.configurable": "vcs.Git",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
     "vue.rearranger.settings.migration": "true",
     "应用程序.Main.executor": "Profiler#1",
     "应用程序.io.github.wsyong11.gameforge.framework.dataflow.Main.executor": "Run",
@@ -316,6 +314,7 @@
     <configuration name="io.github.wsyong11.gameforge.framework.dataflow.Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="io.github.wsyong11.gameforge.framework.dataflow.Main" />
       <module name="GameForge.Framework.DataFlow.main" />
+      <option name="VM_PARAMETERS" value="-ea" />
       <extension name="coverage">
         <pattern>
           <option name="PATTERN" value="io.github.wsyong11.gameforge.framework.dataflow.*" />
@@ -598,7 +597,8 @@
       <workItem from="1764041341975" duration="534000" />
       <workItem from="1764041919352" duration="21159000" />
       <workItem from="1764083769884" duration="5892000" />
-      <workItem from="1764145703997" duration="14443000" />
+      <workItem from="1764145703997" duration="14697000" />
+      <workItem from="1764233149340" duration="22282000" />
     </task>
     <task id="LOCAL-00001" summary="Removed gradle.properties in .gitignore">
       <option name="closed" value="true" />
@@ -888,7 +888,15 @@
       <option name="project" value="LOCAL" />
       <updated>1764091610492</updated>
     </task>
-    <option name="localTasksCounter" value="37" />
+    <task id="LOCAL-00037" summary="同步代码">
+      <option name="closed" value="true" />
+      <created>1764170328433</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1764170328433</updated>
+    </task>
+    <option name="localTasksCounter" value="38" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -966,6 +974,8 @@
     <MESSAGE value="测试Git" />
     <MESSAGE value="同步代码" />
     <option name="LAST_COMMIT_MESSAGE" value="同步代码" />
+    <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

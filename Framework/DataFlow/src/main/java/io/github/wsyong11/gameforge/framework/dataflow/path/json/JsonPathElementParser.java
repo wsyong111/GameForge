@@ -2,21 +2,19 @@ package io.github.wsyong11.gameforge.framework.dataflow.path.json;
 
 import io.github.wsyong11.gameforge.framework.dataflow.path.ElementPath;
 import io.github.wsyong11.gameforge.framework.lang.ex.SyntaxException;
+import io.github.wsyong11.gameforge.framework.lang.parser.AbstractLineTokenParser;
 import io.github.wsyong11.gameforge.framework.lang.token.*;
-import org.apache.commons.lang3.ArrayUtils;
 import org.intellij.lang.annotations.Language;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-public class JsonPathElementParser {
-	private static final Tokenizer JSON_PATH_TOKENIZER = new Tokenizer(List.of(
+public class JsonPathElementParser extends AbstractLineTokenParser<ElementPath> {
+	private static final Tokenizer TOKENIZER = new Tokenizer(List.of(
 		// 1. 多字符运算符/递归操作符（.., <=, >=, !=, ==）
 		TokenRules.ofOperator(Set.of("==", "!=", "<=", ">=", "<", ">", ".", "[", "]", "(", ")", "?", "@", "$", "*", ",", ":")),
 
@@ -37,31 +35,20 @@ public class JsonPathElementParser {
 		TokenRules.ofMultiLineComment("/*", "*/")
 	));
 
-	private final String path;
-	private ElementPath instance;
-
 	public JsonPathElementParser(@NotNull @Language("JSONPath") String path) {
-		Objects.requireNonNull(path, "path is null");
-
-		this.path = path;
-		this.instance = null;
+		super(TOKENIZER, path);
 	}
 
 	@NotNull
-	public synchronized ElementPath parse() {
-		if (this.instance != null)
-			return this.instance;
-
+	public ElementPath parse(@NotNull TokenIterator iterator) {
 		List<JsonPathOperation> operations = new ArrayList<>();
-
-		TokenIterator tokenIterator = new TokenIterator(JSON_PATH_TOKENIZER.tokenize(this.path));
 
 		int index = 0;
 		while (true) {
-			Token token = tokenIterator.next();
+			Token token = next();
 
 			if (token instanceof ErrorToken)
-				throw this.newSyntaxError(token, "Invalid syntax");
+				throw this.invalidTokenError(token);
 
 			if (token instanceof EOFToken)
 				break;
@@ -70,63 +57,29 @@ public class JsonPathElementParser {
 				continue;
 
 			System.out.println("Token: " + token);
-			if (!this.processToken(index, token, tokenIterator, operations))
-				throw this.newSyntaxError(token, "Invalid syntax");
+			if (!this.processToken(index, token, iterator, operations))
+				throw this.invalidTokenError(token);
 
 			index++;
 		}
 
-		return new JsonPathElementPath(operations);
+		return  new JsonPathElementPath(operations);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
 	private static final Pattern JSON_FIELD_REGEX = Pattern.compile("^[A-Za-z0-9_]+$");
 
-	@NotNull
-	private SyntaxException newSyntaxError(@NotNull Token token, @NotNull String message, Object... formatArgs) {
-		Objects.requireNonNull(token, "token is null");
-		Objects.requireNonNull(message, "message is null");
-		Objects.requireNonNull(formatArgs, "formatArgs is null");
-
-		return new SyntaxException(message.formatted(formatArgs), this.path, token.getSrcIndex(), token.length());
-	}
-
-	@NotNull
-	private SyntaxException newExpectedStyleError(@NotNull Token token, @NotNull String... expectChars) {
-		return this.newSyntaxError(token, "Expected %s, but '%s' found",
-			expectChars.length == 1
-				? "'" + expectChars[0] + "'"
-				: "%s or '%s'".formatted(
-				/**/String.join(", ", ArrayUtils.remove(expectChars, expectChars.length - 1)) + "",
-				/**/expectChars[expectChars.length - 1]),
-			token.getToken());
-	}
-
-	@NotNull
-	@Contract("_ -> param1")
-	private Token checkToken(@NotNull Token token) {
-		Objects.requireNonNull(token, "token is null");
-
-		if (token instanceof EOFToken)
-			throw new SyntaxException("Unexpected end of input", this.path, this.path.length(), 1);
-
-		if (token instanceof ErrorToken)
-			throw this.newSyntaxError(token, "Invalid syntax");
-
-		return token;
-	}
-
 	private int parseInt(@NotNull Token token) {
 		if (!token.equalsToken(NumberToken.class))
-			throw this.newSyntaxError(token,
+			throw this.syntaxError(token,
 				"Excepted number, but '%s' found",
 				token.getToken());
 
 		try {
 			return Integer.parseInt(token.getToken());
 		} catch (NumberFormatException e) {
-			SyntaxException exception = this.newSyntaxError(token,
+			SyntaxException exception = this.syntaxError(token,
 				"'%s' cannot parse as integer",
 				token.getToken());
 			exception.initCause(e);
@@ -134,14 +87,25 @@ public class JsonPathElementParser {
 		}
 	}
 
-	private boolean processToken(int index, @NotNull Token token, @NotNull TokenIterator tokenIterator, @NotNull List<JsonPathOperation> operations) {
+	private boolean processToken(int index, @NotNull Token token, @NotNull TokenIterator iterator, @NotNull List<JsonPathOperation> operations) {
 		if (index == 0) {
-			this.processRoot(tokenIterator, operations);
+			this.processRoot(iterator, operations);
 			return true;
 		}
 
+		// . 开头
 		if (token.equalsToken(OperatorToken.class, ".")) {
-			return this.processDot(tokenIterator, operations);
+			return this.processDot(iterator, operations);
+		}
+
+		// [开头
+		if (token.equalsToken(OperatorToken.class, "[")) {
+			JsonPathOperation.Predicate predicate = this.processBrackets(iterator);
+			if (predicate == null)
+				return false;
+
+			operations.add(new JsonPathOperation.AccessField(predicate));
+			return true;
 		}
 
 		return false;
@@ -160,9 +124,7 @@ public class JsonPathElementParser {
 			}
 		}
 
-		throw this.newSyntaxError(token,
-			"JSONPath must start with '$' or '@', but '%s' found",
-			token.getToken());
+		throw this.expectedTokenError(token, "$", "@");
 	}
 
 	private boolean processDot(@NotNull TokenIterator iterator, @NotNull List<JsonPathOperation> operations) {
@@ -198,7 +160,7 @@ public class JsonPathElementParser {
 			} else if (nextToken.equalsToken(IdentToken.class)) {
 				predicate = JsonPathOperation.Predicate.withField(nextToken.getToken());
 			} else {
-				throw this.newSyntaxError(nextToken, "Expected field name or '[' after '..'");
+				throw this.expectedTokenError(nextToken, "field name", "[");
 			}
 
 			operations.add(new JsonPathOperation.RecursiveAccessField(predicate));
@@ -208,6 +170,10 @@ public class JsonPathElementParser {
 		return false;
 	}
 
+	private boolean processRecursiveDot(@NotNull List<JsonPathOperation> operations){
+
+	}
+
 	@Nullable
 	private JsonPathOperation.Predicate processBrackets(@NotNull TokenIterator iterator) {
 		Token startToken = iterator.getCurrent();
@@ -215,50 +181,110 @@ public class JsonPathElementParser {
 
 		Token token = this.checkToken(iterator.next());
 		// ["..."] or [0] or [0:1:1]
+		//  ^^^^^      ^      ^
 		if (token.equalsToken(StringToken.class) || token.equalsToken(NumberToken.class)) {
-			// [0] or [0:1:1], 使用 while 来实现 , 解析
-			// 如果为 slice 则直接return
-			while (true) {
+			// [0] or [0:1:1]
+			if (token.equalsToken(NumberToken.class)) {
 				Token nextToken = this.checkToken(iterator.next());
-				if (currentToken.equalsToken(NumberToken.class)) {
-					// token = Index or slice start
-
-					// [0]
-
-					if (nextToken.equalsToken(OperatorToken.class, "]"))
-						return JsonPathOperation.Predicate.withIndex(this.parseInt(token));
+				// Slice
+				if (nextToken.equalsToken(OperatorToken.class, ":")) {
+					iterator.rewind();
+					iterator.rewind();
+					return this.processSlice(iterator);
+				} else {
+					this.checkBracketEnd(nextToken);
 				}
 
-				if (nextToken.equalsToken(OperatorToken.class, ","))
-					continue;
-
-				return null;
+				int index = this.parseInt(token);
+				return JsonPathOperation.Predicate.withIndex(index);
 			}
-//			List<JsonPathOperation.Predicate> predicates = new ArrayList<>();
-//			predicates.add(this.processStringAndNumberPredicate(token));
-//
-//			Token nextToken = this.checkToken(iterator.next());
-//			//
-//			if (nextToken.equalsToken(OperatorToken.class, ",")) {
-//				while ()
-//			} else if (!nextToken.equalsToken(OperatorToken.class, "]")) {
-//				throw this.newSyntaxError(startToken,
-//					"Bracket not closed, '%s' found",
-//					nextToken.getToken());
-//			}
-//
-//			return
+
+			if (token.equalsToken(StringToken.class)) {
+				Token nextToken = this.checkToken(iterator.next());
+				this.checkBracketEnd(nextToken);
+
+				String field = token.getToken();
+				return JsonPathOperation.Predicate.withField(field);
+			}
+		}
+
+		if (token.equalsToken(OperatorToken.class)) {
+			iterator.rewind();
+			return this.processSlice(iterator);
 		}
 
 		return null;
 	}
 
-	private void checkBracketEnd(@NotNull Token startBracketToken, @NotNull Token token) {
+	private void checkBracketEnd(@NotNull Token token) {
 		if (!token.equalsToken(OperatorToken.class, "]")) {
-			throw this.newSyntaxError(startBracketToken,
-				"Bracket not closed, '%s' found",
+			throw this.newSyntaxError(token,
+				"Brackets are not closed, '%s' found",
 				token.getToken());
 		}
+	}
+
+	@NotNull
+	private JsonPathOperation.Predicate processSlice(@NotNull TokenIterator iterator) {
+		Token startBracketToken = iterator.getCurrent();
+		assert startBracketToken.equalsToken(OperatorToken.class, "[");
+
+		iterator.next(); // skip '['
+
+		Integer start = null;
+		Integer end = null;
+		Integer step = null;
+
+		// Helper: 解析可为空的数字
+		java.util.function.Supplier<Integer> parseIntOrNull = () -> {
+			Token t = iterator.getCurrent();
+			if (t instanceof NumberToken num) {
+				iterator.next();
+				return num.getValue().intValue();
+			}
+			return null;
+		};
+
+		// 第一段：start 或 空
+		if (!iterator.getCurrent().equalsToken(OperatorToken.class, ":")) {
+			start = parseIntOrNull.get();
+		}
+
+		// 必须是 ':'
+		expect(iterator, ":");
+		iterator.next();
+
+		// 第二段：end 或 空
+		if (!iterator.getCurrent().equalsToken(OperatorToken.class, ":")
+			&& !iterator.getCurrent().equalsToken(OperatorToken.class, "]")) {
+			end = parseIntOrNull.get();
+		}
+
+		// 如果遇到第二个 ':'
+		if (iterator.getCurrent().equalsToken(OperatorToken.class, ":")) {
+			iterator.next(); // skip ':'
+
+			// 第三段：step 或 空
+			if (!iterator.getCurrent().equalsToken(OperatorToken.class, "]")) {
+				step = parseIntOrNull.get();
+			}
+		}
+
+		// 必须遇到 ']'
+		expect(iterator, "]");
+		iterator.next();
+
+		// 默认值应用
+		int s = start != null ? start : 0;
+		int e = end != null ? end : Integer.MAX_VALUE;
+		int st = step != null ? step : 1;
+
+		return JsonPathOperation.Predicate.withSlice(s, e, st);
+	}
+
+	private void expect(TokenIterator it, String symbol) {
+		if (!it.getCurrent().equalsToken(OperatorToken.class, symbol))
+			throw this.newSyntaxError(it.getCurrent(), "Expected '" + symbol + "', but got: " + it.getCurrent());
 	}
 
 	private static class FilterParser {

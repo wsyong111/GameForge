@@ -144,7 +144,7 @@ public class Main {
 			"c", Element.primitive(3)
 		));
 
-		ElementPath path = ElementPath.compile("$..author");
+		ElementPath path = ElementPath.compile("$.store.book[:5]");
 		System.out.println(path);
 
 		List<Element> result = path.match(element);

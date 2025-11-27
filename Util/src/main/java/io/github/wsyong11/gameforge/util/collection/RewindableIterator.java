@@ -41,17 +41,28 @@ public class RewindableIterator<T> implements Iterator<T> {
 	}
 
 	public void rewind() {
-		if (this.cursor == 0)
+		if (!this.canRewind())
 			throw new IllegalStateException("Cannot rewind beyond start");
 
 		this.cursor--;
 	}
 
+	public int getCursor() {
+		return this.cursor;
+	}
+
+	public boolean isRewinding() {
+		return this.cursor < this.history.size();
+	}
+
 	@NotNull
 	public T getHistory(int offset) {
-		int index = this.cursor - offset;
+		int index = this.cursor - 1 - offset;
 		Objects.checkIndex(index, this.history.size());
 		return this.history.get(index);
 	}
-}
 
+	public int getHistorySize(){
+		return this.history.size();
+	}
+}

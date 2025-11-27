@@ -28,7 +28,7 @@ public class JsonPathElementPath implements ElementPath {
 		Element rootElement = root != null ? root : element;
 
 		List<JsonPathOperation.ElementValue> currentElements = List.of(
-			JsonPathOperation.ElementValue.ofField(element, ""));
+			JsonPathOperation.ElementValue.ofField(element, "", null));
 
 		for (JsonPathOperation operation : operations) {
 			List<JsonPathOperation.ElementValue> resultElements = new ArrayList<>();

@@ -14,7 +14,7 @@ public class SyntaxException extends RuntimeException {
 		Objects.requireNonNull(text, "text is null");
 
 		if (length <= 0)
-			throw new IllegalArgumentException("Length cannot be zero or negative");
+			throw new IllegalArgumentException("Length cannot be zero or negative: "+length);
 
 		if (index < 0)
 			throw new IndexOutOfBoundsException(index);
