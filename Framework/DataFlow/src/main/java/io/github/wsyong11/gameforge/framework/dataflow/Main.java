@@ -144,7 +144,7 @@ public class Main {
 			"c", Element.primitive(3)
 		));
 
-		ElementPath path = ElementPath.compile("$.store.book[:5]");
+		ElementPath path = ElementPath.compile("$.store.book[?(@.price > 12)]");
 		System.out.println(path);
 
 		List<Element> result = path.match(element);

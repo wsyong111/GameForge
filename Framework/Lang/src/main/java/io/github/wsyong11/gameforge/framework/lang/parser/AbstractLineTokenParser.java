@@ -7,6 +7,8 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -22,8 +24,27 @@ public abstract class AbstractLineTokenParser<T> {
 		Objects.requireNonNull(text, "text is null");
 
 		this.text = text;
-
 		this.iterator = new TokenIterator(tokenizer.tokenize(text));
+
+		this.result = null;
+	}
+
+	protected AbstractLineTokenParser(@NotNull String text, @NotNull TokenIterator iterator) {
+		Objects.requireNonNull(text, "text is null");
+		Objects.requireNonNull(iterator, "iterator is null");
+
+		this.text = text;
+		this.iterator = iterator;
+
+		this.result = null;
+	}
+
+	protected AbstractLineTokenParser(@NotNull String text, @NotNull Iterator<Token> iterator) {
+		Objects.requireNonNull(text, "text is null");
+		Objects.requireNonNull(iterator, "iterator is null");
+
+		this.text = text;
+		this.iterator = new TokenIterator(iterator);
 
 		this.result = null;
 	}
@@ -44,6 +65,7 @@ public abstract class AbstractLineTokenParser<T> {
 		return this.text;
 	}
 
+	@NotNull
 	protected abstract T parse(@NotNull TokenIterator iterator);
 
 	// -------------------------------------------------------------------------------------------------------------- //
@@ -55,6 +77,35 @@ public abstract class AbstractLineTokenParser<T> {
 	@NotNull
 	protected Token next() {
 		return this.checkToken(this.iterator.next());
+	}
+
+	@NotNull
+	protected Token peek() {
+		return this.iterator.peek();
+	}
+
+	protected void rewind() {
+		this.iterator.rewind();
+	}
+
+	protected void rewind(int count) {
+		for (int i = 0; i < count; i++)
+			this.iterator.rewind();
+	}
+
+	@NotNull
+	protected Token getCurrent() {
+		return this.iterator.getCurrent();
+	}
+
+	@NotNull
+	protected String getCurrentToken() {
+		return this.getCurrent().getToken();
+	}
+
+	@NotNull
+	protected TokenIterator getIterator() {
+		return this.iterator;
 	}
 
 	@Contract("_ -> param1")
@@ -73,24 +124,24 @@ public abstract class AbstractLineTokenParser<T> {
 
 	protected boolean matchCurrent(@NotNull String value) {
 		Objects.requireNonNull(value, "value is null");
-		return this.iterator.getCurrent().equalsToken(value);
+		return this.getCurrent().equalsToken(value);
 	}
 
 	protected boolean matchCurrent(@NotNull Class<? extends Token> type) {
 		Objects.requireNonNull(type, "type is null");
-		return this.iterator.getCurrent().equalsToken(type);
+		return this.getCurrent().equalsToken(type);
 	}
 
 	protected boolean matchCurrent(@NotNull Class<? extends Token> type, @NotNull String value) {
 		Objects.requireNonNull(type, "type is null");
 		Objects.requireNonNull(value, "value is null");
-		return this.iterator.getCurrent().equalsToken(type, value);
+		return this.getCurrent().equalsToken(type, value);
 	}
 
 	protected boolean consumeIfMatch(@NotNull String value) {
 		Objects.requireNonNull(value, "value is null");
 
-		Token token = this.iterator.getCurrent();
+		Token token = this.getCurrent();
 		if (token.equalsToken(value)) {
 			this.next();
 			return true;
@@ -101,7 +152,7 @@ public abstract class AbstractLineTokenParser<T> {
 	protected boolean consumeIfMatch(@NotNull Class<? extends Token> type) {
 		Objects.requireNonNull(type, "type is null");
 
-		Token token = this.iterator.getCurrent();
+		Token token = this.getCurrent();
 		if (token.equalsToken(type)) {
 			this.next();
 			return true;
@@ -113,7 +164,7 @@ public abstract class AbstractLineTokenParser<T> {
 		Objects.requireNonNull(type, "type is null");
 		Objects.requireNonNull(value, "value is null");
 
-		Token token = this.iterator.getCurrent();
+		Token token = this.getCurrent();
 		if (token.equalsToken(type, value)) {
 			this.next();
 			return true;
@@ -134,9 +185,19 @@ public abstract class AbstractLineTokenParser<T> {
 	}
 
 	@NotNull
+	protected SyntaxException invalidTokenError() {
+		return this.invalidTokenError(this.getCurrent());
+	}
+
+	@NotNull
 	protected SyntaxException invalidTokenError(@NotNull Token token) {
 		Objects.requireNonNull(token, "token is null");
 		return this.syntaxError(token, "Invalid syntax");
+	}
+
+	@NotNull
+	protected SyntaxException expectedTokenError(@NotNull String expected) {
+		return this.expectedTokenError(this.getCurrent(), expected);
 	}
 
 	@NotNull
@@ -147,23 +208,39 @@ public abstract class AbstractLineTokenParser<T> {
 	}
 
 	@NotNull
+	protected SyntaxException expectedTokenError(@NotNull String... texts) {
+		return this.expectedTokenError(this.getCurrent(), texts);
+	}
+
+	@NotNull
 	protected SyntaxException expectedTokenError(@NotNull Token token, @NotNull String... texts) {
 		Objects.requireNonNull(token, "token is null");
 		Objects.requireNonNull(texts, "texts is null");
 
-		String expectedText;
-		if (texts.length == 1) {
-			expectedText = StringUtils.wrapWithQuotes(texts[0]);
-		} else {
-			expectedText = java.util.Arrays
-				.stream(texts, 0, texts.length - 1)
-				.map(StringUtils::wrapWithQuotes)
-				.collect(Collectors.joining(" ")) + " or " + StringUtils.wrapWithQuotes(texts[texts.length - 1]);
-		}
+		// 'a', 'b' or 'c'
+		String expectedText = Arrays
+			.stream(texts)
+			.map(StringUtils::wrapWithQuotes)
+			.collect(Collectors.collectingAndThen(
+				Collectors.toList(),
+				list -> {
+					int size = list.size();
+					if (size == 1)
+						return list.get(0);
+
+					return String.join(", ", list.subList(0, size - 1))
+						+ " or " + list.get(size - 1);
+				}
+			));
 
 		String tokenText = StringUtils.wrapWithQuotes(token.getToken());
 
 		return this.syntaxError(token, "Expected %s, but %s found", expectedText, tokenText);
+	}
+
+	@NotNull
+	protected SyntaxException unexpectedTokenError() {
+		return this.unexpectedTokenError(this.getCurrent());
 	}
 
 	@NotNull
@@ -179,9 +256,19 @@ public abstract class AbstractLineTokenParser<T> {
 	}
 
 	@NotNull
+	protected SyntaxException redundantTokenError() {
+		return this.redundantTokenError(this.getCurrent());
+	}
+
+	@NotNull
 	protected SyntaxException redundantTokenError(@NotNull Token token) {
 		Objects.requireNonNull(token, "token is null");
 		return this.syntaxError(token, "Redundant token '%s' found", token.getToken());
+	}
+
+	@NotNull
+	protected SyntaxException invalidNumberError() {
+		return this.invalidNumberError(this.getCurrent());
 	}
 
 	@NotNull
@@ -191,9 +278,19 @@ public abstract class AbstractLineTokenParser<T> {
 	}
 
 	@NotNull
+	protected SyntaxException invalidIdentifierError() {
+		return this.invalidIdentifierError(this.getCurrent());
+	}
+
+	@NotNull
 	protected SyntaxException invalidIdentifierError(@NotNull Token token) {
 		Objects.requireNonNull(token, "token is null");
 		return this.syntaxError(token, "Invalid identifier '%s'", token.getToken());
+	}
+
+	@NotNull
+	protected SyntaxException unmatchedBracketError() {
+		return this.unmatchedBracketError(this.getCurrent());
 	}
 
 	@NotNull
@@ -203,9 +300,21 @@ public abstract class AbstractLineTokenParser<T> {
 	}
 
 	@NotNull
+	protected SyntaxException valueOutOfRangeError(int min, int max) {
+		return this.valueOutOfRangeError(this.getCurrent(), min, max);
+	}
+
+	@NotNull
 	protected SyntaxException valueOutOfRangeError(@NotNull Token token, int min, int max) {
 		Objects.requireNonNull(token, "token is null");
 		return this.syntaxError(token, "Value '%s' out of range [%d, %d]", token.getToken(), min, max);
+	}
+
+	@NotNull
+	protected SyntaxException syntaxError(@NotNull String message, Object... formatArgs) {
+		Objects.requireNonNull(message, "message is null");
+		Objects.requireNonNull(formatArgs, "formatArgs is null");
+		return this.syntaxError(this.getCurrent(), message, formatArgs);
 	}
 
 	@NotNull
