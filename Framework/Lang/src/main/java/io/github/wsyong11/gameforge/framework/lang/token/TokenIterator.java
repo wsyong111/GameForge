@@ -3,6 +3,7 @@ package io.github.wsyong11.gameforge.framework.lang.token;
 import io.github.wsyong11.gameforge.util.collection.RewindableIterator;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
 import java.util.Iterator;
 
 public class TokenIterator extends RewindableIterator<Token> implements Iterator<Token> {
@@ -59,5 +60,26 @@ public class TokenIterator extends RewindableIterator<Token> implements Iterator
 			this.next();
 
 		return this.current;
+	}
+
+	@NotNull
+	public TokenIterator slice(int length) {
+		int cursor = this.getCursor();
+		return new SliceTokenIterator(this, cursor, cursor + length);
+	}
+
+	private static class SliceTokenIterator extends TokenIterator {
+		private final TokenIterator parent;
+		private final int startCursor;
+		private final int endCursor;
+
+		public SliceTokenIterator(TokenIterator parent, int startCursor, int endCursor) {
+			super(Collections.emptyIterator());
+			this.parent = parent;
+			this.startCursor = startCursor;
+			this.endCursor = endCursor;
+		}
+
+
 	}
 }

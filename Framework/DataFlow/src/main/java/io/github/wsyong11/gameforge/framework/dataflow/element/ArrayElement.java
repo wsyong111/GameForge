@@ -3,6 +3,7 @@ package io.github.wsyong11.gameforge.framework.dataflow.element;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -10,7 +11,7 @@ import java.util.Objects;
 public class ArrayElement implements Element, Iterable<Element> {
 	private final List<Element> list;
 
-	public ArrayElement(@NotNull List<Element> list) {
+	public ArrayElement(@NotNull Collection<Element> list) {
 		Objects.requireNonNull(list, "list is null");
 		this.list = List.copyOf(list);
 	}

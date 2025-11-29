@@ -2,14 +2,11 @@ package io.github.wsyong11.gameforge.framework.dataflow.element;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.SortedMap;
+import java.util.*;
 
 public interface Element {
 	@NotNull
-	static ArrayElement array(@NotNull List<Element> elements) {
+	static ArrayElement array(@NotNull Collection<Element> elements) {
 		Objects.requireNonNull(elements, "elements is null");
 		return new ArrayElement(elements);
 	}
@@ -44,22 +41,12 @@ public interface Element {
 	}
 
 	@NotNull
-	static NumberElement primitive(int value) {
+	static NumberElement primitive(@NotNull Number value) {
 		return new NumberElement(value);
 	}
 
 	@NotNull
-	static NumberElement primitive(long value) {
-		return new NumberElement(value);
-	}
-
-	@NotNull
-	static NumberElement primitive(float value) {
-		return new NumberElement(value);
-	}
-
-	@NotNull
-	static NumberElement primitive(double value) {
-		return new NumberElement(value);
+	static NullElement nil() {
+		return NullElement.INSTANCE;
 	}
 }

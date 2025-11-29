@@ -3,11 +3,11 @@ package io.github.wsyong11.gameforge.framework.dataflow.path.json;
 import io.github.wsyong11.gameforge.framework.dataflow.path.ElementPath;
 import io.github.wsyong11.gameforge.framework.lang.parser.AbstractLineTokenParser;
 import io.github.wsyong11.gameforge.framework.lang.token.*;
+import org.apache.commons.lang3.NotImplementedException;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -40,29 +40,31 @@ public class JsonPathElementParser extends AbstractLineTokenParser<ElementPath> 
 	@NotNull
 	@Override
 	public ElementPath parse(@NotNull TokenIterator iterator) {
-		List<JsonPathOperation> operations = new ArrayList<>();
-
-		int index = 0;
-		while (true) {
-			Token token = iterator.next();
-
-			if (token instanceof ErrorToken)
-				throw this.invalidTokenError(token);
-
-			if (token instanceof EOFToken)
-				break;
-
-			if (token instanceof CommentToken)
-				continue;
-
-			System.out.println("Token: " + token);
-			if (!this.processToken(index, operations))
-				throw this.invalidTokenError(token);
-
-			index++;
-		}
-
-		return new JsonPathElementPath(operations);
+		throw new NotImplementedException();
+		// TODO: 2025/11/29 json path parser
+//		List<JsonPathOperation> operations = new ArrayList<>();
+//
+//		int index = 0;
+//		while (true) {
+//			Token token = iterator.next();
+//
+//			if (token instanceof ErrorToken)
+//				throw this.invalidTokenError(token);
+//
+//			if (token instanceof EOFToken)
+//				break;
+//
+//			if (token instanceof CommentToken)
+//				continue;
+//
+//			System.out.println("Token: " + token);
+//			if (!this.processToken(index, operations))
+//				throw this.invalidTokenError(token);
+//
+//			index++;
+//		}
+//
+//		return new JsonPathElementPath(operations);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
@@ -167,7 +169,7 @@ public class JsonPathElementParser extends AbstractLineTokenParser<ElementPath> 
 	}
 
 	private static class FilterParser extends AbstractLineTokenParser<JsonPathOperation.Predicate> {
-		protected FilterParser(@NotNull String text, @NotNull TokenIterator iterator) {
+		public FilterParser(@NotNull String text, @NotNull TokenIterator iterator) {
 			super(text, iterator);
 		}
 

@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 public final class ObjectElement implements Element, Iterable<Map.Entry<String, Element>> {
@@ -48,6 +49,11 @@ public final class ObjectElement implements Element, Iterable<Map.Entry<String, 
 	@UnmodifiableView
 	public Map<String, Element> asMap(){
 		return this.map;
+	}
+
+	public void forEachEntry(@NotNull BiConsumer<String, Element > action) {
+		Objects.requireNonNull(action, "action is null");
+		this.map.forEach(action);
 	}
 
 	@NotNull

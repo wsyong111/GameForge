@@ -7,19 +7,7 @@ import java.util.Objects;
 public final class NumberElement implements Element, Comparable<NumberElement> {
 	private final Number number;
 
-	public NumberElement(int number) {
-		this.number = number;
-	}
-
-	public NumberElement(long number) {
-		this.number = number;
-	}
-
-	public NumberElement(float number) {
-		this.number = number;
-	}
-
-	public NumberElement(double number) {
+	public NumberElement(@NotNull Number number) {
 		this.number = number;
 	}
 
