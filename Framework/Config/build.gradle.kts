@@ -1,15 +1,20 @@
-import com.palantir.javapoet.ClassName
-import com.palantir.javapoet.TypeName
-import io.github.wsyong11.gameforge.plugin.codegen.dsl.boxSafe
-import io.github.wsyong11.gameforge.plugin.codegen.dsl.unboxSafe
-import org.gradle.kotlin.dsl.support.uppercaseFirstChar
-import java.util.*
-import javax.lang.model.element.Modifier
+//import com.palantir.javapoet.ClassName
+//import com.palantir.javapoet.TypeName
+//import io.github.wsyong11.gameforge.plugin.codegen.dsl.boxSafe
+//import io.github.wsyong11.gameforge.plugin.codegen.dsl.unboxSafe
+//import org.gradle.kotlin.dsl.support.uppercaseFirstChar
+//import java.util.*
+//import javax.lang.model.element.Modifier
 
 //plugins {
 //    id("io.github.wsyong11.gameforge.codegen")
 //}
-//
+
+dependencies {
+    implementation(project(":Framework:System:Log"))
+    implementation(project(":Framework:DataFlow"))
+}
+
 //codegen {
 //    val jObjects = type(Objects::class)
 //

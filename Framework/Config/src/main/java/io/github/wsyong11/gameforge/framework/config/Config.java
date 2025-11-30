@@ -3,7 +3,6 @@ package io.github.wsyong11.gameforge.framework.config;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
-import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.List;
 import java.util.Objects;
@@ -11,8 +10,13 @@ import java.util.Set;
 
 public interface Config {
 	@NotNull
-	@UnmodifiableView
+	@Unmodifiable
 	Set<String> getKeys();
+
+	default boolean contains(@NotNull String key) {
+		Objects.requireNonNull(key, "key is null");
+		return this.getKeys().contains(key);
+	}
 
 	// ============================================================================================================== //
 
@@ -58,15 +62,6 @@ public interface Config {
 	default long getLong(@NotNull String key, long defaultValue) {
 		Objects.requireNonNull(key, "key is null");
 		Long value = this.getLong(key);
-		return value == null ? defaultValue : value;
-	}
-
-	@Nullable
-	Character getChar(@NotNull String key);
-
-	default char getChar(@NotNull String key, char defaultValue) {
-		Objects.requireNonNull(key, "key is null");
-		Character value = this.getChar(key);
 		return value == null ? defaultValue : value;
 	}
 
@@ -148,9 +143,6 @@ public interface Config {
 
 		@NotNull
 		Editor putLong(@NotNull String key, long value);
-
-		@NotNull
-		Editor putChar(@NotNull String key, char value);
 
 		@NotNull
 		Editor putFloat(@NotNull String key, float value);

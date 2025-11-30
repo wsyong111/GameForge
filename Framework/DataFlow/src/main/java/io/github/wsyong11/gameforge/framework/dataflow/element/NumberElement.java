@@ -32,6 +32,14 @@ public final class NumberElement implements Element, Comparable<NumberElement> {
 		return this.number.doubleValue();
 	}
 
+	public byte getAsByte() {
+		return this.number.byteValue();
+	}
+
+	public short getAsShort() {
+		return this.number.shortValue();
+	}
+
 	@Override
 	public int compareTo(@NotNull NumberElement o) {
 		Objects.requireNonNull(o, "o is null");
