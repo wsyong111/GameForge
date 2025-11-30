@@ -6,75 +6,89 @@ import io.github.wsyong11.gameforge.plugin.codegen.dsl.dsl
 import kotlin.reflect.KClass
 
 open class CodeGenExtension {
-	val jObject = type(Any::class)
+    val jObject = type(Any::class)
 
-	val jString = type(String::class)
-	val jVoid = TypeName.VOID
-	val jBoolean = TypeName.BOOLEAN
-	val jByte = TypeName.BYTE
-	val jShort = TypeName.SHORT
-	val jInt = TypeName.INT
-	val jLong = TypeName.LONG
-	val jChar = TypeName.CHAR
-	val jFloat = TypeName.FLOAT
-	val jDouble = TypeName.DOUBLE
+    //@formatter:off
+    val jString  : ClassName = type(String::class)
+    val jVoid    : TypeName = TypeName.VOID
+    val jcVoid   : TypeName = jVoid.box()
+    val jBoolean : TypeName = TypeName.BOOLEAN
+    val jcBoolean: TypeName = jBoolean.box()
+    val jByte    : TypeName = TypeName.BYTE
+    val jcByte   : TypeName = jByte.box()
+    val jShort   : TypeName = TypeName.SHORT
+    val jcShort  : TypeName = jShort.box()
+    val jInt     : TypeName = TypeName.INT
+    val jcInt    : TypeName = jInt.box()
+    val jLong    : TypeName = TypeName.LONG
+    val jcLong   : TypeName = jLong.box()
+    val jChar    : TypeName = TypeName.CHAR
+    val jcChar   : TypeName = jChar.box()
+    val jFloat   : TypeName = TypeName.FLOAT
+    val jcFloat  : TypeName = jFloat.box()
+    val jDouble  : TypeName = TypeName.DOUBLE
+    val jcDouble : TypeName = jDouble.box()
+    //@formatter:on
 
-	private val _generators: MutableList<CodeGenerator> = mutableListOf()
+    private val _generators: MutableList<CodeGenerator> = mutableListOf()
 
-	public val generators
-		get() = this._generators.toList()
+    val generators
+        get() = this._generators.toList()
 
-	fun register(generator: CodeGenerator) {
-		this._generators.add(generator)
-	}
+    fun register(generator: CodeGenerator) {
+        this._generators.add(generator)
+    }
 
-	fun register(
-		packageName: String,
-		fileConfigurator: ((JavaFile.Builder) -> Unit)? = null,
-		generator: () -> TypeSpec,
-	) {
-		this.register {
-			JavaFile.builder(packageName, generator())
-				.addFileComment("!!Generate by build system!! //")
-				.indent("\t")
-				.apply { fileConfigurator?.invoke(this) }
-				.build()
-		}
-	}
+    fun register(
+        packageName: String,
+        fileConfigurator: ((JavaFile.Builder) -> Unit)? = null,
+        generator: () -> TypeSpec,
+    ) {
+        this.register {
+            JavaFile.builder(packageName, generator())
+                .addFileComment("!!Generate by build system!! //")
+                .indent("\t")
+                .apply { fileConfigurator?.invoke(this) }
+                .build()
+        }
+    }
 
-	fun register(
-		packageName: ClassName,
-		fileConfigurator: ((JavaFile.Builder) -> Unit)? = null,
-		generator: () -> TypeSpec,
-	) = this.register(packageName.packageName(), fileConfigurator, generator)
+    fun register(
+        packageName: ClassName,
+        fileConfigurator: ((JavaFile.Builder) -> Unit)? = null,
+        generator: () -> TypeSpec,
+    ) = this.register(packageName.packageName(), fileConfigurator, generator)
 
-	fun type(type: KClass<*>) =
-		ClassName.get(type.java)
+    fun type(type: KClass<*>): ClassName =
+        ClassName.get(type.java)
 
-	inline fun <reified T> type() =
-		type(T::class)
+    fun type(type: Class<*>): ClassName =
+        ClassName.get(type)
 
-	fun primitive(type: KClass<*>) =
-		TypeName.get(type.java)
+    inline fun <reified T> type() =
+        type(T::class)
 
-	inline fun <reified T> primitive() =
-		primitive(T::class)
+    fun primitive(type: KClass<*>): TypeName =
+        TypeName.get(type.java)
 
-	infix fun String.withClass(name: String) =
-		ClassName.get(this, name)
+    inline fun <reified T> primitive() =
+        primitive(T::class)
 
-	operator fun ClassName.get(vararg type: TypeName) =
-		ParameterizedTypeName.get(this, *type)
+    infix fun String.withClass(name: String): ClassName =
+        ClassName.get(this, name)
 
-	fun createInterface(name: String, block: TypeSpecDSL.() -> Unit) =
-		TypeSpecDSL(TypeSpec.interfaceBuilder(name)).dsl(block).build()
+    operator fun ClassName.get(vararg type: TypeName): ParameterizedTypeName =
+        ParameterizedTypeName.get(this, *type)
 
-	fun createInterface(name: ClassName, block: TypeSpecDSL.() -> Unit) =
-		createInterface(name.simpleName(), block)
+    fun createInterface(name: String, block: TypeSpecDSL.() -> Unit): TypeSpec =
+        TypeSpecDSL(TypeSpec.interfaceBuilder(name)).dsl(block).build()
 
-	fun createClass(name: String, block: TypeSpecDSL.() -> Unit) =
-		TypeSpecDSL(TypeSpec.classBuilder(name)).dsl(block).build()
+    fun createInterface(name: ClassName, block: TypeSpecDSL.() -> Unit) =
+        createInterface(name.simpleName(), block)
 
-	fun createClass(name: ClassName, block: TypeSpecDSL.() -> Unit) =
-		createClass(name.simpleName(), block)
+    fun createClass(name: String, block: TypeSpecDSL.() -> Unit): TypeSpec =
+        TypeSpecDSL(TypeSpec.classBuilder(name)).dsl(block).build()
+
+    fun createClass(name: ClassName, block: TypeSpecDSL.() -> Unit) =
+        createClass(name.simpleName(), block)
 }
