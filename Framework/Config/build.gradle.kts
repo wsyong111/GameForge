@@ -13,6 +13,8 @@
 dependencies {
     implementation(project(":Framework:System:Log"))
     implementation(project(":Framework:DataFlow"))
+    implementation(project(":Framework:Listener"))
+    implementation(project(":Util"))
 }
 
 //codegen {

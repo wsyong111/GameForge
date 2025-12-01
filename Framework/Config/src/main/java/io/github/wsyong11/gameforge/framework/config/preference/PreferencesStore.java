@@ -1,4 +1,4 @@
-package io.github.wsyong11.gameforge.framework.config;
+package io.github.wsyong11.gameforge.framework.config.preference;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-public interface Config {
+public interface PreferencesStore {
 	@NotNull
 	@Unmodifiable
 	Set<String> getKeys();
@@ -18,7 +18,11 @@ public interface Config {
 		return this.getKeys().contains(key);
 	}
 
-	// ============================================================================================================== //
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	void addChangedListener(@NotNull )
+
+	// -------------------------------------------------------------------------------------------------------------- //
 
 	@Nullable
 	Boolean getBoolean(@NotNull String key);
@@ -94,7 +98,7 @@ public interface Config {
 		return value == null ? defaultValue : value;
 	}
 
-	// ============================================================================================================== //
+	// -------------------------------------------------------------------------------------------------------------- //
 
 	@Nullable
 	@Unmodifiable
@@ -123,7 +127,7 @@ public interface Config {
 		return value == null ? defaultValue : value;
 	}
 
-	// ============================================================================================================== //
+	// -------------------------------------------------------------------------------------------------------------- //
 
 	@NotNull
 	Editor edit();
