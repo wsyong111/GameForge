@@ -1,6 +1,9 @@
 package io.github.wsyong11.gameforge.framework.config.preference;
 
+import io.github.wsyong11.gameforge.framework.config.preference.listener.PreferenceChangedListener;
 import io.github.wsyong11.gameforge.framework.dataflow.element.*;
+import io.github.wsyong11.gameforge.framework.listener.ListenerList;
+import io.github.wsyong11.gameforge.framework.listener.ex.ListenerExceptionCallback;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import org.apache.commons.lang3.tuple.Pair;
@@ -21,6 +24,8 @@ public class ElementPreferencesStore implements PreferencesStore {
 
 	private final Consumer<ObjectElement> changeCallback;
 
+	private final ListenerList listenerList;
+
 	private final Map<String, Element> config;
 	private final ReadWriteLock configLock;
 
@@ -29,6 +34,8 @@ public class ElementPreferencesStore implements PreferencesStore {
 		Objects.requireNonNull(changeCallback, "changeCallback is null");
 
 		this.changeCallback = changeCallback;
+
+		this.listenerList = ListenerList.sync();
 
 		this.config = new HashMap<>();
 		this.configLock = new ReentrantReadWriteLock();
@@ -66,7 +73,9 @@ public class ElementPreferencesStore implements PreferencesStore {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void notifyChanged() {
+	private void notifyChanged(@NotNull Set<String> keys) {
+		Objects.requireNonNull(keys, "keys is null");
+
 		ObjectElement result;
 
 		Lock lock = this.configLock.readLock();
@@ -102,6 +111,13 @@ public class ElementPreferencesStore implements PreferencesStore {
 		}
 
 		this.changeCallback.accept(result);
+
+		Set<String> keysView = Collections.unmodifiableSet(keys);
+
+		this.listenerList.fire(
+			PreferenceChangedListener.class,
+			l -> l.onPreferenceChanged(this, keysView),
+			ListenerExceptionCallback.log(LOGGER));
 	}
 
 	@NotNull
@@ -109,6 +125,18 @@ public class ElementPreferencesStore implements PreferencesStore {
 	@Override
 	public Set<String> getKeys() {
 		return Set.copyOf(this.config.keySet());
+	}
+
+	@Override
+	public void addChangedListener(@NotNull PreferenceChangedListener listener) {
+		Objects.requireNonNull(listener, "listener is null");
+		this.listenerList.add(PreferenceChangedListener.class, listener);
+	}
+
+	@Override
+	public void removeChangedListener(@NotNull PreferenceChangedListener listener) {
+		Objects.requireNonNull(listener, "listener is null");
+		this.listenerList.remove(PreferenceChangedListener.class, listener);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
@@ -469,9 +497,12 @@ public class ElementPreferencesStore implements PreferencesStore {
 			if (this.modifyCache.isEmpty())
 				return;
 
+			Set<String> changedKeys;
+
 			Lock writeLock = ElementPreferencesStore.this.configLock.writeLock();
 			writeLock.lock();
 			try {
+				changedKeys = Set.copyOf(this.modifyCache.keySet());
 				for (Map.Entry<String, Element> entry : this.modifyCache.entrySet()) {
 					String key = entry.getKey();
 					Element value = entry.getValue();
@@ -486,7 +517,7 @@ public class ElementPreferencesStore implements PreferencesStore {
 				writeLock.unlock();
 			}
 
-			ElementPreferencesStore.this.notifyChanged();
+			ElementPreferencesStore.this.notifyChanged(changedKeys);
 		}
 	}
 }

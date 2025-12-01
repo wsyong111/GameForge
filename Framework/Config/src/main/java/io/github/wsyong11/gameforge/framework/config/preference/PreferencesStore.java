@@ -1,5 +1,6 @@
 package io.github.wsyong11.gameforge.framework.config.preference;
 
+import io.github.wsyong11.gameforge.framework.config.preference.listener.PreferenceChangedListener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -20,7 +21,9 @@ public interface PreferencesStore {
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
-	void addChangedListener(@NotNull )
+	void addChangedListener(@NotNull PreferenceChangedListener listener);
+
+	void removeChangedListener(@NotNull PreferenceChangedListener listener);
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
