@@ -30,6 +30,31 @@ public interface Element {
 	}
 
 	@NotNull
+	static ObjectElement object(@NotNull Object... pairs) {
+		Objects.requireNonNull(pairs, "pairs is null");
+
+		if (pairs.length % 2 != 0)
+			throw new IllegalArgumentException("object() expects even number of arguments: key, value, key, value...");
+
+		Map<String, Element> map = new LinkedHashMap<>();
+
+		for (int i = 0; i < pairs.length; i += 2) {
+			Object keyRaw = pairs[i];
+			Object valueRaw = pairs[i + 1];
+
+			if (!(keyRaw instanceof String key))
+				throw new IllegalArgumentException("key must be a String but got: " + keyRaw);
+
+			if (!(valueRaw instanceof Element value))
+				throw new IllegalArgumentException("value must be an Element but got: " + valueRaw);
+
+			map.put(key, value);
+		}
+
+		return new ObjectElement(map);
+	}
+
+	@NotNull
 	static StringElement string(@NotNull String value) {
 		Objects.requireNonNull(value, "value is null");
 		return new StringElement(value);
