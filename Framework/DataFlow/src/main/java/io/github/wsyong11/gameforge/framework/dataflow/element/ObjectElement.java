@@ -1,87 +1,50 @@
 package io.github.wsyong11.gameforge.framework.dataflow.element;
 
+import io.github.wsyong11.gameforge.framework.dataflow.element.internal.AbstractObjectElement;
+import io.github.wsyong11.gameforge.framework.dataflow.element.mutable.MutableElement;
+import io.github.wsyong11.gameforge.framework.dataflow.element.mutable.MutableObjectElement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
-public final class ObjectElement implements Element, Iterable<Map.Entry<String, Element>> {
-	private final Map<String, Element> map;
-
-	public ObjectElement(@NotNull SortedMap<String, Element> map) {
-		Objects.requireNonNull(map, "map is null");
-		this.map = Collections.unmodifiableMap(new LinkedHashMap<>(map));
-	}
-
+public final class ObjectElement extends AbstractObjectElement<Element> implements Element {
 	public ObjectElement(@NotNull Map<String, Element> map) {
-		Objects.requireNonNull(map, "map is null");
-		this.map = Map.copyOf(map);
+		super(Collections.unmodifiableMap(new LinkedHashMap<>(
+			Objects.requireNonNull(map, "map is null")
+		)));
 	}
 
 	@NotNull
+	@Override
 	public Element get(@NotNull String key) {
-		Objects.requireNonNull(key, "key is null");
-		return this.map.getOrDefault(key, MissingElement.INSTANCE);
-	}
-
-	public boolean contains(@NotNull String key) {
-		Objects.requireNonNull(key, "key is null");
-		return this.map.containsKey(key);
-	}
-
-	public int size() {
-		return this.map.size();
-	}
-
-	public boolean isEmpty() {
-		return this.map.isEmpty();
+		return Objects.requireNonNullElse(super.get(key), MissingElement.INSTANCE);
 	}
 
 	@NotNull
 	@UnmodifiableView
+	@Override
 	public Set<String> keys() {
-		return this.map.keySet();
+		return super.keys();
 	}
 
 	@NotNull
 	@UnmodifiableView
-	public Map<String, Element> asMap(){
-		return this.map;
-	}
-
-	public void forEachEntry(@NotNull BiConsumer<String, Element > action) {
-		Objects.requireNonNull(action, "action is null");
-		this.map.forEach(action);
+	@Override
+	public Map<String, Element> asMap() {
+		return super.asMap();
 	}
 
 	@NotNull
 	@Override
-	public Iterator<Map.Entry<String, Element>> iterator() {
-		return this.map.entrySet().iterator();
-	}
+	public MutableObjectElement asMutable() {
+		Map<String, MutableElement> result = new LinkedHashMap<>(this.map.size());
+		for (Map.Entry<String, Element> entry : this.map.entrySet()) {
+			String key = entry.getKey();
+			Element value = entry.getValue();
+			result.put(key, value.asMutable());
+		}
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-
-		ObjectElement that = (ObjectElement) o;
-		return Objects.equals(this.map, that.map);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hashCode(this.map);
-	}
-
-	@Override
-	public String toString() {
-		return "{" + this.map
-			.entrySet()
-			.stream()
-			.map(entry -> "\"" + entry.getKey() + "\": " + entry.getValue())
-			.collect(Collectors.joining(", ")) + "}";
+		return new MutableObjectElement(result);
 	}
 }

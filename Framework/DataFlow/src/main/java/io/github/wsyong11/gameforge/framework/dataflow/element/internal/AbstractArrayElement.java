@@ -1,14 +1,10 @@
 package io.github.wsyong11.gameforge.framework.dataflow.element.internal;
 
-import io.github.wsyong11.gameforge.framework.dataflow.element.ArrayElement;
-import io.github.wsyong11.gameforge.framework.dataflow.element.MissingElement;
 import io.github.wsyong11.gameforge.framework.dataflow.element.base.BaseArrayElement;
 import io.github.wsyong11.gameforge.framework.dataflow.element.base.BaseElement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnmodifiableView;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -45,12 +41,18 @@ public abstract class AbstractArrayElement<E extends BaseElement> implements Bas
 
 	@NotNull
 	@Override
+	public List<E> asList() {
+		return this.list;
+	}
+
+	@NotNull
+	@Override
 	public Iterator<E> iterator() {
 		return this.list.iterator();
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(@Nullable Object o) {
 		if (this == o) return true;
 		if (o == null || this.getClass() != o.getClass()) return false;
 
@@ -63,6 +65,7 @@ public abstract class AbstractArrayElement<E extends BaseElement> implements Bas
 		return Objects.hashCode(this.list);
 	}
 
+	@NotNull
 	@Override
 	public String toString() {
 		return this.list.toString();

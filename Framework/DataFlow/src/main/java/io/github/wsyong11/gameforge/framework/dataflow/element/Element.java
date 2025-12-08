@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public interface Element extends BaseElement {
+public sealed interface Element extends BaseElement permits ArrayElement, BooleanElement, MissingElement, NullElement, NumberElement, ObjectElement, StringElement {
 	@NotNull
 	static ArrayElement array(@NotNull Collection<Element> elements) {
 		Objects.requireNonNull(elements, "elements is null");
@@ -18,12 +18,6 @@ public interface Element extends BaseElement {
 	static ArrayElement array(@NotNull Element... elements) {
 		Objects.requireNonNull(elements, "elements is null");
 		return new ArrayElement(List.of(elements));
-	}
-
-	@NotNull
-	static ObjectElement object(@NotNull SortedMap<String, Element> map) {
-		Objects.requireNonNull(map, "map is null");
-		return new ObjectElement(map);
 	}
 
 	@NotNull
@@ -64,12 +58,13 @@ public interface Element extends BaseElement {
 	}
 
 	@NotNull
-	static BooleanElement primitive(boolean value) {
-		return value ? BooleanElement.TRUE : BooleanElement.FALSE;
+	static BooleanElement bool(boolean value) {
+		return BooleanElement.of(value);
 	}
 
 	@NotNull
-	static NumberElement primitive(@NotNull Number value) {
+	static NumberElement number(@NotNull Number value) {
+		Objects.requireNonNull(value, "value is null");
 		return new NumberElement(value);
 	}
 
@@ -77,6 +72,8 @@ public interface Element extends BaseElement {
 	static NullElement nil() {
 		return NullElement.INSTANCE;
 	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
 
 	@Nullable
 	MutableElement asMutable();

@@ -1,18 +1,15 @@
 package io.github.wsyong11.gameforge.framework.dataflow.element.mutable;
 
 import io.github.wsyong11.gameforge.framework.dataflow.element.ArrayElement;
-import io.github.wsyong11.gameforge.framework.dataflow.element.Element;
-import io.github.wsyong11.gameforge.framework.dataflow.element.MissingElement;
-import io.github.wsyong11.gameforge.framework.dataflow.element.NullElement;
 import io.github.wsyong11.gameforge.framework.dataflow.element.internal.AbstractArrayElement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnknownNullability;
-import org.jetbrains.annotations.UnmodifiableView;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Objects;
 
-public class MutableArrayElement extends AbstractArrayElement<MutableElement> implements MutableElement {
+public final class MutableArrayElement extends AbstractArrayElement<MutableElement> implements MutableElement {
 	public MutableArrayElement() {
 		super(new ArrayList<>());
 	}
@@ -41,13 +38,7 @@ public class MutableArrayElement extends AbstractArrayElement<MutableElement> im
 
 	@NotNull
 	@Override
-	public List<MutableElement> asList() {
-		return this.list;
-	}
-
-	@NotNull
-	@Override
-	public Element asElement() {
+	public ArrayElement asElement() {
 		return new ArrayElement(this.list
 			.stream()
 			.map(MutableElement::asElementSafe)

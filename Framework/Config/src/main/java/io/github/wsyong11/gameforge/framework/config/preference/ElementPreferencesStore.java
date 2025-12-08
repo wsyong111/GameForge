@@ -376,7 +376,7 @@ public class ElementPreferencesStore implements PreferencesStore {
 		public Editor putBoolean(@NotNull String key, boolean value) {
 			Objects.requireNonNull(key, "key is null");
 
-			this.modifyCache.put(key, Element.primitive(value));
+			this.modifyCache.put(key, Element.bool(value));
 			return this;
 		}
 
@@ -385,7 +385,7 @@ public class ElementPreferencesStore implements PreferencesStore {
 		public Editor putByte(@NotNull String key, byte value) {
 			Objects.requireNonNull(key, "key is null");
 
-			this.modifyCache.put(key, Element.primitive(value));
+			this.modifyCache.put(key, Element.number(value));
 			return this;
 		}
 
@@ -394,7 +394,7 @@ public class ElementPreferencesStore implements PreferencesStore {
 		public Editor putShort(@NotNull String key, short value) {
 			Objects.requireNonNull(key, "key is null");
 
-			this.modifyCache.put(key, Element.primitive(value));
+			this.modifyCache.put(key, Element.number(value));
 			return this;
 		}
 
@@ -403,7 +403,7 @@ public class ElementPreferencesStore implements PreferencesStore {
 		public Editor putInt(@NotNull String key, int value) {
 			Objects.requireNonNull(key, "key is null");
 
-			this.modifyCache.put(key, Element.primitive(value));
+			this.modifyCache.put(key, Element.number(value));
 			return this;
 		}
 
@@ -412,7 +412,7 @@ public class ElementPreferencesStore implements PreferencesStore {
 		public Editor putLong(@NotNull String key, long value) {
 			Objects.requireNonNull(key, "key is null");
 
-			this.modifyCache.put(key, Element.primitive(value));
+			this.modifyCache.put(key, Element.number(value));
 			return this;
 		}
 
@@ -421,7 +421,7 @@ public class ElementPreferencesStore implements PreferencesStore {
 		public Editor putFloat(@NotNull String key, float value) {
 			Objects.requireNonNull(key, "key is null");
 
-			this.modifyCache.put(key, Element.primitive(value));
+			this.modifyCache.put(key, Element.number(value));
 			return this;
 		}
 
@@ -430,7 +430,7 @@ public class ElementPreferencesStore implements PreferencesStore {
 		public Editor putDouble(@NotNull String key, double value) {
 			Objects.requireNonNull(key, "key is null");
 
-			this.modifyCache.put(key, Element.primitive(value));
+			this.modifyCache.put(key, Element.number(value));
 			return this;
 		}
 

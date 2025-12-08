@@ -41,10 +41,10 @@ public class ElementBuilder {
 			return Element.string(string);
 
 		if (obj instanceof Boolean bool)
-			return Element.primitive(bool);
+			return Element.bool(bool);
 
 		if (obj instanceof Number number)
-			return Element.primitive(number);
+			return Element.number(number);
 
 		throw new UnsupportedOperationException("Cannot build the element with class " + obj.getClass().getName());
 	}

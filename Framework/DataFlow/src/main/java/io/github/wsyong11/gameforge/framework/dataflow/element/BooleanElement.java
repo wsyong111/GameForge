@@ -1,37 +1,25 @@
 package io.github.wsyong11.gameforge.framework.dataflow.element;
 
-import java.util.Objects;
+import io.github.wsyong11.gameforge.framework.dataflow.element.internal.AbstractBooleanElement;
+import io.github.wsyong11.gameforge.framework.dataflow.element.mutable.MutableBooleanElement;
+import org.jetbrains.annotations.NotNull;
 
-public final class BooleanElement implements Element {
+public final class BooleanElement extends AbstractBooleanElement implements Element {
 	public static BooleanElement FALSE = new BooleanElement(false);
 	public static BooleanElement TRUE = new BooleanElement(true);
 
-	private final boolean value;
-
 	private BooleanElement(boolean value) {
-		this.value = value;
+		super(value);
 	}
 
-	public boolean getValue() {
-		return this.value;
+	@NotNull
+	public static BooleanElement of(boolean value) {
+		return value ? TRUE : FALSE;
 	}
 
+	@NotNull
 	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-
-		BooleanElement that = (BooleanElement) o;
-		return value == that.value;
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hashCode(this.value);
-	}
-
-	@Override
-	public String toString() {
-		return String.valueOf(this.value);
+	public MutableBooleanElement asMutable() {
+		return new MutableBooleanElement(this.getValue());
 	}
 }

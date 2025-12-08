@@ -1,9 +1,7 @@
 package io.github.wsyong11.gameforge.framework.dataflow.element.base;
 
-import io.github.wsyong11.gameforge.framework.dataflow.element.Element;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.List;
 

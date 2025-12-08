@@ -93,10 +93,10 @@ public class JsonElementCodec implements ElementCodec {
 
 			if (json instanceof JsonPrimitive primitive) {
 				if (primitive.isBoolean())
-					return Element.primitive(primitive.getAsBoolean());
+					return Element.bool(primitive.getAsBoolean());
 
 				if (primitive.isNumber())
-					return Element.primitive(primitive.getAsNumber());
+					return Element.number(primitive.getAsNumber());
 
 				return Element.string(primitive.getAsString());
 			}

@@ -2,6 +2,8 @@ package io.github.wsyong11.gameforge.framework.dataflow.element.base;
 
 import io.github.wsyong11.gameforge.framework.dataflow.element.Element;
 import io.github.wsyong11.gameforge.framework.dataflow.element.mutable.MutableElement;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * 元素层次结构中所有元素的基本接口
@@ -10,4 +12,13 @@ import io.github.wsyong11.gameforge.framework.dataflow.element.mutable.MutableEl
  * 建议通过 {@link Element} 和 {@link MutableElement} 作为类型</strong></p>
  */
 public interface BaseElement {
+	@Override
+	boolean equals(@Nullable Object o);
+
+	@Override
+	int hashCode();
+
+	@Override
+	@NotNull
+	String toString();
 }

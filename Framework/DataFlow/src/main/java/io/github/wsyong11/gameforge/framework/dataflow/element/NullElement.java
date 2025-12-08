@@ -1,6 +1,7 @@
 package io.github.wsyong11.gameforge.framework.dataflow.element;
 
 import io.github.wsyong11.gameforge.framework.dataflow.element.mutable.MutableElement;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class NullElement implements Element {
@@ -15,7 +16,7 @@ public final class NullElement implements Element {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(@Nullable Object obj) {
 		return obj instanceof NullElement;
 	}
 
@@ -24,6 +25,7 @@ public final class NullElement implements Element {
 		return NullElement.class.hashCode();
 	}
 
+	@NotNull
 	@Override
 	public String toString() {
 		return "null";
