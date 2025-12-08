@@ -1,10 +1,13 @@
 package io.github.wsyong11.gameforge.framework.dataflow.element;
 
+import io.github.wsyong11.gameforge.framework.dataflow.element.base.BaseElement;
+import io.github.wsyong11.gameforge.framework.dataflow.element.mutable.MutableElement;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public interface Element {
+public interface Element extends BaseElement {
 	@NotNull
 	static ArrayElement array(@NotNull Collection<Element> elements) {
 		Objects.requireNonNull(elements, "elements is null");
@@ -74,4 +77,33 @@ public interface Element {
 	static NullElement nil() {
 		return NullElement.INSTANCE;
 	}
+
+	@Nullable
+	MutableElement asMutable();
 }
+
+/*
+interface BaseElement
+| abstract class AbstractArrayElement<T extends BaseElement> implements BaseElement
+| abstract class AbstractArrayElement implements BaseElement
+| abstract class AbstractBooleanElement implements BaseElement
+| abstract class AbstractNumberElement implements BaseElement
+| abstract class AbstractObjectElement<T extends BaseElement> implements BaseElement
+| abstract class AbstractStringElement implements BaseElement
+|
+| interface Element extends BaseElement
+| | class ArrayElement extends AbstractArrayElement<Element> implements Element
+| | class BooleanElement extends AbstractBooleanElement implements Element
+| | class MissingElement implements Element
+| | class NullElement implements Element
+| | class NumberElement extends AbstractNumberElement implements Element
+| | class ObjectElement extends AbstractObjectElement<Element> implements Element
+| \ class StringElement extends AbstractStringElement implements Element
+|
+| interface MutableElement extends BaseElement
+| | class MutableArrayElement extends AbstractArrayElement<MutableElement> implements MutableElement
+| | class MutableBooleanElement extends AbstractBooleanElement implements MutableElement
+| | class MutableNumberElement extends AbstractNumberElement implements MutableElement
+| | class MutableObjectElement extends AbstractObjectElement<MutableElement> implements MutableElement
+| \ class MutableStringElement extends AbstractStringElement implements MutableElement
+ */
