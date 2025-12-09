@@ -1,6 +1,6 @@
 package io.github.wsyong11.gameforge.framework.config.preference;
 
-import io.github.wsyong11.gameforge.framework.config.preference.listener.PreferenceChangedListener;
+import io.github.wsyong11.gameforge.framework.config.preference.listener.PreferenceChangedListenerV1;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-public interface PreferencesStore {
+@Deprecated
+public interface PreferencesStoreV1 {
 	@NotNull
 	@Unmodifiable
 	Set<String> getKeys();
@@ -21,9 +22,9 @@ public interface PreferencesStore {
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
-	void addChangedListener(@NotNull PreferenceChangedListener listener);
+	void addChangedListener(@NotNull PreferenceChangedListenerV1 listener);
 
-	void removeChangedListener(@NotNull PreferenceChangedListener listener);
+	void removeChangedListener(@NotNull PreferenceChangedListenerV1 listener);
 
 	// -------------------------------------------------------------------------------------------------------------- //
 

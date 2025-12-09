@@ -1,6 +1,6 @@
 package io.github.wsyong11.gameforge.framework.config.preference;
 
-import io.github.wsyong11.gameforge.framework.config.preference.listener.PreferenceChangedListener;
+import io.github.wsyong11.gameforge.framework.config.preference.listener.PreferenceChangedListenerV1;
 import io.github.wsyong11.gameforge.framework.dataflow.element.*;
 import io.github.wsyong11.gameforge.framework.listener.ListenerList;
 import io.github.wsyong11.gameforge.framework.listener.ex.ListenerExceptionCallback;
@@ -19,7 +19,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class ElementPreferencesStore implements PreferencesStore {
+@Deprecated
+public class ElementPreferencesStoreV1 implements PreferencesStoreV1 {
 	private static final Logger LOGGER = Log.getLogger();
 
 	private final Consumer<ObjectElement> changeCallback;
@@ -29,7 +30,7 @@ public class ElementPreferencesStore implements PreferencesStore {
 	private final Map<String, Element> config;
 	private final ReadWriteLock configLock;
 
-	public ElementPreferencesStore(@NotNull ObjectElement root, @NotNull Consumer<ObjectElement> changeCallback) {
+	public ElementPreferencesStoreV1(@NotNull ObjectElement root, @NotNull Consumer<ObjectElement> changeCallback) {
 		Objects.requireNonNull(root, "root is null");
 		Objects.requireNonNull(changeCallback, "changeCallback is null");
 
@@ -115,7 +116,7 @@ public class ElementPreferencesStore implements PreferencesStore {
 		Set<String> keysView = Collections.unmodifiableSet(keys);
 
 		this.listenerList.fire(
-			PreferenceChangedListener.class,
+			PreferenceChangedListenerV1.class,
 			l -> l.onPreferenceChanged(this, keysView),
 			ListenerExceptionCallback.log(LOGGER));
 	}
@@ -128,15 +129,15 @@ public class ElementPreferencesStore implements PreferencesStore {
 	}
 
 	@Override
-	public void addChangedListener(@NotNull PreferenceChangedListener listener) {
+	public void addChangedListener(@NotNull PreferenceChangedListenerV1 listener) {
 		Objects.requireNonNull(listener, "listener is null");
-		this.listenerList.add(PreferenceChangedListener.class, listener);
+		this.listenerList.add(PreferenceChangedListenerV1.class, listener);
 	}
 
 	@Override
-	public void removeChangedListener(@NotNull PreferenceChangedListener listener) {
+	public void removeChangedListener(@NotNull PreferenceChangedListenerV1 listener) {
 		Objects.requireNonNull(listener, "listener is null");
-		this.listenerList.remove(PreferenceChangedListener.class, listener);
+		this.listenerList.remove(PreferenceChangedListenerV1.class, listener);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
@@ -499,7 +500,7 @@ public class ElementPreferencesStore implements PreferencesStore {
 
 			Set<String> changedKeys;
 
-			Lock writeLock = ElementPreferencesStore.this.configLock.writeLock();
+			Lock writeLock = ElementPreferencesStoreV1.this.configLock.writeLock();
 			writeLock.lock();
 			try {
 				changedKeys = Set.copyOf(this.modifyCache.keySet());
@@ -508,16 +509,16 @@ public class ElementPreferencesStore implements PreferencesStore {
 					Element value = entry.getValue();
 
 					if (value == null)
-						ElementPreferencesStore.this.config.remove(key);
+						ElementPreferencesStoreV1.this.config.remove(key);
 					else
-						ElementPreferencesStore.this.config.put(key, value);
+						ElementPreferencesStoreV1.this.config.put(key, value);
 				}
 				this.modifyCache.clear();
 			} finally {
 				writeLock.unlock();
 			}
 
-			ElementPreferencesStore.this.notifyChanged(changedKeys);
+			ElementPreferencesStoreV1.this.notifyChanged(changedKeys);
 		}
 	}
 }
