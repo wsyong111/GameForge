@@ -15,8 +15,13 @@ public class Template {
 
 		for (int i = 0; i < args.length; i++) {
 			Object arg = args[i];
-			if (arg instanceof TemplateValueProvider provider)
-				args[i] = provider.getValue();
+			if (arg instanceof TemplateValueProvider provider) {
+				try {
+					args[i] = provider.getValue();
+				} catch (Exception e) {
+					args[i] = new TemplateEvaluationException(e);
+				}
+			}
 		}
 	}
 }
