@@ -92,7 +92,7 @@ public class ValueCodecs {
 		}
 	};
 
-	public static final ValueCodec<Boolean> BOOLEAN_CODEC = new ValueCodec<Boolean>() {
+	public static final ValueCodec<Boolean> BOOLEAN_CODEC = new ValueCodec<>() {
 		@NotNull
 		@Override
 		public Element encode(@NotNull Boolean value, @NotNull Class<? extends Boolean> type) throws ValueCodecException {

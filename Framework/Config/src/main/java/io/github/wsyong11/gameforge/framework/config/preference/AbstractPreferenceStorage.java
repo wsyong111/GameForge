@@ -22,12 +22,14 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import static io.github.wsyong11.gameforge.framework.system.log.LogTemplate.lazy;
 
 public abstract class AbstractPreferenceStorage implements PreferenceStorage {
+	private static final Logger LOGGER = Log.getLogger();
+
 	protected static final List<ValueCodec<?>> DEFAULT_CODECS = List.of(
 		ValueCodecs.STRING_CODEC,
 		ValueCodecs.NUMBER_CODEC,
 		ValueCodecs.BOOLEAN_CODEC
 	);
-	private static final Logger LOGGER = Log.getLogger();
+
 	// TODO: 2025/12/10 优化Codec查找速度
 	private final ReadWriteLock codecListLock;
 	private final Set<ValueCodec<?>> codecList;

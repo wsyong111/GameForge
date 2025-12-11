@@ -1,3 +1,5 @@
+import io.github.wsyong11.gameforge.dependencies.junit
+
 //import com.palantir.javapoet.ClassName
 //import com.palantir.javapoet.TypeName
 //import io.github.wsyong11.gameforge.plugin.codegen.dsl.boxSafe
@@ -17,6 +19,8 @@ dependencies {
     implementation(project(":Util"))
 	implementation(project(":Framework:Common"))
 }
+
+junit()
 
 //codegen {
 //    val jObjects = type(Objects::class)

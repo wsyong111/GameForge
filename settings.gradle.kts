@@ -3,6 +3,7 @@ pluginManagement {
 		kotlin("jvm") version "2.0.0" apply false
 
 		id("com.gradleup.shadow") version "9.0.0-beta15" apply false
+		id("me.champeau.jmh") version "0.7.3" apply false
 	}
 
 	repositories {
