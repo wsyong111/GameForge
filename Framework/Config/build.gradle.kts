@@ -12,6 +12,10 @@ import io.github.wsyong11.gameforge.dependencies.junit
 //    id("io.github.wsyong11.gameforge.codegen")
 //}
 
+plugins {
+	id("me.champeau.jmh")
+}
+
 dependencies {
     implementation(project(":Framework:System:Log"))
     implementation(project(":Framework:DataFlow"))

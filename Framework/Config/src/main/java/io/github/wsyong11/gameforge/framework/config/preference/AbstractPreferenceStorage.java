@@ -11,10 +11,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -31,12 +29,27 @@ public abstract class AbstractPreferenceStorage implements PreferenceStorage {
 	);
 
 	// TODO: 2025/12/10 优化Codec查找速度
-	private final ReadWriteLock codecListLock;
-	private final Set<ValueCodec<?>> codecList;
+	private final ReadWriteLock codecsLock;
+	private final Set<ValueCodec<?>> codecs;
+	private final Map<Class<?>, List<ValueCodec<?>>> codecTypeCache;
 
 	public AbstractPreferenceStorage() {
-		this.codecListLock = new ReentrantReadWriteLock();
-		this.codecList = new LinkedHashSet<>(DEFAULT_CODECS);
+		this.codecsLock = new ReentrantReadWriteLock();
+		this.codecs = new LinkedHashSet<>();
+		this.codecTypeCache = new ConcurrentHashMap<>();
+
+		DEFAULT_CODECS.forEach(this::registerCodec);
+	}
+
+	@NotNull
+	private List<ValueCodec<?>> createCodecCache(@NotNull Class<?> key) {
+		Objects.requireNonNull(key, "key is null");
+
+		return this
+			.getCodecs()
+			.stream()
+			.filter(codec -> codec.getSupportTypes().contains(key))
+			.toList();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -58,12 +71,12 @@ public abstract class AbstractPreferenceStorage implements PreferenceStorage {
 			throw new PreferencesCodecException("Failed to cast " + element + " to " + type, e);
 		}
 
-		ExceptionHandler exceptionHandler = new ExceptionHandler();
-		for (ValueCodec<?> codec : this.getCodecs()) {
-			try {
-				Set<Class<?>> types = (Set<Class<?>>) codec.getSupportTypes();
+		List<ValueCodec<?>> codecs = this.codecTypeCache.computeIfAbsent(type, this::createCodecCache);
 
-				if (!types.contains(type) || !codec.isSupportedElement(element))
+		ExceptionHandler exceptionHandler = new ExceptionHandler();
+		for (ValueCodec<?> codec : codecs) {
+			try {
+				if (!codec.isSupportedElement(element))
 					continue;
 
 				ValueCodec<T> realTypeCodec = (ValueCodec<T>) codec;
@@ -98,14 +111,11 @@ public abstract class AbstractPreferenceStorage implements PreferenceStorage {
 			throw new PreferencesCodecException("Failed to cast " + value + " to " + type);
 		}
 
+		List<ValueCodec<?>> codecs = this.codecTypeCache.computeIfAbsent(type, this::createCodecCache);
+
 		ExceptionHandler exceptionHandler = new ExceptionHandler();
-		for (ValueCodec<?> codec : this.getCodecs()) {
+		for (ValueCodec<?> codec : codecs) {
 			try {
-				Set<Class<?>> types = (Set<Class<?>>) codec.getSupportTypes();
-
-				if (!types.contains(type))
-					continue;
-
 				ValueCodec<T> valueCodec = (ValueCodec<T>) codec;
 				if (!valueCodec.isSupportedValue(value))
 					continue;
@@ -125,10 +135,12 @@ public abstract class AbstractPreferenceStorage implements PreferenceStorage {
 	public void registerCodec(@NotNull ValueCodec<?> codec) {
 		Objects.requireNonNull(codec, "codec is null");
 
-		Lock lock = this.codecListLock.writeLock();
+		Lock lock = this.codecsLock.writeLock();
 		lock.lock();
 		try {
-			this.codecList.add(codec);
+			if (!this.codecs.add(codec))
+				return;
+			this.codecTypeCache.clear();
 		} finally {
 			lock.unlock();
 		}
@@ -138,10 +150,12 @@ public abstract class AbstractPreferenceStorage implements PreferenceStorage {
 	public void unregisterCodec(@NotNull ValueCodec<?> codec) {
 		Objects.requireNonNull(codec, "codec is null");
 
-		Lock lock = this.codecListLock.writeLock();
+		Lock lock = this.codecsLock.writeLock();
 		lock.lock();
 		try {
-			this.codecList.remove(codec);
+			if (!this.codecs.remove(codec))
+				return;
+			this.codecTypeCache.clear();
 		} finally {
 			lock.unlock();
 		}
@@ -151,10 +165,10 @@ public abstract class AbstractPreferenceStorage implements PreferenceStorage {
 	@Unmodifiable
 	@Override
 	public List<ValueCodec<?>> getCodecs() {
-		Lock lock = this.codecListLock.readLock();
+		Lock lock = this.codecsLock.readLock();
 		lock.lock();
 		try {
-			return List.copyOf(this.codecList);
+			return List.copyOf(this.codecs);
 		} finally {
 			lock.unlock();
 		}

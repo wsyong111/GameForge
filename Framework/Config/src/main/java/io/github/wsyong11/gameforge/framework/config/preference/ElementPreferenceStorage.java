@@ -5,6 +5,7 @@ import io.github.wsyong11.gameforge.framework.config.preference.listener.Prefere
 import io.github.wsyong11.gameforge.framework.dataflow.element.mutable.MutableElement;
 import io.github.wsyong11.gameforge.framework.dataflow.element.mutable.MutableObjectElement;
 import io.github.wsyong11.gameforge.framework.listener.ListenerList;
+import io.github.wsyong11.gameforge.framework.listener.ex.ListenerExceptionCallback;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.util.exception.ExceptionHandler;
@@ -61,14 +62,8 @@ public class ElementPreferenceStorage extends AbstractPreferenceStorage {
 	// -------------------------------------------------------------------------------------------------------------- //
 
 	private void scanKeys() {
-		Lock lock = this.dataLock.writeLock();
-		lock.lock();
-		try {
-			this.valueElementMap.clear();
-			this.scanElement("", this.element);
-		} finally {
-			lock.unlock();
-		}
+		this.valueElementMap.clear();
+		this.scanElement("", this.element);
 	}
 
 	private void scanElement(@NotNull String path, @NotNull MutableObjectElement element) {
@@ -85,9 +80,8 @@ public class ElementPreferenceStorage extends AbstractPreferenceStorage {
 			if (key.equals(VALUE_KEY))
 				continue;
 
-			String newPath = path.isEmpty() ? key : path + "." + key;
 			if (child instanceof MutableObjectElement objectElement)
-				this.scanElement(newPath, objectElement);
+				this.scanElement(path.isEmpty() ? key : path + "." + key, objectElement);
 		}
 	}
 
@@ -157,6 +151,23 @@ public class ElementPreferenceStorage extends AbstractPreferenceStorage {
 	public void removeChangeListener(@NotNull PreferenceChangedListener listener) {
 		Objects.requireNonNull(listener, "listener is null");
 		this.listenerList.remove(PreferenceChangedListener.class, listener);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	private void notifyModified(@NotNull Set<String> changedKeys) {
+		Objects.requireNonNull(changedKeys, "changedKeys is null");
+
+		try {
+			this.modifyCallback.run();
+		} catch (Exception e) {
+			LOGGER.error("Error when calling modify callback", e);
+		}
+
+		this.listenerList.fire(
+			PreferenceChangedListener.class,
+			l -> l.onPreferenceChanged(this, changedKeys),
+			ListenerExceptionCallback.log(LOGGER));
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
@@ -276,38 +287,39 @@ public class ElementPreferenceStorage extends AbstractPreferenceStorage {
 
 		@Override
 		public void apply() {
-			ElementPreferenceStorage storage = ElementPreferenceStorage.this;
-
-			ExceptionHandler exceptionHandler = new ExceptionHandler();
-
-			Lock lock = storage.dataLock.writeLock();
-			lock.lock();
 			try {
-				if (this.clearPreferences) {
-					storage.valueElementMap.clear();
-					storage.element.clear();
+				ElementPreferenceStorage storage = ElementPreferenceStorage.this;
+
+				ExceptionHandler exceptionHandler = new ExceptionHandler();
+
+				Lock lock = storage.dataLock.writeLock();
+				lock.lock();
+				try {
+					if (this.clearPreferences) {
+						storage.valueElementMap.clear();
+						storage.element.clear();
+					}
+
+					for (Map.Entry<String, Pair<Class<?>, ?>> entry : this.modifiedMap.entrySet()) {
+						String key = entry.getKey();
+						Pair<Class<?>, ?> value = entry.getValue();
+
+						if (value == null)
+							this.removeStorageKey(key);
+						else
+							this.modifyStorageKey(exceptionHandler, key, value.getRight(), value.getLeft());
+					}
+				} finally {
+					lock.unlock();
 				}
 
-				for (Map.Entry<String, Pair<Class<?>, ?>> entry : this.modifiedMap.entrySet()) {
-					String key = entry.getKey();
-					Pair<Class<?>, ?> value = entry.getValue();
+				storage.notifyModified(Set.copyOf(this.modifiedMap.keySet()));
 
-					if (value == null)
-						this.removeStorageKey(key);
-					else
-						this.modifyStorageKey(exceptionHandler, key, value.getRight(), value.getLeft());
-				}
+				exceptionHandler.throwException("Failed to modify some preferences", PreferencesCodecException::new);
 			} finally {
-				lock.unlock();
+				this.clearPreferences = false;
+				this.modifiedMap.clear();
 			}
-
-			try {
-				storage.modifyCallback.run();
-			} catch (Exception e) {
-				LOGGER.error("Error when calling modify callback", e);
-			}
-
-			exceptionHandler.throwException("Failed to modify some preferences", PreferencesCodecException::new);
 		}
 	}
 }
