@@ -3,8 +3,9 @@ package io.github.wsyong11.gameforge.framework.lang.token;
 import io.github.wsyong11.gameforge.util.collection.RewindableIterator;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public class TokenIterator extends RewindableIterator<Token> implements Iterator<Token> {
 	private Token current;
@@ -40,7 +41,7 @@ public class TokenIterator extends RewindableIterator<Token> implements Iterator
 
 		if (super.hasNext()) {
 			this.peeked = super.next();
-			this.rewind();
+			super.rewind();
 			return this.peeked;
 		}
 
@@ -64,22 +65,13 @@ public class TokenIterator extends RewindableIterator<Token> implements Iterator
 
 	@NotNull
 	public TokenIterator slice(int length) {
-		int cursor = this.getCursor();
-		return new SliceTokenIterator(this, cursor, cursor + length);
-	}
+		List<Token> buf = new ArrayList<>(length);
 
-	private static class SliceTokenIterator extends TokenIterator {
-		private final TokenIterator parent;
-		private final int startCursor;
-		private final int endCursor;
-
-		public SliceTokenIterator(TokenIterator parent, int startCursor, int endCursor) {
-			super(Collections.emptyIterator());
-			this.parent = parent;
-			this.startCursor = startCursor;
-			this.endCursor = endCursor;
+		for (int i = 0; i < length; i++) {
+			buf.add(this.peek());
+			this.next();
 		}
 
-
+		return new TokenIterator(buf.iterator());
 	}
 }

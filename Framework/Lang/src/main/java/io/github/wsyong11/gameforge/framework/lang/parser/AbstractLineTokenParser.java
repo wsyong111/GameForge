@@ -80,6 +80,17 @@ public abstract class AbstractLineTokenParser<T> {
 	}
 
 	@NotNull
+	protected Token nextUnsafe() {
+		return this.iterator.next();
+	}
+
+	protected boolean isEOF() {
+		return !this.iterator.hasNext()
+			|| this.iterator.peek().equalsToken(EOFToken.class);
+
+	}
+
+	@NotNull
 	protected Token peek() {
 		return this.iterator.peek();
 	}
