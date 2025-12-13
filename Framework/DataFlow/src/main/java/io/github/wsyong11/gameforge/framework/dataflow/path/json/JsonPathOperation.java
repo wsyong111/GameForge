@@ -1,7 +1,9 @@
 package io.github.wsyong11.gameforge.framework.dataflow.path.json;
 
 import io.github.wsyong11.gameforge.framework.dataflow.element.*;
+import io.github.wsyong11.gameforge.util.StreamUtils;
 import io.github.wsyong11.gameforge.util.StringUtils;
+import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.collections4.IteratorUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.jetbrains.annotations.NotNull;
@@ -11,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public interface JsonPathOperation {
@@ -19,6 +22,7 @@ public interface JsonPathOperation {
 
 	@FunctionalInterface
 	interface Predicate {
+		// TODO: 2025/12/13 复制可迭代对象避免外部更改
 		@NotNull
 		static Predicate withField(@NotNull String field) {
 			Objects.requireNonNull(field, "field is null");
@@ -46,11 +50,25 @@ public interface JsonPathOperation {
 			if (fields.size() == 1)
 				return withField(IteratorUtils.first(fields.iterator()));
 
-			return context ->
-				context.getCurrent() instanceof ElementValue.Field fieldValue &&
-					fields.contains(fieldValue.getField());
+			return new Predicate() {
+				@Override
+				public boolean test(@NotNull Context context) {
+					return context.getCurrent() instanceof ElementValue.Field fieldValue &&
+						fields.contains(fieldValue.getField());
+				}
+
+				@NotNull
+				@Override
+				public String getExpression() {
+					return "[" + fields
+						.stream()
+						.map(StreamUtils.wrapText('"', '"'))
+						.collect(Collectors.joining(", ")) + "]";
+				}
+			};
 		}
 
+		// TODO: 2025/12/13 兼容负数索引
 		@NotNull
 		static Predicate withIndex(int index) {
 			if (index < 0)
@@ -71,11 +89,25 @@ public interface JsonPathOperation {
 					throw new IllegalArgumentException("Index cannot be negative");
 			}
 
-			return (context) ->
-				context.getCurrent() instanceof ElementValue.Index indexValue &&
-					indexList.contains(indexValue.getIndex());
+			return new Predicate() {
+				@Override
+				public boolean test(@NotNull Context context) {
+					return context.getCurrent() instanceof ElementValue.Index indexValue &&
+						indexList.contains(indexValue.getIndex());
+				}
+
+				@NotNull
+				@Override
+				public String getExpression() {
+					return "[" + indexList
+						.stream()
+						.map(Object::toString)
+						.collect(Collectors.joining(", ")) + "]";
+				}
+			};
 		}
 
+		// TODO: 2025/12/13 兼容负数索引
 		@NotNull
 		static Predicate withSlice(int start, int end, int step) {
 			if (step <= 0)
@@ -125,6 +157,32 @@ public interface JsonPathOperation {
 			};
 		}
 
+		@NotNull
+		static Predicate andAll(@NotNull Iterable<Predicate> predicates) {
+			Objects.requireNonNull(predicates, "predicates is null");
+
+			List<Predicate> list = IterableUtils.toList(predicates);
+			if (list.size() == 1)
+				return list.get(0);
+
+			return (context) -> list
+				.stream()
+				.allMatch(p -> p.test(context));
+		}
+
+		@NotNull
+		static Predicate orAll(@NotNull Iterable<Predicate> predicates) {
+			Objects.requireNonNull(predicates, "predicates is null");
+
+			List<Predicate> list = IterableUtils.toList(predicates);
+			if (list.size() == 1)
+				return list.get(0);
+
+			return (context) -> list
+				.stream()
+				.anyMatch(p -> p.test(context));
+		}
+
 		boolean test(@NotNull Context context);
 
 		@NotNull
@@ -141,11 +199,16 @@ public interface JsonPathOperation {
 		@NotNull
 		default Predicate or(@NotNull Iterable<Predicate> other) {
 			Objects.requireNonNull(other, "other is null");
+
+			List<Predicate> list = IterableUtils.toList(other);
+			if (list.isEmpty())
+				return this;
+
 			return (context) -> {
 				if (this.test(context))
 					return true;
 
-				for (Predicate predicate : other) {
+				for (Predicate predicate : list) {
 					if (predicate.test(context))
 						return true;
 				}
@@ -168,11 +231,16 @@ public interface JsonPathOperation {
 		@NotNull
 		default Predicate and(@NotNull Iterable<Predicate> other) {
 			Objects.requireNonNull(other, "other is null");
+
+			List<Predicate> list = IterableUtils.toList(other);
+			if (list.isEmpty())
+				return this;
+
 			return (context) -> {
 				if (!this.test(context))
 					return false;
 
-				for (Predicate predicate : other) {
+				for (Predicate predicate : list) {
 					if (!predicate.test(context))
 						return false;
 				}
@@ -349,7 +417,7 @@ public interface JsonPathOperation {
 
 		@Override
 		public String toString() {
-			return "*";
+			return ".*";
 		}
 	}
 

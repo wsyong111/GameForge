@@ -149,6 +149,22 @@ public abstract class AbstractLineTokenParser<T> {
 		return this.getCurrent().equalsToken(type, value);
 	}
 
+	protected boolean matchNext(@NotNull String value) {
+		Objects.requireNonNull(value, "value is null");
+		return this.peek().equalsToken(value);
+	}
+
+	protected boolean matchNext(@NotNull Class<? extends Token> type) {
+		Objects.requireNonNull(type, "type is null");
+		return this.peek().equalsToken(type);
+	}
+
+	protected boolean matchNext(@NotNull Class<? extends Token> type, @NotNull String value) {
+		Objects.requireNonNull(type, "type is null");
+		Objects.requireNonNull(value, "value is null");
+		return this.peek().equalsToken(type, value);
+	}
+
 	protected boolean consumeIfMatch(@NotNull String value) {
 		Objects.requireNonNull(value, "value is null");
 
@@ -177,7 +193,7 @@ public abstract class AbstractLineTokenParser<T> {
 
 		Token token = this.getCurrent();
 		if (token.equalsToken(type, value)) {
-			this.next();
+			this.nextUnsafe();
 			return true;
 		}
 		return false;

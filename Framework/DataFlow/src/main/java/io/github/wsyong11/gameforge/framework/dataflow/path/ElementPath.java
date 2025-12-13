@@ -1,8 +1,6 @@
 package io.github.wsyong11.gameforge.framework.dataflow.path;
 
 import io.github.wsyong11.gameforge.framework.dataflow.element.Element;
-import io.github.wsyong11.gameforge.framework.dataflow.path.json.JsonPathElementParser;
-import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
@@ -11,12 +9,6 @@ import java.util.List;
 import java.util.Objects;
 
 public interface ElementPath {
-	@NotNull
-	static ElementPath compile(@NotNull @Language("JSONPath") String path) {
-		Objects.requireNonNull(path, "path is null");
-		return new JsonPathElementParser(path).parse();
-	}
-
 	@NotNull
 	@UnmodifiableView
 	List<Element> match(@NotNull Element element);

@@ -1,21 +1,18 @@
 package io.github.wsyong11.gameforge.framework.dataflow.path.json;
 
 import io.github.wsyong11.gameforge.framework.dataflow.path.ElementPath;
+import io.github.wsyong11.gameforge.framework.lang.ex.SyntaxException;
 import io.github.wsyong11.gameforge.framework.lang.parser.AbstractLineTokenParser;
-import io.github.wsyong11.gameforge.framework.lang.token.OperatorToken;
-import io.github.wsyong11.gameforge.framework.lang.token.TokenIterator;
-import io.github.wsyong11.gameforge.framework.lang.token.TokenRules;
-import io.github.wsyong11.gameforge.framework.lang.token.Tokenizer;
+import io.github.wsyong11.gameforge.framework.lang.token.*;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class JsonPathElementParser extends AbstractLineTokenParser<ElementPath> {
 	private static final Tokenizer TOKENIZER = new Tokenizer(List.of(
 		// 1. 多字符运算符/递归操作符（.., <=, >=, !=, ==）
-		TokenRules.ofOperator(Set.of("=~", "==", "!=", "<=", ">=", "<", ">", ".", "[", "]", "(", ")", "?", "@", "$", "*", ",", ":", "/")),
+		TokenRules.ofOperator(Set.of("=~", "==", "!=", "<=", ">=", "<", ">", "..", ".", "[", "]", "(", ")", "?", "@", "$", "*", ",", ":", "/")),
 
 		// 2. 关键字（true, false, null）
 		TokenRules.ofKeywords(Set.of("true", "false", "null")),
@@ -34,22 +31,208 @@ public class JsonPathElementParser extends AbstractLineTokenParser<ElementPath> 
 		TokenRules.ofMultiLineComment("/*", "*/")
 	));
 
-	public JsonPathElementParser(@NotNull @Language("JSONPath") String path) {
+	private final JsonPathMode mode;
+
+	public JsonPathElementParser(@NotNull @Language("JSONPath") String path, JsonPathMode mode) {
 		super(TOKENIZER, path);
+		Objects.requireNonNull(mode, "mode is null");
+
+		this.mode = mode;
 	}
 
 	@NotNull
 	@Override
 	public ElementPath parse(@NotNull TokenIterator iterator) {
-		if (!this.matchCurrent(OperatorToken.class, "$") &&
-			!this.matchCurrent(OperatorToken.class, "@"))
+		if (!this.consumeIfMatch(OperatorToken.class, "$") &&
+			!this.consumeIfMatch(OperatorToken.class, "@"))
 			throw this.expectedTokenError(this.getCurrent(), "$", "@");
 
-		if (!this.isEOF())
+		if (this.isEOF())
 			return new JsonPathElementPath(List.of(new JsonPathOperation.Root()));
 
-		return null;
+		List<JsonPathOperation> operations = new ArrayList<>();
+		operations.add(new JsonPathOperation.Root());
+
+		while (true) {
+			Token token = this.getCurrent();
+			if (token instanceof ErrorToken)
+				throw this.invalidTokenError(token);
+
+			if (token instanceof EOFToken)
+				break;
+
+			if (token instanceof CommentToken)
+				continue;
+
+			if (!this.processToken(operations))
+				throw this.invalidTokenError(token);
+		}
+
+		return new JsonPathElementPath(operations);
 		// TODO: 2025/11/29 json path parser
+	}
+
+	private boolean processToken(@NotNull List<JsonPathOperation> operations) {
+		Objects.requireNonNull(operations, "operations is null");
+
+		if (this.matchCurrent(OperatorToken.class, "[")) {
+			if (!this.processBracketFieldAccess(operations) &&
+				!this.processArrayIndexAccess(operations) &&
+				!this.processWildcard(operations)
+			)
+				throw this.expectedTokenError(
+					this.peek(),
+					"?", "'", "\"", "0-9", "*");
+
+			return true;
+		}
+
+		if (this.matchCurrent(OperatorToken.class, ".")) {
+			if (!this.processFieldAccess(operations) &&
+				!this.processWildcard(operations)
+			)
+				throw this.expectedTokenError(
+					this.peek(),
+					"[^0-9][a-zA-Z0-9]+");
+			return true;
+		}
+
+		if (this.matchCurrent(OperatorToken.class, "..")) {
+			if (!this.processRecursiveAccess(operations))
+				throw this.expectedTokenError(
+					this.peek(),
+					"[^0-9][a-zA-Z0-9]+");
+			return true;
+		}
+
+		return false;
+	}
+
+	// .field
+	private boolean processFieldAccess(@NotNull List<JsonPathOperation> operations) {
+		Objects.requireNonNull(operations, "operations is null");
+
+		if (!this.matchCurrent(OperatorToken.class, "."))
+			return false;
+
+		if (!this.matchNext(IdentToken.class))
+			return false;
+
+		Token field = this.next();
+		operations.add(new JsonPathOperation.AccessField(JsonPathOperation.Predicate.withField(field.getToken())));
+
+		this.nextUnsafe();
+		return true;
+	}
+
+	// [*] and .*
+	private boolean processWildcard(@NotNull List<JsonPathOperation> operations) {
+		Objects.requireNonNull(operations, "operations is null");
+
+		if (this.matchCurrent(OperatorToken.class, ".") &&
+			this.matchNext(OperatorToken.class, "*")) {
+			operations.add(new JsonPathOperation.Wildcard());
+			this.next();
+			this.nextUnsafe();
+			return true;
+		}
+
+		if (this.matchCurrent(OperatorToken.class, "[") &&
+			this.matchNext(OperatorToken.class, "*")) {
+			this.next();
+			this.next();
+			if (!this.consumeIfMatch(OperatorToken.class, "]"))
+				throw this.unmatchedBracketError();
+
+			operations.add(new JsonPathOperation.Wildcard());
+			return true;
+		}
+
+		return false;
+	}
+
+	// [0] and [0, ...]
+	private boolean processArrayIndexAccess(@NotNull List<JsonPathOperation> operations) {
+		Objects.requireNonNull(operations, "operations is null");
+
+		if (!this.matchCurrent(OperatorToken.class, "["))
+			return false;
+
+		if (this.matchNext(OperatorToken.class, "*"))
+			return false;
+
+		if (!this.matchNext(NumberToken.class) && !this.matchNext(OperatorToken.class, ":"))
+			return false;
+
+		this.next();
+
+		Set<Integer> indexSet = new LinkedHashSet<>();
+
+		while (true) {
+			if (this.matchCurrent(NumberToken.class)) {
+				String indexString = this.getCurrentToken();
+				int index;
+				try {
+					index = Integer.parseInt(indexString);
+				} catch (NumberFormatException e) {
+					SyntaxException exception = this.syntaxError("Failed to parse array index: '%s'", indexString);
+					exception.initCause(e);
+					throw exception;
+				}
+
+				indexSet.add(index);
+				this.next();
+				continue;
+			}
+
+			if (this.consumeIfMatch(OperatorToken.class, ","))
+				continue;
+
+			if (this.consumeIfMatch(OperatorToken.class, "]"))
+				break;
+
+			throw this.unmatchedBracketError();
+		}
+
+		operations.add(new JsonPathOperation.AccessField(JsonPathOperation.Predicate.withIndex(indexSet)));
+		return true;
+	}
+
+	// ['field'] , ["field"] and ["field", ...]
+	private boolean processBracketFieldAccess(@NotNull List<JsonPathOperation> operations) {
+		Objects.requireNonNull(operations, "operations is null");
+
+		if (!this.matchCurrent(OperatorToken.class, "["))
+			return false;
+
+		if (!this.matchNext(StringToken.class))
+			return false;
+
+		this.next();
+
+		Set<String> fields = new LinkedHashSet<>();
+
+		while (true) {
+			if (this.matchCurrent(StringToken.class)) {
+				String field = this.getCurrentToken();
+				fields.add(field);
+				this.next();
+				continue;
+			}
+
+			if (this.consumeIfMatch(OperatorToken.class, ","))
+				continue;
+
+			if (this.consumeIfMatch(OperatorToken.class, "]"))
+				break;
+
+			throw this.unmatchedBracketError();
+		}
+
+		operations.add(new JsonPathOperation.AccessField(JsonPathOperation.Predicate.withFields(fields)));
+		return true;
+	}
+}
 //		List<JsonPathOperation> operations = new ArrayList<>();
 //
 //		int index = 0;
@@ -198,32 +381,3 @@ public class JsonPathElementParser extends AbstractLineTokenParser<ElementPath> 
 //			return (context) -> false;
 //		}
 //	}
-}
-/*
- ┏━━━━━━━┳━━━━━━━┳━━━━━━━┓
- ┃ 9   2 ┃   3   ┃   8   ┃
- ┃       ┃ 1     ┃     5 ┃
- ┃ 6 1   ┃ 4 8   ┃       ┃
- ┣━━━━━━━╋━━━━━━━╋━━━━━━━┫
- ┃ 2 5 8 ┃ 9 1 6 ┃ 3 7 4 ┃
- ┃ 7 4 9 ┃ 8 5 3 ┃ 1 6 2 ┃
- ┃ 1 3 6 ┃ 7 4 2 ┃ 8 5 9 ┃
- ┣━━━━━━━╋━━━━━━━╋━━━━━━━┫
- ┃ 4   1 ┃       ┃ 5   3 ┃
- ┃   2   ┃   9   ┃       ┃
- ┃       ┃ 3     ┃ 2 1   ┃
- ┗━━━━━━━┻━━━━━━━┻━━━━━━━┛
-
-┏━━━━━━━┳━━━━━━━┳━━━━━━━┓
-┃ 9   2 ┃   3   ┃   8   ┃
-┃       ┃ 1     ┃     5 ┃
-┃ 6 1   ┃ 4 8   ┃       ┃
-┣━━━━━━━╋━━━━━━━╋━━━━━━━┫
-┃       ┃ 9   6 ┃     4 ┃
-┃ 7 4 9 ┃ 8   3 ┃ 1 6   ┃
-┃ 1 3   ┃ 7   2 ┃ 8 5 9 ┃
-┣━━━━━━━╋━━━━━━━╋━━━━━━━┫
-┃ 4   1 ┃       ┃ 5   3 ┃
-┃   2   ┃   9   ┃       ┃
-┃       ┃ 3     ┃ 2 1   ┃
-┗━━━━━━━┻━━━━━━━┻━━━━━━━┛ */
