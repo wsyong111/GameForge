@@ -3,7 +3,7 @@
     <option name="MAIN_CLASS_NAME" value="io.github.wsyong11.gameforge.Main" />
     <module name="GameForge.main" />
     <option name="PROGRAM_PARAMETERS" value="--type client --log-level trace --debug --temp-dir &quot;./temp/&quot; " />
-    <option name="VM_PARAMETERS" value="-Dlog4j2.debug=false -Dio.github.wsyong11.gameforge.framework.env.EnvConfig.debug=true" />
+    <option name="VM_PARAMETERS" value="-Dlog4j2.debug=false -Dio.github.wsyong11.gameforge.framework.env.EnvConfig.debug=true -Dorg.lwjgl.util.Debug=true -Dorg.lwjgl.librarypath=./" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/run" />
     <method v="2">
       <option name="Make" enabled="true" />

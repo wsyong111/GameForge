@@ -1,6 +1,7 @@
 package io.github.wsyong11.gameforge.framework.config.preference;
 
-import io.github.wsyong11.gameforge.framework.config.preference.ex.PreferencesCodecException;
+import io.github.wsyong11.gameforge.framework.config.codec.ValueCodec;
+import io.github.wsyong11.gameforge.framework.config.ex.RuntimeCodecException;
 import io.github.wsyong11.gameforge.framework.config.preference.listener.PreferenceChangedListener;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -43,7 +44,7 @@ public interface PreferenceStorage {
 	 * @param type 期望的值类型，不能为 {@code null}。
 	 * @param <T>  值的类型。
 	 * @return 如果存在对应的首选项，返回对应类型的值；否则返回 {@code null}。
-	 * @throws PreferencesCodecException 当解码失败时抛出。
+	 * @throws RuntimeCodecException 当解码失败时抛出。
 	 */
 	@Nullable
 	<T> T getValue(@NotNull String key, @NotNull Class<T> type);
@@ -56,7 +57,7 @@ public interface PreferenceStorage {
 	 * @param defaultValue 如果首选项不存在则返回的默认值，可以为 {@code null}。
 	 * @param <T>          值的类型。
 	 * @return 如果存在对应的首选项，返回对应类型的值；否则返回 {@code defaultValue}。
-	 * @throws PreferencesCodecException 当解码失败时抛出。
+	 * @throws RuntimeCodecException 当解码失败时抛出。
 	 * @see #getValue(String, Class)
 	 */
 	@Nullable
@@ -96,7 +97,7 @@ public interface PreferenceStorage {
 	 * 如果多个编解码器支持相同类型，将按注册顺序选择第一个返回 {@code true} 的编解码器。
 	 * </p>
 	 * <p>
-	 * 解码过程中若编解码器抛出异常，该异常会被挂载在 {@link PreferencesCodecException#getSuppressed()} 列表中，
+	 * 解码过程中若编解码器抛出异常，该异常会被挂载在 {@link RuntimeCodecException#getSuppressed()} 列表中，
 	 * 并尝试下一个可用编解码器。
 	 * </p>
 	 *
@@ -173,10 +174,10 @@ public interface PreferenceStorage {
 		 * <p>
 		 * 提交方式可为同步或异步，由具体实现决定。
 		 * 提交时会触发更改监听器，如果编码器在序列化过程中出现异常，
-		 * 将通过 {@link PreferencesCodecException} 抛出；未出现异常的字段仍会被写入。
+		 * 将通过 {@link RuntimeCodecException} 抛出；未出现异常的字段仍会被写入。
 		 * </p>
 		 *
-		 * @throws PreferencesCodecException 序列化失败时抛出。
+		 * @throws RuntimeCodecException 序列化失败时抛出。
 		 */
 		void apply();
 	}

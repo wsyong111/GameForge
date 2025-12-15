@@ -1,4 +1,4 @@
-package io.github.wsyong11.gameforge.framework.config.preference.ex;
+package io.github.wsyong11.gameforge.framework.config.ex;
 
 import io.github.wsyong11.gameforge.framework.ex.CodecException;
 import org.jetbrains.annotations.NotNull;

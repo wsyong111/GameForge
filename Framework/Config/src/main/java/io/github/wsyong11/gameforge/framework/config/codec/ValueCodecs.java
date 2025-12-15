@@ -1,6 +1,6 @@
-package io.github.wsyong11.gameforge.framework.config.preference;
+package io.github.wsyong11.gameforge.framework.config.codec;
 
-import io.github.wsyong11.gameforge.framework.config.preference.ex.ValueCodecException;
+import io.github.wsyong11.gameforge.framework.config.ex.ValueCodecException;
 import io.github.wsyong11.gameforge.framework.dataflow.element.BooleanElement;
 import io.github.wsyong11.gameforge.framework.dataflow.element.Element;
 import io.github.wsyong11.gameforge.framework.dataflow.element.NumberElement;
@@ -8,11 +8,23 @@ import io.github.wsyong11.gameforge.framework.dataflow.element.StringElement;
 import lombok.experimental.UtilityClass;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
 @UtilityClass
 public class ValueCodecs {
+	public static final List<ValueCodec<?>> CODECS = List.of(
+		ValueCodecs.STRING_CODEC,
+		ValueCodecs.NUMBER_CODEC,
+		ValueCodecs.BOOLEAN_CODEC
+	);
+
+	public static void fill(@NotNull CodecMap map) {
+		Objects.requireNonNull(map, "map is null");
+		CODECS.forEach(map::add);
+	}
+
 	public static final ValueCodec<String> STRING_CODEC = new ValueCodec<>() {
 		@NotNull
 		@Override
@@ -123,4 +135,6 @@ public class ValueCodecs {
 			return value instanceof BooleanElement;
 		}
 	};
+
+	// TODO 2025/12/16: 实现EnumCodec
 }

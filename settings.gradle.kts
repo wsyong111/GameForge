@@ -21,7 +21,6 @@ fun include(path: String, name: String? = null) {
 		project(path).name = name
 }
 
-include(":AnnotationProcessor")
 include(":Assets")
 include(":BuildInfo")
 include(":Util")
@@ -31,6 +30,7 @@ include(":Framework:Annotation")
 include(":Framework:App")
 include(":Framework:Common")
 include(":Framework:Config")
+include(":Framework:Config:AnnotationProcessor")
 include(":Framework:DataFlow")
 include(":Framework:Debug")
 include(":Framework:EnvConfig")

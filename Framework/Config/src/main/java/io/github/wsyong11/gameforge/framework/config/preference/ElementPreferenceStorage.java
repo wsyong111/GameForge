@@ -1,6 +1,6 @@
 package io.github.wsyong11.gameforge.framework.config.preference;
 
-import io.github.wsyong11.gameforge.framework.config.preference.ex.PreferencesCodecException;
+import io.github.wsyong11.gameforge.framework.config.ex.RuntimeCodecException;
 import io.github.wsyong11.gameforge.framework.config.preference.listener.PreferenceChangedListener;
 import io.github.wsyong11.gameforge.framework.dataflow.element.mutable.MutableElement;
 import io.github.wsyong11.gameforge.framework.dataflow.element.mutable.MutableObjectElement;
@@ -315,7 +315,7 @@ public class ElementPreferenceStorage extends AbstractPreferenceStorage {
 
 				storage.notifyModified(Set.copyOf(this.modifiedMap.keySet()));
 
-				exceptionHandler.throwException("Failed to modify some preferences", PreferencesCodecException::new);
+				exceptionHandler.throwException("Failed to modify some preferences", RuntimeCodecException::new);
 			} finally {
 				this.clearPreferences = false;
 				this.modifiedMap.clear();
