@@ -36,7 +36,7 @@ public interface ValueCodec<T> {
 	 * @throws ValueCodecException 当值无法编码时抛出。
 	 */
 	@NotNull
-	Element encode(@NotNull T value, @NotNull Class<? extends T> type) throws ValueCodecException;
+	Element encode(@NotNull CodecContext ctx, @NotNull T value, @NotNull Class<? extends T> type) throws ValueCodecException;
 
     /**
      * 从 {@link Element} 解码为指定类型的值。
@@ -51,7 +51,7 @@ public interface ValueCodec<T> {
      * @throws ValueCodecException 当元素无法解码为指定类型时抛出。
      */
 	@NotNull
-	T decode(@NotNull Element element, @NotNull Class<? extends T> type) throws ValueCodecException;
+	T decode(@NotNull CodecContext ctx, @NotNull Element element, @NotNull Class<? extends T> type) throws ValueCodecException;
 
     /**
      * 获取此编解码器能够处理的 Java 类型集合。
@@ -62,7 +62,10 @@ public interface ValueCodec<T> {
      * @return 支持的类型集合，不允许为 {@code null} 且必须非空。
      */
 	@NotNull
+	@Deprecated
 	Set<Class<? extends T>> getSupportTypes();
+
+	boolean isSupportType(@NotNull Class<?extends T> type);
 
     /**
      * 判断是否支持指定的值。

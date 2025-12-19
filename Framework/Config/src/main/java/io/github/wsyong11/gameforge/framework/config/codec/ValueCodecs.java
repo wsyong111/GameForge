@@ -14,17 +14,6 @@ import java.util.Set;
 
 @UtilityClass
 public class ValueCodecs {
-	public static final List<ValueCodec<?>> CODECS = List.of(
-		ValueCodecs.STRING_CODEC,
-		ValueCodecs.NUMBER_CODEC,
-		ValueCodecs.BOOLEAN_CODEC
-	);
-
-	public static void fill(@NotNull CodecMap map) {
-		Objects.requireNonNull(map, "map is null");
-		CODECS.forEach(map::add);
-	}
-
 	public static final ValueCodec<String> STRING_CODEC = new ValueCodec<>() {
 		@NotNull
 		@Override
@@ -136,5 +125,16 @@ public class ValueCodecs {
 		}
 	};
 
+	public static final List<ValueCodec<?>> CODECS = List.of(
+		ValueCodecs.STRING_CODEC,
+		ValueCodecs.NUMBER_CODEC,
+		ValueCodecs.BOOLEAN_CODEC
+	);
+
 	// TODO 2025/12/16: 实现EnumCodec
+
+	public static void fill(@NotNull CodecMap map) {
+		Objects.requireNonNull(map, "map is null");
+		CODECS.forEach(map::add);
+	}
 }

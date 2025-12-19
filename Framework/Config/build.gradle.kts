@@ -20,8 +20,9 @@ dependencies {
     implementation(project(":Framework:System:Log"))
     implementation(project(":Framework:DataFlow"))
     implementation(project(":Framework:Listener"))
+    implementation(project(":Framework:Common"))
+    implementation(project(":Framework:Annotation"))
     implementation(project(":Util"))
-	implementation(project(":Framework:Common"))
 }
 
 junit()

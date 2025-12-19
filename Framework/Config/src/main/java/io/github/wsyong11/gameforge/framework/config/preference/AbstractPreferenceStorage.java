@@ -17,7 +17,6 @@ public abstract class AbstractPreferenceStorage implements PreferenceStorage {
 
 	public AbstractPreferenceStorage() {
 		this.codecs = new CodecMap();
-		ValueCodecs.fill(this.codecs);
 	}
 
 	@Nullable

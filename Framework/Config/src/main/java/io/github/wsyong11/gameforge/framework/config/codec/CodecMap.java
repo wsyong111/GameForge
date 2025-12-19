@@ -29,13 +29,20 @@ public class CodecMap {
 
 	private volatile Map<Class<?>, List<ValueCodec<?>>> codecTypeMapSnapshot;
 
-	public CodecMap() {
+	public CodecMap(){
+		this(true);
+	}
+
+	public CodecMap(boolean defaultCodec) {
 		this.lock = new Object();
 		this.codecs = new LinkedHashSet<>();
 		this.codecSupportTypeMap = new HashMap<>();
 		this.codecTypeMap = new WeakHashMap<>();
 
 		this.codecTypeMapSnapshot = Map.of();
+
+		if(defaultCodec)
+			ValueCodecs.fill(this);
 	}
 
 	@UnmodifiableView

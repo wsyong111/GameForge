@@ -97,13 +97,13 @@ public class JsonPathElementParser extends AbstractLineTokenParser<ElementPath> 
 			return true;
 		}
 
-		if (this.matchCurrent(OperatorToken.class, "..")) {
-			if (!this.processRecursiveAccess(operations))
-				throw this.expectedTokenError(
-					this.peek(),
-					"[^0-9][a-zA-Z0-9]+");
-			return true;
-		}
+//		if (this.matchCurrent(OperatorToken.class, "..")) {
+//			if (!this.processRecursiveAccess(operations))
+//				throw this.expectedTokenError(
+//					this.peek(),
+//					"[^0-9][a-zA-Z0-9]+");
+//			return true;
+//		}
 
 		return false;
 	}
@@ -256,7 +256,7 @@ public class JsonPathElementParser extends AbstractLineTokenParser<ElementPath> 
 //		}
 //
 //		return new JsonPathElementPath(operations);
-	}
+//	}
 //
 //	// -------------------------------------------------------------------------------------------------------------- //
 //
