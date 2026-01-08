@@ -20,4 +20,16 @@ public final class MutableStringElement extends AbstractStringElement<MutableStr
 	public StringElement asElement() {
 		return new StringElement(this.getValue());
 	}
+
+	@NotNull
+	@Override
+	public MutableStringElement copy() {
+		return new MutableStringElement(this.getValue());
+	}
+
+	@NotNull
+	@Override
+	public MutableStringElement deepCopy() {
+		return new MutableStringElement(this.getValue());
+	}
 }

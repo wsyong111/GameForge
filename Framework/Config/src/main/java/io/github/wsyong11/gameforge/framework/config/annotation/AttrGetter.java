@@ -14,6 +14,6 @@ import java.lang.annotation.Target;
 public @interface AttrGetter {
 	@Language("JSONPath")
 	@NonNls
-		@NotNull
+	@NotNull
 	String value();
 }

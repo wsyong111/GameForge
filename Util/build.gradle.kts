@@ -6,7 +6,3 @@ plugins {
 
 group = "io.github.wsyong11.gameforge.util"
 artifactId = "Util"
-
-dependencies {
-
-}

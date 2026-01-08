@@ -55,7 +55,7 @@ public class Bit {
 		for (var entry : mapping.entrySet()) {
 			int bit = entry.getKey();
 			if (has(flags, bit)) {
-				if (sb.length() > 0) sb.append(" | ");
+				if (!sb.isEmpty()) sb.append(" | ");
 				sb.append(entry.getValue());
 				knownMask |= bit;
 			}
@@ -63,11 +63,11 @@ public class Bit {
 
 		int unknown = flags & ~knownMask;
 		if (unknown != 0) {
-			if (sb.length() > 0) sb.append(" | ");
+			if (!sb.isEmpty()) sb.append(" | ");
 			sb.append("0b").append(Integer.toBinaryString(unknown));
 		}
 
-		return sb.length() == 0 ? "[NONE]" : sb.toString();
+		return sb.isEmpty() ? "[NONE]" : sb.toString();
 	}
 
 	@NotNull
@@ -80,12 +80,12 @@ public class Bit {
 		Objects.requireNonNull(mapping, "mapping is null");
 
 		StringBuilder sb = new StringBuilder();
-		int knownMask = 0;
+		long knownMask = 0;
 
 		for (var entry : mapping.entrySet()) {
 			long bit = entry.getKey();
 			if (has(flags, bit)) {
-				if (sb.length() > 0) sb.append(" | ");
+				if (!sb.isEmpty()) sb.append(" | ");
 				sb.append(entry.getValue());
 				knownMask |= bit;
 			}
@@ -93,10 +93,10 @@ public class Bit {
 
 		long unknown = flags & ~knownMask;
 		if (unknown != 0L) {
-			if (sb.length() > 0) sb.append(" | ");
+			if (!sb.isEmpty()) sb.append(" | ");
 			sb.append("0b").append(Long.toBinaryString(unknown));
 		}
 
-		return sb.length() == 0 ? "[NONE]" : sb.toString();
+		return sb.isEmpty() ? "[NONE]" : sb.toString();
 	}
 }

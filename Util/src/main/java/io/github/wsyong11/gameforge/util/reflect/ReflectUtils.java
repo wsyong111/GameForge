@@ -9,6 +9,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -55,11 +56,11 @@ public class ReflectUtils {
 		String modifiers = Modifier.toString(method.getModifiers());
 		String returnType = method.getReturnType().getName();
 		String params = Arrays.stream(method.getParameterTypes())
-		                      .map(Class::getName)
-		                      .collect(Collectors.joining(", "));
+			.map(Class::getName)
+			.collect(Collectors.joining(", "));
 
 		return modifiers + " " + method.getDeclaringClass()
-		                               .getName() + "#" + method.getName() + "(" + params + "): " + returnType;
+			.getName() + "#" + method.getName() + "(" + params + "): " + returnType;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
@@ -79,5 +80,33 @@ public class ReflectUtils {
 		} catch (ClassNotFoundException ignored) {
 			return false;
 		}
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	@NotNull
+	public static Class<?> findCommonSuperclass(@NotNull List<Class<?>> classes) {
+		if (classes.isEmpty())
+			return Object.class;
+
+		Class<?> candidate = classes.get(0);
+
+		while (candidate != null) {
+			boolean allMatch = true;
+
+			for (Class<?> c : classes) {
+				if (!candidate.isAssignableFrom(c)) {
+					allMatch = false;
+					break;
+				}
+			}
+
+			if (allMatch)
+				return candidate;
+
+			candidate = candidate.getSuperclass();
+		}
+
+		return Object.class;
 	}
 }

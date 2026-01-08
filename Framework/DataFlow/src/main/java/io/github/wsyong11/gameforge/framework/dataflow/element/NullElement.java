@@ -28,6 +28,6 @@ public final class NullElement implements Element {
 	@NotNull
 	@Override
 	public String toString() {
-		return "null";
+		return "<null>";
 	}
 }

@@ -13,7 +13,7 @@ import java.util.Objects;
 
 public final class MutableObjectElement extends AbstractObjectElement<MutableElement> implements MutableElement {
 	public MutableObjectElement() {
-		super(new HashMap<>());
+		super(new LinkedHashMap<>());
 	}
 
 	public MutableObjectElement(@NotNull Map<String, MutableElement> map) {
@@ -44,12 +44,25 @@ public final class MutableObjectElement extends AbstractObjectElement<MutableEle
 	@Override
 	public ObjectElement asElement() {
 		Map<String, Element> result = new LinkedHashMap<>(this.map.size());
-		for (Map.Entry<String, MutableElement> entry : this.map.entrySet()) {
-			String key = entry.getKey();
-			MutableElement value = entry.getValue();
-			result.put(key, MutableElement.asElementSafe(value));
-		}
+		this.map.forEach((key, value) ->
+			result.put(key, MutableElement.asElementSafe(value)));
 
 		return new ObjectElement(result);
+	}
+
+	@NotNull
+	@Override
+	public MutableObjectElement copy() {
+		return new MutableObjectElement(this.map);
+	}
+
+	@NotNull
+	@Override
+	public MutableObjectElement deepCopy() {
+		Map<String, MutableElement> result = new LinkedHashMap<>(this.map.size());
+		this.map.forEach((key, value) ->
+			result.put(key, value.deepCopy()));
+
+		return new MutableObjectElement(result);
 	}
 }

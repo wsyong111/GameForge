@@ -23,4 +23,15 @@ public final class MutableNumberElement extends AbstractNumberElement<MutableNum
 	public NumberElement asElement() {
 		return new NumberElement(this.getNumber());
 	}
+	@NotNull
+	@Override
+	public  MutableNumberElement copy() {
+		return new MutableNumberElement(this.getNumber());
+	}
+
+	@NotNull
+	@Override
+	public  MutableNumberElement deepCopy() {
+		return new MutableNumberElement(this.getNumber());
+	}
 }

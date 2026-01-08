@@ -18,17 +18,16 @@ import java.util.*;
 
 import static io.github.wsyong11.gameforge.framework.system.log.LogTemplate.lazy;
 
-public abstract class Configuration {
+public abstract class Model {
 	private static final Logger LOGGER = Log.getLogger();
 
 	@NotNull
-	@io.github.wsyong11.gameforge.framework.annotation.ThreadSensitive
-	public static <T extends Configuration> T create(@NotNull Class<T> type, @NotNull Element element) {
+	public static <T extends Model> T create(@NotNull Class<T> type, @NotNull Element element) {
 		Objects.requireNonNull(type, "type is null");
 		Objects.requireNonNull(element, "element is null");
 
-		if (!Configuration.class.isAssignableFrom(type))
-			throw new IllegalArgumentException("Type " + type + " is not extends Configuration");
+		if (!Model.class.isAssignableFrom(type))
+			throw new IllegalArgumentException("Type " + type + " is not extends Model");
 
 		T config;
 
@@ -46,7 +45,7 @@ public abstract class Configuration {
 
 			config = newInstance(impl);
 		} else {
-			throw new UnsupportedOperationException();
+			config = newInstance(type);
 		}
 
 		config.setElement(element);
@@ -55,7 +54,7 @@ public abstract class Configuration {
 	}
 
 	@NotNull
-	private static <T extends Configuration> T newInstance(@NotNull Class<T> type) {
+	private static <T extends Model> T newInstance(@NotNull Class<T> type) {
 		Objects.requireNonNull(type, "type is null");
 
 		Constructor<T> constructor;
@@ -76,7 +75,7 @@ public abstract class Configuration {
 
 	@SuppressWarnings("unchecked")
 	@Nullable
-	private static <T extends Configuration> Class<? extends T> findImpl(@NotNull ClassLoader loader, @NotNull Class<T> type) {
+	private static <T extends Model> Class<? extends T> findImpl(@NotNull ClassLoader loader, @NotNull Class<T> type) {
 		Objects.requireNonNull(loader, "loader is null");
 		Objects.requireNonNull(type, "type is null");
 
@@ -93,14 +92,14 @@ public abstract class Configuration {
 
 	private volatile Element element;
 
-	protected Configuration() {
+	protected Model() {
 		this.codecMap = new CodecMap();
 		this.registerCodec(this.codecMap);
 
 		this.element = null;
 	}
 
-	protected Configuration(@NotNull Element element) {
+	protected Model(@NotNull Element element) {
 		this();
 		Objects.requireNonNull(element, "element is null");
 
@@ -117,6 +116,7 @@ public abstract class Configuration {
 	}
 
 	protected void registerCodec(@NotNull CodecMap map) {
+
 	}
 
 	@Contract("_, _, null -> _; _, _, !null -> !null")

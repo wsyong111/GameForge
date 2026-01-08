@@ -1,7 +1,9 @@
 package io.github.wsyong11.gameforge.framework.config.preference;
 
+import com.google.common.reflect.TypeToken;
 import io.github.wsyong11.gameforge.framework.config.ex.RuntimeCodecException;
 import io.github.wsyong11.gameforge.framework.config.preference.listener.PreferenceChangedListener;
+import io.github.wsyong11.gameforge.framework.dataflow.element.Element;
 import io.github.wsyong11.gameforge.framework.dataflow.element.mutable.MutableElement;
 import io.github.wsyong11.gameforge.framework.dataflow.element.mutable.MutableObjectElement;
 import io.github.wsyong11.gameforge.framework.listener.ListenerList;
@@ -21,6 +23,7 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.BiFunction;
 
 public class ElementPreferenceStorage extends AbstractPreferenceStorage {
 	private static final Logger LOGGER = Log.getLogger();
@@ -120,6 +123,21 @@ public class ElementPreferenceStorage extends AbstractPreferenceStorage {
 	public <T> T getValue(@NotNull String key, @NotNull Class<T> type) {
 		Objects.requireNonNull(key, "key is null");
 		Objects.requireNonNull(type, "type is null");
+		return this.getValueInternal(key, type, this::decode);
+	}
+
+	@Nullable
+	@Override
+	public <T> T getValue(@NotNull String key, @NotNull TypeToken<T> type) {
+		Objects.requireNonNull(key, "key is null");
+		Objects.requireNonNull(type, "type is null");
+		return this.getValueInternal(key, type, this::decode);
+	}
+
+	@Nullable
+	private <T, R> R getValueInternal(@NotNull String key, @NotNull T type, @NotNull BiFunction<Element, T, R> decoder) {
+		Objects.requireNonNull(key, "key is null");
+		Objects.requireNonNull(decoder, "decoder is null");
 
 		checkKey(key);
 
@@ -133,7 +151,7 @@ public class ElementPreferenceStorage extends AbstractPreferenceStorage {
 			if (element == null)
 				return null;
 
-			return this.decode(element.asElement(), type);
+			return decoder.apply(element.asElement(), type);
 		} finally {
 			lock.unlock();
 		}
@@ -181,7 +199,8 @@ public class ElementPreferenceStorage extends AbstractPreferenceStorage {
 	@NotNull
 	private class EditorImpl implements Editor {
 		// Value == null -> Remove
-		private final Map<String, Pair<Class<?>, ?>> modifiedMap;
+		// Pair<Class/TypeToken, Value>
+		private final Map<String, Pair<Object, ?>> modifiedMap;
 
 		private volatile boolean clearPreferences;
 
@@ -194,6 +213,17 @@ public class ElementPreferenceStorage extends AbstractPreferenceStorage {
 		@NotNull
 		@Override
 		public synchronized <T> Editor setValue(@NotNull String key, @Nullable T value, @NotNull Class<T> type) {
+			Objects.requireNonNull(key, "key is null");
+			Objects.requireNonNull(type, "type is null");
+			checkKey(key);
+
+			this.modifiedMap.put(key, Pair.of(type, value));
+			return this;
+		}
+
+		@NotNull
+		@Override
+		public synchronized <T> Editor setValue(@NotNull String key, @Nullable T value, @NotNull TypeToken<T> type) {
 			Objects.requireNonNull(key, "key is null");
 			Objects.requireNonNull(type, "type is null");
 			checkKey(key);
@@ -251,7 +281,7 @@ public class ElementPreferenceStorage extends AbstractPreferenceStorage {
 			@NotNull ExceptionHandler exceptionHandler,
 			@NotNull String key,
 			@Nullable Object value,
-			@NotNull Class<?> type
+			@NotNull Object type
 		) {
 			Objects.requireNonNull(exceptionHandler, "exceptionHandler is null");
 			Objects.requireNonNull(key, "key is null");
@@ -275,7 +305,10 @@ public class ElementPreferenceStorage extends AbstractPreferenceStorage {
 
 			MutableElement encodedValue;
 			try {
-				encodedValue = storage.encode(value, (Class<? super Object>) type).asMutable();
+				if (type instanceof Class<?>)
+					encodedValue = storage.encode(value, (Class<? super Object>) type).asMutable();
+				else
+					encodedValue = storage.encode(value, (TypeToken<? super Object>) type).asMutable();
 			} catch (Exception e) {
 				exceptionHandler.accept(e);
 				return;
@@ -300,9 +333,9 @@ public class ElementPreferenceStorage extends AbstractPreferenceStorage {
 						storage.element.clear();
 					}
 
-					for (Map.Entry<String, Pair<Class<?>, ?>> entry : this.modifiedMap.entrySet()) {
+					for (Map.Entry<String, Pair<Object, ?>> entry : this.modifiedMap.entrySet()) {
 						String key = entry.getKey();
-						Pair<Class<?>, ?> value = entry.getValue();
+						Pair<Object, ?> value = entry.getValue();
 
 						if (value == null)
 							this.removeStorageKey(key);

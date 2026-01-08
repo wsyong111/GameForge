@@ -11,4 +11,8 @@ public class ValueCodecException extends CodecException {
 	public ValueCodecException(@NotNull String message) {
 		super(message);
 	}
+
+	public ValueCodecException(@NotNull Throwable cause) {
+		super(cause);
+	}
 }

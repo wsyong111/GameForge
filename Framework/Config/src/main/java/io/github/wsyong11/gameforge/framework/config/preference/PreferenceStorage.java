@@ -1,5 +1,6 @@
 package io.github.wsyong11.gameforge.framework.config.preference;
 
+import com.google.common.reflect.TypeToken;
 import io.github.wsyong11.gameforge.framework.config.codec.ValueCodec;
 import io.github.wsyong11.gameforge.framework.config.ex.RuntimeCodecException;
 import io.github.wsyong11.gameforge.framework.config.preference.listener.PreferenceChangedListener;
@@ -69,6 +70,40 @@ public interface PreferenceStorage {
 		T value = this.getValue(key, type);
 		return value == null ? defaultValue : value;
 	}
+
+	/**
+	 * 获取指定键的首选项值。
+	 *
+	 * @param key  要获取的首选项键，不能为 {@code null}。
+	 * @param type 期望的值类型，不能为 {@code null}。
+	 * @param <T>  值的类型。
+	 * @return 如果存在对应的首选项，返回对应类型的值；否则返回 {@code null}。
+	 * @throws RuntimeCodecException 当解码失败时抛出。
+	 */
+	@Nullable
+	<T> T getValue(@NotNull String key, @NotNull TypeToken<T> type);
+
+	/**
+	 * 获取指定键的首选项值，如果不存在则返回默认值。
+	 *
+	 * @param key          要获取的首选项键，不能为 {@code null}。
+	 * @param type         期望的值类型，不能为 {@code null}。
+	 * @param defaultValue 如果首选项不存在则返回的默认值，可以为 {@code null}。
+	 * @param <T>          值的类型。
+	 * @return 如果存在对应的首选项，返回对应类型的值；否则返回 {@code defaultValue}。
+	 * @throws RuntimeCodecException 当解码失败时抛出。
+	 * @see #getValue(String, Class)
+	 */
+	@Nullable
+	@Contract("_, _, !null -> !null; _, _, null -> _")
+	default <T> T getValue(@NotNull String key, @NotNull TypeToken<T> type, @Nullable T defaultValue) {
+		Objects.requireNonNull(key, "key is null");
+		Objects.requireNonNull(type, "type is null");
+
+		T value = this.getValue(key, type);
+		return value == null ? defaultValue : value;
+	}
+
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
@@ -146,6 +181,18 @@ public interface PreferenceStorage {
 		 */
 		@NotNull
 		<T> Editor setValue(@NotNull String key, @Nullable T value, @NotNull Class<T> type);
+
+		/**
+		 * 设置指定键的首选项值，值将在实际提交时序列化。
+		 *
+		 * @param key   要设置的首选项键，不能为 {@code null}。
+		 * @param value 要设置的值，可以为 {@code null}。
+		 * @param type  值的类型，不能为 {@code null}。
+		 * @param <T>   值的类型。
+		 * @return 当前编辑器实例，用于链式调用。
+		 */
+		@NotNull
+		<T> Editor setValue(@NotNull String key, @Nullable T value, @NotNull TypeToken<T> type);
 
 		/**
 		 * 删除指定的首选项。

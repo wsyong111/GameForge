@@ -44,4 +44,19 @@ public final class MutableArrayElement extends AbstractArrayElement<MutableEleme
 			.map(MutableElement::asElementSafe)
 			.toList());
 	}
+
+	@NotNull
+	@Override
+	public MutableArrayElement copy() {
+		return new MutableArrayElement(this.list);
+	}
+
+	@NotNull
+	@Override
+	public MutableArrayElement deepCopy() {
+		return new MutableArrayElement(this.list
+			.stream()
+			.map(MutableElement::deepCopy)
+			.toList());
+	}
 }

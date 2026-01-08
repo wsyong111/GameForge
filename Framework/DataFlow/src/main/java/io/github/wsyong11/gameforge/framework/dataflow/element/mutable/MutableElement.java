@@ -3,6 +3,7 @@ package io.github.wsyong11.gameforge.framework.dataflow.element.mutable;
 import io.github.wsyong11.gameforge.framework.dataflow.element.Element;
 import io.github.wsyong11.gameforge.framework.dataflow.element.NullElement;
 import io.github.wsyong11.gameforge.framework.dataflow.element.base.BaseElement;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -101,6 +102,22 @@ public sealed interface MutableElement extends BaseElement permits MutableArrayE
 		return element == null ? NullElement.INSTANCE : element.asElement();
 	}
 
+	@Contract("null, _ -> null; !null, _ -> !null")
+	@Nullable
+	static MutableElement copySafe(@Nullable MutableElement element, boolean deep) {
+		if (element == null)
+			return null;
+		return deep ? element.deepCopy() : element.copy();
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
 	@NotNull
 	Element asElement();
+
+	@NotNull
+	MutableElement copy();
+
+	@NotNull
+	MutableElement deepCopy();
 }
