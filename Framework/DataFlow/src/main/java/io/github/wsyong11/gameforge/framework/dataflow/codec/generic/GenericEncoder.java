@@ -8,5 +8,5 @@ import org.jetbrains.annotations.NotNull;
 @FunctionalInterface
 public interface GenericEncoder<T> {
 	@NotNull
-	Element encode(@NotNull CodecContext ctx, @NotNull T value, @NotNull TypeContext types)throws CodecException;
+	Element encode(@NotNull CodecContext ctx, @NotNull T value, @NotNull ResolvedParameterType types)throws CodecException;
 }

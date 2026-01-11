@@ -63,33 +63,30 @@ public class GenericInfos {
 
 			return map;
 		})
-		.parameterResolver(0, TypeResolver.collection(Map::keySet))
-		.parameterResolver(1, TypeResolver.collection(Map::values))
-		.build();
-
-	public static final GenericInfo<List<?>> LIST = GenericInfo
-		.builder(new TypeToken<List<?>>() {})
-		.encoder((ctx, value, types) -> {
-			Type type = types.get(0);
-
-			List<Element> result = new ArrayList<>();
-			for (Object item : value)
-				result.add(ctx.encode(item, type));
-
-			return Element.array(result);
-		})
-		.decoder((ctx, element, types) -> {
-			if (!(element instanceof ArrayElement array))
-				throw new CodecException();
-
-			Type type = types.get(0);
-
-			List<Object> result = new ArrayList<>();
-			for (Element item : array)
-				result.add(ctx.decode(item, type));
-
-			return result;
-		})
-		.parameterResolver(0, TypeResolver.collection(l -> l))
+		.parameter(0, b -> b
+			.itemProvider(Map::keySet))
+		.parameter(1, b -> b
+			.itemProvider(Map::values))
 		.build();
 }
+
+/*
+struct GenericInfo<T> {
+	GenericCodec<T> codec;
+	ParameterInfo<T>[] parameters;
+}
+
+struct ParameterInfo<T> {
+	TypeVariable<T> variable;
+	ItemProvider<T> itemProvider;
+	TypeVariableToken token;
+}
+
+struct TypeVariableToken {
+	TypeVariable<?> variable;
+}
+
+interface ItemProvider<T> {
+	Collection<?> get(T value);
+}
+ */

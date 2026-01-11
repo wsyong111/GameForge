@@ -7,10 +7,10 @@ import org.jetbrains.annotations.NotNull;
 
 public interface Codec<T> {
 	@NotNull
-	<V extends T> Element encode(@NotNull CodecContext ctx, @NotNull V value, @NotNull Class<V> type) throws CodecException;
+	Element encode(@NotNull CodecContext ctx, @NotNull T value, @NotNull Class<?extends T> type) throws CodecException;
 
 	@NotNull
-	<V extends T> V decode(@NotNull CodecContext ctx, @NotNull Element element, @NotNull Class<V> type) throws CodecException;
+	T decode(@NotNull CodecContext ctx, @NotNull Element element, @NotNull Class<? extends T> type) throws CodecException;
 
 	boolean isSupportType(@NotNull Class<?> type);
 

@@ -2,7 +2,7 @@ package io.github.wsyong11.gameforge.framework.dataflow.codec;
 
 import com.google.common.reflect.TypeToken;
 import io.github.wsyong11.gameforge.framework.dataflow.codec.codec.Codec;
-import io.github.wsyong11.gameforge.framework.dataflow.codec.generic.GenericHandler;
+import io.github.wsyong11.gameforge.framework.dataflow.codec.generic.GenericInfo;
 import io.github.wsyong11.gameforge.framework.dataflow.element.Element;
 import io.github.wsyong11.gameforge.framework.ex.CodecException;
 import org.jetbrains.annotations.NotNull;
@@ -35,17 +35,15 @@ public interface Codecs {
 
 	void removeCodec(@NotNull Codec<?> codec);
 
-	<T> void registerGenericHandler(@NotNull GenericHandler<T> handler);
-
-	void unregisterGenericHandler(@NotNull GenericHandler<?> handler);
-
 	@NotNull
 	@Unmodifiable
 	List<Codec<?>> getCodecs();
 
+	void addGenericInfo(@NotNull GenericInfo<?> info);
+
+	void removeGenericInfo(@NotNull GenericInfo<?> info);
+
 	@NotNull
 	@Unmodifiable
-	List<GenericHandler<?>> getGenericHandlers();
-
-	void clear();
+	List<GenericInfo<?>> getGenericInfos();
 }

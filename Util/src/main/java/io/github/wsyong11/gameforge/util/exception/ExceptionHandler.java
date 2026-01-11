@@ -205,7 +205,7 @@ public class ExceptionHandler implements Consumer<Throwable>, Iterable<Throwable
 		if (size == 1)
 			return exception;
 
-		this.exceptions.forEach(exception::addSuppressed);
+		this.exceptions.subList(1, this.exceptions.size()).forEach(exception::addSuppressed);
 		return exception;
 	}
 

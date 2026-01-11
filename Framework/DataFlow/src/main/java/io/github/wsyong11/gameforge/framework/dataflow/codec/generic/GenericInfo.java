@@ -1,7 +1,9 @@
 package io.github.wsyong11.gameforge.framework.dataflow.codec.generic;
 
 import com.google.common.reflect.TypeToken;
+import io.github.wsyong11.gameforge.util.reflect.ReflectUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 import org.jetbrains.annotations.UnmodifiableView;
 
@@ -13,40 +15,39 @@ import java.util.stream.IntStream;
 
 public class GenericInfo<T> {
 	private final Class<T> type;
-	private final List<GenericParameterInfo<T>> parameters;
-	private final GenericEncoder<T> encoder;
-	private final GenericDecoder<T> decoder;
-
-	@SuppressWarnings("unchecked")
-	@NotNull
-	public static <V> Builder<V> builder(@NotNull TypeToken<V> type) {
-		Objects.requireNonNull(type, "type is null");
-		return (Builder<V>) new Builder<>(type.getRawType());
-	}
+	private final Map<TypeVariable<Class<T>>, GenericParameterInfo<T>> parameters;
+	private final GenericCodec<T> codec;
 
 	public GenericInfo(
 		@NotNull Class<T> type,
-		@NotNull List<GenericParameterInfo<T>> parameters,
-		@NotNull GenericEncoder<T> encoder,
-		@NotNull GenericDecoder<T> decoder
+		@NotNull Map<TypeVariable<Class<T>>, GenericParameterInfo<T>> parameters,
+		@NotNull GenericCodec<T> codec
 	) {
 		Objects.requireNonNull(type, "type is null");
 		Objects.requireNonNull(parameters, "parameters is null");
-		Objects.requireNonNull(encoder, "encoder is null");
-		Objects.requireNonNull(decoder, "decoder is null");
+		Objects.requireNonNull(codec, "codec is null");
 
 		this.type = type;
-		this.parameters = List.copyOf(parameters);
-		this.encoder = encoder;
-		this.decoder = decoder;
+		this.parameters = Map.copyOf(parameters);
+		this.codec=codec;
 
-		if (this.parameters.size() != type.getTypeParameters().length)
-			throw new IllegalArgumentException("Parameter length not same of type parameters length");
+		Set<TypeVariable<Class<T>>> typeParameters = Set.of(type.getTypeParameters());
 
-		for (int i = 0; i < this.parameters.size(); i++) {
-			GenericParameterInfo<T> parameter = this.parameters.get(i);
-			if (parameter.getType() != type)
-				throw new IllegalArgumentException("Parameter from index " + i + " is not same of class type");
+		for (Map.Entry<TypeVariable<Class<T>>, GenericParameterInfo<T>> entry : this.parameters.entrySet()) {
+			TypeVariable<Class<T>> key = entry.getKey();
+			GenericParameterInfo<T> value = entry.getValue();
+
+			if (!typeParameters.contains(key))
+				throw new IllegalArgumentException("Type variable %s is not declared by %s (declared by %s)".formatted(
+					key.getName(),
+					type.getName(),
+					ReflectUtils.declarationToString(key.getGenericDeclaration())));
+
+			if (!Objects.equals(key, value.getVariable()))
+				throw new IllegalArgumentException("Type variable %s is not declared by %s (declared by %s)".formatted(
+					key.getName(),
+					type.getName(),
+					ReflectUtils.declarationToString(key.getGenericDeclaration())));
 		}
 	}
 
@@ -57,93 +58,40 @@ public class GenericInfo<T> {
 
 	@NotNull
 	@UnmodifiableView
-	public List<GenericParameterInfo<T>> getParameters() {
+	public Map<TypeVariable<Class<T>>, GenericParameterInfo<T>> getParameters() {
 		return this.parameters;
 	}
 
-	@NotNull
-	public GenericEncoder<T> getEncoder() {
-		return this.encoder;
+	@Nullable
+	public GenericParameterInfo<T> getParameter(@NotNull TypeVariable<?> variable){
+		Objects.requireNonNull(variable, "variable is null");
+		return this.parameters.get(variable);
+	}
+
+	@Nullable
+	public GenericParameterInfo<T> getParameter(@NotNull TypeVariableToken token){
+		Objects.requireNonNull(token, "token is null");
+		return this.getParameter(token.getVariable());
 	}
 
 	@NotNull
-	public GenericDecoder<T> getDecoder() {
-		return this.decoder;
-	}
-
-	@Override
-	public String toString() {
-		TypeVariable<Class<T>>[] typeParameters = this.type.getTypeParameters();
-		String parameters = IntStream
-			.range(0, typeParameters.length)
-			.mapToObj(i -> this.parameters.get(i).isIgnore() ? "*" : typeParameters[i].getName())
-			.collect(Collectors.joining(", "));
-
-		return "GenericInfo(" + this.type + "<" + parameters + ">)";
+	public GenericCodec<T> getCodec() {
+		return this.codec;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
 	public static class Builder<V> {
 		private final Class<V> type;
-		private final List<GenericParameterInfo<V>> parameters;
-		private final int parameterCount;
-
-		private GenericEncoder<V> encoder;
-		private GenericDecoder<V> decoder;
 
 		public Builder(@NotNull Class<V> type) {
 			Objects.requireNonNull(type, "type is null");
 			this.type = type;
-
-			this.parameterCount = type.getTypeParameters().length;
-			this.parameters = new ArrayList<>(this.parameterCount);
-
-			for (int i = 0; i < this.parameterCount; i++)
-				this.parameters.add(new GenericParameterInfo<>(this.type, i));
-		}
-
-		@NotNull
-		public Builder<V> encoder(@NotNull GenericEncoder<V> encoder) {
-			Objects.requireNonNull(encoder, "encoder is null");
-			this.encoder = encoder;
-			return this;
-		}
-
-		@NotNull
-		public Builder<V> decoder(@NotNull GenericDecoder<V> decoder) {
-			Objects.requireNonNull(decoder, "decoder is null");
-			this.decoder = decoder;
-			return this;
-		}
-
-		public Builder<V> parameter(@Range(from = 0, to = Integer.MAX_VALUE) int index, @NotNull Consumer<GenericParameterInfo.Builder<V>> callback) {
-			Objects.checkIndex(index, this.parameterCount);
-			Objects.requireNonNull(callback, "callback is null");
-
-			GenericParameterInfo.Builder<V> builder = new GenericParameterInfo.Builder<>(this.type, index);
-			callback.accept(builder);
-			this.parameters.set(index, builder.build());
-
-			return this;
-		}
-
-		@NotNull
-		public Builder<V> parameter(@Range(from = 0, to = Integer.MAX_VALUE) int index) {
-			return this.parameter(index, GenericParameterInfo.Builder::ignore);
-		}
-
-		@NotNull
-		public Builder<V> parameterResolver(@Range(from = 0, to = Integer.MAX_VALUE) int index, @NotNull TypeResolver<V> resolver) {
-			return this.parameter(index, b -> b.resolver(resolver));
 		}
 
 		@NotNull
 		public GenericInfo<V> build() {
-			Objects.requireNonNull(this.encoder, "Require encoder");
-			Objects.requireNonNull(this.decoder, "Require decoder");
 
-			return new GenericInfo<>(this.type, this.parameters, this.encoder, this.decoder);
 		}
 	}
 }

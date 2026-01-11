@@ -3,19 +3,34 @@ package io.github.wsyong11.gameforge.framework.dataflow;
 import com.google.common.reflect.TypeToken;
 import io.github.wsyong11.gameforge.framework.dataflow.codec.Codecs;
 import io.github.wsyong11.gameforge.framework.dataflow.codec.SimpleCodecs;
-import io.github.wsyong11.gameforge.framework.dataflow.codec.generic.handler.ListGenericHandler;
+import io.github.wsyong11.gameforge.framework.dataflow.codec.codec.CommonCodecs;
+import io.github.wsyong11.gameforge.framework.dataflow.codec.generic.GenericInfo;
+import io.github.wsyong11.gameforge.framework.dataflow.codec.generic.GenericInfos;
 import io.github.wsyong11.gameforge.framework.ex.CodecException;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Main {
 	public static void main(String[] args) throws CodecException {
 		Codecs codecs = new SimpleCodecs();
-		codecs.registerGenericHandler(new ListGenericHandler());
+		codecs.addGenericInfo(GenericInfos.LIST);
+		codecs.addGenericInfo(GenericInfos.MAP);
+		codecs.addGenericInfo(GenericInfo
+			.builder(new TypeToken<ArrayList<?>>() {})
+			.encoder((ctx, v, t) -> {throw new RuntimeException();})
+			.decoder((ctx, v, t) -> {throw new RuntimeException();})
+			.build());
+
+		codecs.addCodec(CommonCodecs.STRING_CODEC);
+		codecs.addCodec(CommonCodecs.NUMBER_CODEC);
 
 		System.out.println(codecs.encode(
-			List.of("L", "K", "P"),
-			new TypeToken<List<String>>() {})
+			Map.of(
+				"A", List.of(1, 2, 6)
+			),
+			new TypeToken<Map>() {})
 		);
 //		Element element = MutableElement
 //			.object()

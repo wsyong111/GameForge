@@ -1,9 +1,7 @@
 package io.github.wsyong11.gameforge.framework.dataflow.codec;
 
 import io.github.wsyong11.gameforge.framework.dataflow.codec.codec.Codec;
-import io.github.wsyong11.gameforge.framework.dataflow.codec.generic.GenericHandler;
-import io.github.wsyong11.gameforge.framework.dataflow.codec.generic.info.GenericHandlerInfo;
-import io.github.wsyong11.gameforge.framework.dataflow.codec.generic.info.GenericHandlerInfoBuilder;
+import io.github.wsyong11.gameforge.framework.dataflow.codec.generic.GenericInfo;
 import io.github.wsyong11.gameforge.framework.dataflow.element.Element;
 import io.github.wsyong11.gameforge.framework.dataflow.element.NullElement;
 import io.github.wsyong11.gameforge.framework.dataflow.element.mutable.MutableElement;
@@ -12,9 +10,11 @@ import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.util.collection.CollectionUtils;
 import io.github.wsyong11.gameforge.util.exception.ExceptionHandler;
+import io.github.wsyong11.gameforge.util.reflect.ReflectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,15 +27,15 @@ public abstract class AbstractCodecs implements Codecs {
 	private final Set<Codec<?>> codecList;
 	private final Map<Class<?>, List<Codec<?>>> codecTypeCache;
 
-	private final Set<GenericHandler<?>> genericHandlerList;
-	private final Map<Class<?>, GenericHandlerInfo<?>> genericHandlerInfoMap;
+	private final Set<GenericInfo<?>> genericInfoList;
+	private final Map<Class<?>, List<GenericInfo<?>>> genericInfoCache;
 
 	public AbstractCodecs() {
 		this.codecList = new LinkedHashSet<>();
 		this.codecTypeCache = new ConcurrentHashMap<>();
 
-		this.genericHandlerList = new LinkedHashSet<>();
-		this.genericHandlerInfoMap=new ConcurrentHashMap<>();
+		this.genericInfoList = new LinkedHashSet<>();
+		this.genericInfoCache = new ConcurrentHashMap<>();
 	}
 
 	@NotNull
@@ -43,9 +43,9 @@ public abstract class AbstractCodecs implements Codecs {
 	private List<Codec<?>> resolveCodecsForType(@NotNull Class<?> type) {
 		Objects.requireNonNull(type, "type is null");
 
-		Set<Codec<?>> list;
+		List<Codec<?>> list;
 		synchronized (this.codecList) {
-			list = Set.copyOf(this.codecList);
+			list = List.copyOf(this.codecList);
 		}
 
 		return list
@@ -88,6 +88,9 @@ public abstract class AbstractCodecs implements Codecs {
 
 			throw new CodecException("Failed to cast " + value + " to " + type);
 		}
+
+		if (!type.isInstance(value))
+			throw new CodecException(value.getClass().getName() + " is not instance of " + type.getName());
 
 		ExceptionHandler exceptionHandler = new ExceptionHandler();
 		for (Codec<T> codec : this.getCodec(type)) {
@@ -170,43 +173,6 @@ public abstract class AbstractCodecs implements Codecs {
 		});
 	}
 
-	@SuppressWarnings("unchecked")
-	@Unmodifiable
-	@Nullable
-	protected <T> GenericHandlerInfo<T> findGenericHandler(@NotNull Class<T> type) {
-		Objects.requireNonNull(type, "type is null");
-		return (GenericHandlerInfo<T>) this.genericHandlerInfoMap.get(type);
-	}
-
-	@Override
-	public<T> void registerGenericHandler(@NotNull GenericHandler<T> handler) {
-		Objects.requireNonNull(handler, "handler is null");
-
-		synchronized (this.genericHandlerList) {
-			if (!this.genericHandlerList.add(handler))
-				return;
-		}
-
-		GenericHandlerInfoBuilder<T> builder = new GenericHandlerInfoBuilder<>(handler);
-		handler.buildInfo(builder);
-		GenericHandlerInfo<T> info = builder.build();
-
-		this.genericHandlerInfoMap.put(info.getType(), info);
-	}
-
-	@Override
-	public void unregisterGenericHandler(@NotNull GenericHandler<?> handler) {
-		Objects.requireNonNull(handler, "handler is null");
-
-		synchronized (this.genericHandlerList) {
-			if (!this.genericHandlerList.remove(handler))
-				return;
-		}
-
-		this.genericHandlerInfoMap.entrySet().removeIf(info ->
-			info.getValue().getHandler() == handler)
-	}
-
 	@NotNull
 	@Unmodifiable
 	@Override
@@ -216,20 +182,66 @@ public abstract class AbstractCodecs implements Codecs {
 		}
 	}
 
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	@NotNull
+	private List<GenericInfo<?>> resolveGenericInfo(@NotNull Class<?> type) {
+		Objects.requireNonNull(type, "type is null");
+
+		List<GenericInfo<?>> list;
+		synchronized (this.genericInfoList) {
+			list = List.copyOf(this.genericInfoList);
+		}
+
+		return list
+			.stream()
+			.filter(info -> {
+				Class<?> infoType = info.getType();
+				return infoType == type || infoType.isAssignableFrom(type);
+			})
+			.sorted(Comparator.comparingInt(info ->
+				ReflectUtils.getInheritanceDistance(type, info.getType())))
+			.toList();
+	}
+
 	@NotNull
 	@Unmodifiable
-	@Override
-	public List<GenericHandler<?>> getGenericHandlers() {
-		synchronized (this.genericHandlerList) {
-			return List.copyOf(this.genericHandlerList);
-		}
+	protected <T> List<GenericInfo<T>> findGenericInfo(@NotNull Class<T> type) {
+		Objects.requireNonNull(type, "type is null");
+		return CollectionUtils.forceCast(this.genericInfoCache.computeIfAbsent(type, this::resolveGenericInfo));
 	}
 
 	@Override
-	public void clear() {
-		synchronized (this.codecList) {
-			this.codecList.clear();
+	public void addGenericInfo(@NotNull GenericInfo<?> info) {
+		Objects.requireNonNull(info, "info is null");
+
+		synchronized (this.genericInfoList) {
+			if (!this.genericInfoList.add(info))
+				return;
 		}
-		this.codecTypeCache.clear();
+
+		this.genericInfoCache.clear();
+	}
+
+	@Override
+	public void removeGenericInfo(@NotNull GenericInfo<?> info) {
+		Objects.requireNonNull(info, "info is null");
+
+		synchronized (this.genericInfoList) {
+			if (!this.genericInfoList.remove(info))
+				return;
+		}
+
+		this.genericInfoCache.entrySet().removeIf(entry -> {
+			List<GenericInfo<?>> cache = entry.getValue();
+			return cache.isEmpty() || cache.contains(info);
+		});
+	}
+
+	@NotNull
+	@Unmodifiable
+	@Override
+	public List<GenericInfo<?>> getGenericInfos() {
+		return List.copyOf(this.genericInfoList);
 	}
 }
