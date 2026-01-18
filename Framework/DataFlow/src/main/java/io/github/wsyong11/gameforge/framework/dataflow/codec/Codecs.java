@@ -2,6 +2,7 @@ package io.github.wsyong11.gameforge.framework.dataflow.codec;
 
 import com.google.common.reflect.TypeToken;
 import io.github.wsyong11.gameforge.framework.dataflow.codec.codec.Codec;
+import io.github.wsyong11.gameforge.framework.dataflow.codec.generic.GenericCodec;
 import io.github.wsyong11.gameforge.framework.dataflow.codec.generic.GenericInfo;
 import io.github.wsyong11.gameforge.framework.dataflow.element.Element;
 import io.github.wsyong11.gameforge.framework.ex.CodecException;
@@ -39,11 +40,11 @@ public interface Codecs {
 	@Unmodifiable
 	List<Codec<?>> getCodecs();
 
-	void addGenericInfo(@NotNull GenericInfo<?> info);
+	void addGenericCodec(@NotNull GenericCodec<?> codec);
 
-	void removeGenericInfo(@NotNull GenericInfo<?> info);
+	void removeGenericCodec(@NotNull GenericCodec<?> codec);
 
 	@NotNull
 	@Unmodifiable
-	List<GenericInfo<?>> getGenericInfos();
+	List<GenericCodec<?>> getGenericCodecs();
 }

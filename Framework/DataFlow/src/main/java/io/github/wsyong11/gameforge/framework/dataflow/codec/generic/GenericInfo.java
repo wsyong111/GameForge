@@ -1,17 +1,13 @@
 package io.github.wsyong11.gameforge.framework.dataflow.codec.generic;
 
-import com.google.common.reflect.TypeToken;
 import io.github.wsyong11.gameforge.util.reflect.ReflectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.Range;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.lang.reflect.TypeVariable;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class GenericInfo<T> {
 	private final Class<T> type;
@@ -29,7 +25,7 @@ public class GenericInfo<T> {
 
 		this.type = type;
 		this.parameters = Map.copyOf(parameters);
-		this.codec=codec;
+		this.codec = codec;
 
 		Set<TypeVariable<Class<T>>> typeParameters = Set.of(type.getTypeParameters());
 
@@ -63,13 +59,13 @@ public class GenericInfo<T> {
 	}
 
 	@Nullable
-	public GenericParameterInfo<T> getParameter(@NotNull TypeVariable<?> variable){
+	public GenericParameterInfo<T> getParameter(@NotNull TypeVariable<?> variable) {
 		Objects.requireNonNull(variable, "variable is null");
 		return this.parameters.get(variable);
 	}
 
 	@Nullable
-	public GenericParameterInfo<T> getParameter(@NotNull TypeVariableToken token){
+	public GenericParameterInfo<T> getParameter(@NotNull TypeVariableToken token) {
 		Objects.requireNonNull(token, "token is null");
 		return this.getParameter(token.getVariable());
 	}
@@ -83,15 +79,54 @@ public class GenericInfo<T> {
 
 	public static class Builder<V> {
 		private final Class<V> type;
+		private final GenericCodec<V> codec;
 
-		public Builder(@NotNull Class<V> type) {
+		private final Set<TypeVariable<Class<V>>> typeVariables;
+		private final Map<TypeVariable<Class<V>>, GenericParameterInfo.Builder<V>> parameters;
+
+		public Builder(@NotNull Class<V> type, @NotNull GenericCodec<V> codec) {
 			Objects.requireNonNull(type, "type is null");
+			Objects.requireNonNull(codec, "codec is null");
+
 			this.type = type;
+			this.codec = codec;
+
+			this.typeVariables = Set.of(type.getTypeParameters());
+			this.parameters = new HashMap<>();
+		}
+
+		@SuppressWarnings("unchecked")
+		@NotNull
+		public GenericParameterInfo.Builder<V> parameter(@NotNull TypeVariableToken token) {
+			Objects.requireNonNull(token, "token is null");
+
+			TypeVariable<?> variable = token.getVariable();
+			if (!this.typeVariables.contains(variable))
+				throw new IllegalArgumentException("Type variable %s is not declared by %s".formatted(
+					variable.getName(),
+					this.type.getName()));
+
+			TypeVariable<Class<V>> typeVariable = (TypeVariable<Class<V>>) variable;
+
+			GenericParameterInfo.Builder<V> builder = new GenericParameterInfo.Builder<>(typeVariable);
+			this.parameters.put(typeVariable, builder);
+			return builder;
+		}
+
+		@NotNull
+		public Builder<V> parameter(@NotNull TypeVariableToken token, @NotNull Consumer<GenericParameterInfo.Builder<V>> callback) {
+			Objects.requireNonNull(token, "token is null");
+			callback.accept(this.parameter(token));
+			return this;
 		}
 
 		@NotNull
 		public GenericInfo<V> build() {
+			Map<TypeVariable<Class<V>>, GenericParameterInfo<V>> parameters = new HashMap<>();
+			this.parameters.forEach((key, value) ->
+				parameters.put(key, value.build()));
 
+			return new GenericInfo<>(this.type, parameters, this.codec);
 		}
 	}
 }

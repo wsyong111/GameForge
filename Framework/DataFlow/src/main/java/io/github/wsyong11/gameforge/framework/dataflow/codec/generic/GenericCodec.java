@@ -12,10 +12,10 @@ public interface GenericCodec<T> {
 	void buildInfo(@NotNull GenericInfo.Builder<T> builder);
 
 	@NotNull
-	T decode(@NotNull CodecContext ctx, @NotNull Element element, @NotNull ResolvedParameterType types) throws CodecException;
+	T decode(@NotNull CodecContext ctx, @NotNull Element element, @NotNull ResolvedType types) throws CodecException;
 
 	@NotNull
-	Element encode(@NotNull CodecContext ctx, @NotNull T value, @NotNull ResolvedParameterType types) throws CodecException;
+	Element encode(@NotNull CodecContext ctx, @NotNull T value, @NotNull ResolvedType types) throws CodecException;
 
 	default boolean isSupportElement(@NotNull CodecContext ctx, @NotNull Element element) {
 		return true;

@@ -5,7 +5,7 @@ import io.github.wsyong11.gameforge.framework.dataflow.codec.Codecs;
 import io.github.wsyong11.gameforge.framework.dataflow.codec.SimpleCodecs;
 import io.github.wsyong11.gameforge.framework.dataflow.codec.codec.CommonCodecs;
 import io.github.wsyong11.gameforge.framework.dataflow.codec.generic.GenericInfo;
-import io.github.wsyong11.gameforge.framework.dataflow.codec.generic.GenericInfos;
+import io.github.wsyong11.gameforge.framework.dataflow.codec.generic.codec.MapCodec;
 import io.github.wsyong11.gameforge.framework.ex.CodecException;
 
 import java.util.ArrayList;
@@ -15,13 +15,7 @@ import java.util.Map;
 public class Main {
 	public static void main(String[] args) throws CodecException {
 		Codecs codecs = new SimpleCodecs();
-		codecs.addGenericInfo(GenericInfos.LIST);
-		codecs.addGenericInfo(GenericInfos.MAP);
-		codecs.addGenericInfo(GenericInfo
-			.builder(new TypeToken<ArrayList<?>>() {})
-			.encoder((ctx, v, t) -> {throw new RuntimeException();})
-			.decoder((ctx, v, t) -> {throw new RuntimeException();})
-			.build());
+		codecs.addGenericCodec(new MapCodec());
 
 		codecs.addCodec(CommonCodecs.STRING_CODEC);
 		codecs.addCodec(CommonCodecs.NUMBER_CODEC);
@@ -30,7 +24,7 @@ public class Main {
 			Map.of(
 				"A", List.of(1, 2, 6)
 			),
-			new TypeToken<Map>() {})
+			new TypeToken<Map<String, ?>>() {})
 		);
 //		Element element = MutableElement
 //			.object()

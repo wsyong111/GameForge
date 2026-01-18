@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.TypeVariable;
 import java.util.Objects;
+import java.util.function.Function;
 
 public class GenericParameterInfo<T> {
 	private final TypeVariable<Class<T>> variable;
@@ -26,8 +27,29 @@ public class GenericParameterInfo<T> {
 
 	@Nullable
 	public ItemProvider<T> getItemProvider() {
-		return itemProvider;
+		return this.itemProvider;
 	}
 
+	public static class Builder<V> {
+		private final TypeVariable<Class<V>> variable;
 
+		@Nullable
+		private ItemProvider<V> itemProvider;
+
+		public Builder(@NotNull TypeVariable<Class<V>> variable) {
+			Objects.requireNonNull(variable, "variable is null");
+			this.variable = variable;
+		}
+
+		@NotNull
+		public Builder<V> itemProvider(@Nullable ItemProvider<V> provider) {
+			this.itemProvider = provider;
+			return this;
+		}
+
+		@NotNull
+		public GenericParameterInfo<V> build() {
+			return new GenericParameterInfo<>(this.variable, this.itemProvider);
+		}
+	}
 }
