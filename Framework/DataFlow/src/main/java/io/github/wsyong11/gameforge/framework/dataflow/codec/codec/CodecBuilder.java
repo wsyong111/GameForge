@@ -5,6 +5,7 @@ import io.github.wsyong11.gameforge.framework.dataflow.element.Element;
 import io.github.wsyong11.gameforge.framework.ex.CodecException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -61,6 +62,7 @@ public class CodecBuilder<T> {
 	public CodecBuilder<T> supportType(@NotNull Class<?> type) {
 		Objects.requireNonNull(type, "type is null");
 		this.supportTypes.add(type);
+		return this;
 	}
 
 	@NotNull
@@ -99,7 +101,20 @@ public class CodecBuilder<T> {
 
 	@NotNull
 	public Codec<T> build() {
-		Set<Class<?>> supportTypes = this.supportTypes.isEmpty() ? null : this.supportTypes;
+		Objects.requireNonNull(this.encoder, "Require encoder");
+		Objects.requireNonNull(this.decoder, "Require decoder");
+
+		if (this.supportTypes.isEmpty())
+			throw new IllegalArgumentException("Support types is empty");
+
+		return new CodecImpl<>(
+			this.encoder,
+			this.decoder,
+			this.supportTypes,
+			this.supportTypePredicate,
+			this.supportValuePredicate,
+			this.supportElementPredicate
+		);
 	}
 
 	@FunctionalInterface
@@ -117,41 +132,79 @@ public class CodecBuilder<T> {
 	private static class CodecImpl<V> implements Codec<V> {
 		private final Encoder<V> encoder;
 		private final Decoder<V> decoder;
-		private final
+		private final Set<Class<?>> supportTypes;
+		@Nullable
 		private final Predicate<Class<?>> supportTypePredicate;
 		@Nullable
 		private final BiPredicate<Class<? extends V>, Object> supportValuePredicate;
 		@Nullable
 		private final BiPredicate<Class<? extends V>, Element> supportElementPredicate;
 
-		@Override
-		public @NotNull Element encode(@NotNull CodecContext ctx, @NotNull V value, @NotNull Class<? extends V> type) throws CodecException {
-			return null;
+		public CodecImpl(
+			@NotNull Encoder<V> encoder,
+			@NotNull Decoder<V> decoder,
+			@NotNull Set<Class<?>> supportTypes,
+			@Nullable Predicate<Class<?>> supportTypePredicate,
+			@Nullable BiPredicate<Class<? extends V>, Object> supportValuePredicate,
+			@Nullable BiPredicate<Class<? extends V>, Element> supportElementPredicate
+		) {
+			Objects.requireNonNull(encoder, "encoder is null");
+			Objects.requireNonNull(decoder, "decoder is null");
+			Objects.requireNonNull(supportTypes, "supportTypes is null");
+
+			this.encoder = encoder;
+			this.decoder = decoder;
+			this.supportTypes = Set.copyOf(supportTypes);
+			this.supportTypePredicate = supportTypePredicate;
+			this.supportValuePredicate = supportValuePredicate;
+			this.supportElementPredicate = supportElementPredicate;
 		}
 
+		@NotNull
 		@Override
-		public @NotNull V decode(@NotNull CodecContext ctx, @NotNull Element element, @NotNull Class<? extends V> type) throws CodecException {
-			return null;
+		public Element encode(@NotNull CodecContext ctx, @NotNull V value, @NotNull Class<? extends V> type) throws CodecException {
+			Objects.requireNonNull(ctx, "ctx is null");
+			Objects.requireNonNull(value, "value is null");
+			Objects.requireNonNull(type, "type is null");
+			return this.encoder.encode(ctx, value, type);
+		}
+
+		@NotNull
+		@Override
+		public V decode(@NotNull CodecContext ctx, @NotNull Element element, @NotNull Class<? extends V> type) throws CodecException {
+			Objects.requireNonNull(ctx, "ctx is null");
+			Objects.requireNonNull(element, "element is null");
+			Objects.requireNonNull(type, "type is null");
+			return this.decoder.decode(ctx, element, type);
 		}
 
 		@Override
 		public boolean isSupportType(@NotNull Class<?> type) {
-			return false;
+			Objects.requireNonNull(type, "type is null");
+			return this.supportTypePredicate == null || this.supportTypePredicate.test(type);
 		}
 
+		@NotNull
+		@Unmodifiable
 		@Override
-		public @Nullable Set<Class<?>> getSupportTypes() {
-			return Codec.super.getSupportTypes();
+		public Set<Class<?>> getSupportTypes() {
+			return this.supportTypes;
 		}
 
 		@Override
 		public boolean isSupportValue(@NotNull CodecContext ctx, @NotNull Object value, @NotNull Class<? extends V> type) {
-			return false;
+			Objects.requireNonNull(ctx, "ctx is null");
+			Objects.requireNonNull(value, "value is null");
+			Objects.requireNonNull(type, "type is null");
+			return this.supportValuePredicate == null || this.supportValuePredicate.test(type, value);
 		}
 
 		@Override
 		public boolean isSupportElement(@NotNull CodecContext ctx, @NotNull Element element, @NotNull Class<? extends V> type) {
-			return false;
+			Objects.requireNonNull(ctx, "ctx is null");
+			Objects.requireNonNull(element, "element is null");
+			Objects.requireNonNull(type, "type is null");
+			return this.supportElementPredicate == null || this.supportElementPredicate.test(type, element);
 		}
 	}
 }

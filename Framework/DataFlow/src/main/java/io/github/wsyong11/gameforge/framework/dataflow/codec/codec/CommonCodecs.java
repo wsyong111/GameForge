@@ -9,7 +9,7 @@ import io.github.wsyong11.gameforge.framework.ex.CodecException;
 import java.util.List;
 
 public class CommonCodecs {
-	public static final Codec<String> STRING_CODEC = SimpleCodec
+	public static final Codec<String> STRING_CODEC = Codec
 		.<String>builder()
 		.encoder((ctx, value, type) -> Element.string(value))
 		.decoder((ctx, element, type) -> {
@@ -21,7 +21,7 @@ public class CommonCodecs {
 		.supportElement(e -> e instanceof StringElement)
 		.build();
 
-	public static final Codec<Number> NUMBER_CODEC = SimpleCodec
+	public static final Codec<Number> NUMBER_CODEC = Codec
 		.<Number>builder()
 		.encoder((ctx, value, type) -> Element.number(value))
 		.decoder((ctx, element, type) -> {
@@ -48,7 +48,7 @@ public class CommonCodecs {
 		.supportElement(e -> e instanceof NumberElement)
 		.build();
 
-	public static final Codec<Boolean> BOOLEAN_CODEC = SimpleCodec
+	public static final Codec<Boolean> BOOLEAN_CODEC = Codec
 		.<Boolean>builder()
 		.encoder((ctx, value, type) -> Element.bool(value))
 		.decoder((ctx, element, type) -> {
@@ -61,7 +61,7 @@ public class CommonCodecs {
 		.build();
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
-	public static final Codec<Enum<?>> ENUM_CODEC = SimpleCodec
+	public static final Codec<Enum<?>> ENUM_CODEC = Codec
 		.<Enum<?>>builder()
 		.encoder((ctx, value, type) -> ctx.encode("@enum:" + value.name(), String.class))
 		.decoder((ctx, element, type) -> {
@@ -76,7 +76,8 @@ public class CommonCodecs {
 				throw new CodecException("Cannot parse '" + name + "' to enum " + type);
 			}
 		})
-		.supportType(Class::isEnum)
+		.supportTypes(Enum.class)
+		.supportTypePredicate(Class::isEnum)
 		.supportElement(e -> e instanceof StringElement)
 		.build();
 

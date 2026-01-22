@@ -21,7 +21,6 @@ public interface Codec<T> {
 	@NotNull
 	T decode(@NotNull CodecContext ctx, @NotNull Element element, @NotNull Class<? extends T> type) throws CodecException;
 
-
 	@NotNull
 	@Unmodifiable
 	Set<Class<?>> getSupportTypes();

@@ -128,8 +128,7 @@ public class SimpleCodecs extends AbstractCodecs {
 				continue;
 			}
 
-			List<?> items;
-			try {
+			List<?> items;			try {
 				// Don't use List.copyOf, we need support null item
 				items = new ArrayList<>(itemProvider.get(value));
 			} catch (Exception e) {
@@ -142,7 +141,7 @@ public class SimpleCodecs extends AbstractCodecs {
 				.<Class<?>>map(Object::getClass)
 				.toList();
 
-
+jjjjj
 		}
 
 		Class<?> rawType = info.getType();
