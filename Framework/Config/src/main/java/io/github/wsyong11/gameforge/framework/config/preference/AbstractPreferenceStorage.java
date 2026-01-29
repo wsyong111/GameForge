@@ -29,6 +29,7 @@ public abstract class AbstractPreferenceStorage implements PreferenceStorage {
 
 	@Nullable
 	protected <T> T decode(@NotNull Element element, @NotNull TypeToken<T> type) throws RuntimeCodecException {
+	return null;
 	}
 
 	@NotNull
@@ -40,7 +41,7 @@ public abstract class AbstractPreferenceStorage implements PreferenceStorage {
 	@NotNull
 	protected <T> Element encode(@Nullable T value, @NotNull TypeToken<T> type) throws RuntimeCodecException {
 		Objects.requireNonNull(type, "type is null");
-		return this.codecs.encode(value, type);
+		return this.codecs.encode(value, type.getRawType());
 	}
 
 	@Override

@@ -141,7 +141,7 @@ public class SimpleCodecs extends AbstractCodecs {
 				.<Class<?>>map(Object::getClass)
 				.toList();
 
-jjjjj
+			// TODO: 2026/01/25 Find support type
 		}
 
 		Class<?> rawType = info.getType();
