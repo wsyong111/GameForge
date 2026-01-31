@@ -347,11 +347,7 @@ codegen {
 						code {
 							code("this.measureImpl()")
 							statement("\$T impl = this.impl", dcLogger)
-							ifBlock("impl == null") {
-								returns("false")
-							}
-							newLine()
-							returns("impl.is${levelName.uppercaseFirstChar()}Enabled()")
+							returns("impl != null && impl.is${levelName.uppercaseFirstChar()}Enabled()")
 						}
 					},
 					logMethodConfigurator = { argNames ->

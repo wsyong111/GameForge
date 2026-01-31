@@ -1,4 +1,13 @@
 package io.github.wsyong11.gameforge.framework.system.audio;
 
-public interface AudioDevice {
+import org.jetbrains.annotations.NotNull;
+
+public interface AudioDevice extends AutoCloseable {
+	@NotNull
+	AudioDeviceIdentity getIdentity();
+
+	boolean isClosed();
+
+	@Override
+	void close();
 }

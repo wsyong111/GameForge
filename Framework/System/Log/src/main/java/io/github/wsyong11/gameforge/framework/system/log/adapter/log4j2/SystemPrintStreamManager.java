@@ -50,6 +50,6 @@ public class SystemPrintStreamManager {
 
 	static {
 		System.setOut(stdoutWrapper);
-		System.setErr(  stderrWrapper);
+		System.setErr(stderrWrapper);
 	}
 }

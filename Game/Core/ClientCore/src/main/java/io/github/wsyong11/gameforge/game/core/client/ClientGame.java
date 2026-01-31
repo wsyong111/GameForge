@@ -6,6 +6,8 @@ import io.github.wsyong11.gameforge.framework.i18n.I18nManager;
 import io.github.wsyong11.gameforge.framework.i18n.SimpleI18nManager;
 import io.github.wsyong11.gameforge.framework.key.KeyAction;
 import io.github.wsyong11.gameforge.framework.key.KeyCode;
+import io.github.wsyong11.gameforge.framework.system.audio.AudioSystem;
+import io.github.wsyong11.gameforge.framework.system.audio.impl.openal.OpenALAudioEngine;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.render.RenderSystem;
@@ -20,14 +22,19 @@ import io.github.wsyong11.gameforge.framework.system.window.listener.WindowInput
 import io.github.wsyong11.gameforge.framework.system.window.listener.WindowListener;
 import io.github.wsyong11.gameforge.game.client.service.I18nService;
 import io.github.wsyong11.gameforge.game.common.GameContext;
+import io.github.wsyong11.gameforge.game.common.GameEnvConfig;
 import io.github.wsyong11.gameforge.game.common.core.AbstractGame;
 import io.github.wsyong11.gameforge.game.common.service.ServiceRegistry;
 import io.github.wsyong11.gameforge.game.core.client.service.I18nServiceStub;
+import io.github.wsyong11.gameforge.util.io.CallbackPrintStream;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2i;
+import org.lwjgl.system.Configuration;
+import org.lwjgl.system.Library;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
 public class ClientGame extends AbstractGame {
@@ -59,11 +66,43 @@ public class ClientGame extends AbstractGame {
 	}
 
 	@Override
+	protected void onPreStarting() throws Throwable {
+		super.onPreStarting();
+		this.initLWJGL();
+	}
+
+	private void initLWJGL() {
+		GameEnvConfig envConfig = this.getEnvConfig();
+
+		LOGGER.debug("Configuration and initialize lwjgl");
+
+		Logger lwjglLogger = Log.getLogger("LWJGL");
+
+		Configuration.DEBUG.set(envConfig.isDebug());
+		Configuration.DEBUG_STREAM.set(new CallbackPrintStream(message -> {
+			String msg = message.trim();
+			if (msg.isEmpty())
+				return;
+
+			if (msg.startsWith("[LWJGL]"))
+				lwjglLogger.trace(msg.substring(7).trim());
+			else
+				lwjglLogger.trace(msg);
+		}, StandardCharsets.UTF_8));
+
+		Configuration.DISABLE_CHECKS.set(!envConfig.isDebug());
+
+		Library.initialize();
+	}
+
+	@Override
 	protected void onStarting() throws Throwable {
 		super.onStarting();
 
 		ServiceRegistry serviceRegistry = this.getServiceRegistry();
 		serviceRegistry.register(I18nService.class, new I18nServiceStub(this.i18nManager));
+
+		AudioSystem.init(() -> OpenALAudioEngine::new);
 
 		// TODO: 2025/11/19 I18n keys load
 //		ResourceManager resourceManager = this.getResourceManager();
@@ -97,16 +136,16 @@ public class ClientGame extends AbstractGame {
 
 		Window window = renderSystem.getWindow();
 //		resourceManager.registerReloadListener(() -> {
-			Resource iconResource = resourceManager.getResource(ICON_PATH);
-			if (iconResource != null) {
-				try (InputStream stream = iconResource.openStream()) {
-					window.setIcon(IconIO.read(stream));
-				} catch (IOException e) {
-					LOGGER.warn("Failed to load window icon from location {}", ICON_PATH, e);
-				}
-			} else {
-				LOGGER.warn("Failed to load window icon from location {}", ICON_PATH);
+		Resource iconResource = resourceManager.getResource(ICON_PATH);
+		if (iconResource != null) {
+			try (InputStream stream = iconResource.openStream()) {
+				window.setIcon(IconIO.read(stream));
+			} catch (IOException e) {
+				LOGGER.warn("Failed to load window icon from location {}", ICON_PATH, e);
 			}
+		} else {
+			LOGGER.warn("Failed to load window icon from location {}", ICON_PATH);
+		}
 //		});
 
 		window.addInputListener(new WindowInputListener() {
@@ -124,9 +163,15 @@ public class ClientGame extends AbstractGame {
 			}
 		});
 
-		renderSystem.registerRenderer(new TestRenderer());
+//		renderSystem.registerRenderer(new TestRenderer());
 
 		RenderSystem.loop();
+	}
+
+	@Override
+	protected void onPreDestroyed() throws Throwable {
+		super.onPreDestroyed();
+		AudioSystem.shutdown();
 	}
 
 	//

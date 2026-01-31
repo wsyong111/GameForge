@@ -1,4 +1,5 @@
 import io.github.wsyong11.gameforge.dependencies.JOML
+import io.github.wsyong11.gameforge.dependencies.LWJGL
 import io.github.wsyong11.gameforge.dependencies.implementation
 import io.github.wsyong11.gameforge.project.artifactId
 
@@ -6,6 +7,7 @@ artifactId = "ClientCore"
 
 dependencies {
 	implementation(project, JOML)
+	implementation(project, LWJGL)
 
 	implementation(project(":Game:Core:CommonCore"))
 	implementation(project(":Game:Client"))
@@ -23,4 +25,5 @@ dependencies {
 	implementation(project(":Framework:System:Log"))
 	implementation(project(":Framework:App"))
 	implementation(project(":Framework:I18n"))
+	implementation(project(":Framework:System:Audio"))
 }
