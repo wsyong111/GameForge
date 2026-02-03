@@ -1,5 +1,6 @@
 package io.github.wsyong11.gameforge.framework.system.audio;
 
+import io.github.wsyong11.gameforge.framework.system.audio.impl.simple.NamedAudioDeviceIdentity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -7,6 +8,11 @@ import java.util.UUID;
 
 public interface AudioDeviceIdentity {
 	UUID EMPTY_ID = new UUID(0L, 0L);
+
+	@NotNull
+	static AudioDeviceIdentity empty() {
+		return NamedAudioDeviceIdentity.EMPTY;
+	}
 
 	@NotNull
 	String getName();

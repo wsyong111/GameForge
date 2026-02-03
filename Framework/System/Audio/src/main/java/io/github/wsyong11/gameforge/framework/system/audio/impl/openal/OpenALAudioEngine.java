@@ -1,8 +1,18 @@
 package io.github.wsyong11.gameforge.framework.system.audio.impl.openal;
 
-import io.github.wsyong11.gameforge.framework.system.audio.*;
+import io.github.wsyong11.gameforge.framework.system.audio.AudioDevice;
+import io.github.wsyong11.gameforge.framework.system.audio.AudioDeviceIdentity;
+import io.github.wsyong11.gameforge.framework.system.audio.AudioListener;
+import io.github.wsyong11.gameforge.framework.system.audio.AudioPlayer;
+import io.github.wsyong11.gameforge.framework.system.audio.audio.Audio;
+import io.github.wsyong11.gameforge.framework.system.audio.engine.AudioEngineContext;
 import io.github.wsyong11.gameforge.framework.system.audio.ex.AudioDeviceException;
-import io.github.wsyong11.gameforge.framework.system.audio.impl.simple.EmptyAudioDevice;
+import io.github.wsyong11.gameforge.framework.system.audio.ex.AudioDeviceOpenException;
+import io.github.wsyong11.gameforge.framework.system.audio.impl.openal.context.OpenALContext;
+import io.github.wsyong11.gameforge.framework.system.audio.impl.openal.device.NoopAudioDevice;
+import io.github.wsyong11.gameforge.framework.system.audio.impl.openal.device.OpenALAudioDevice;
+import io.github.wsyong11.gameforge.framework.system.audio.impl.openal.device.OpenALAudioDeviceImpl;
+import io.github.wsyong11.gameforge.framework.system.audio.impl.simple.AbstractAudioEngine;
 import io.github.wsyong11.gameforge.framework.system.audio.impl.simple.NamedAudioDeviceIdentity;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
@@ -11,26 +21,28 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.joml.Vector3fc;
 
+import java.nio.FloatBuffer;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static io.github.wsyong11.gameforge.framework.system.log.LogTemplate.lazy;
-import static org.lwjgl.openal.AL11.AL_POSITION;
-import static org.lwjgl.openal.AL11.alListener3f;
+import static org.lwjgl.openal.AL11.*;
 import static org.lwjgl.openal.ALC11.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
-public class OpenALAudioEngine implements AudioEngine {
+public class OpenALAudioEngine extends AbstractAudioEngine {
 	private static final Logger LOGGER = Log.getLogger();
 
 	private AudioDeviceIdentity defaultDeviceIdentity;
 	private List<AudioDeviceIdentity> devicesIdentityList;
 
-	private AudioDevice currentDevice;
+	private OpenALAudioDevice activeDevice;
+	private DeviceStatus activeDeviceStatus;
 	@Nullable
-	private OpenALContext currentContext;
-	private boolean contextChanged;
+	private OpenALContext activeContext;
+	private AudioDeviceIdentity activeDeviceIdentity;
 
 	private final Map<AudioDeviceIdentity, OpenALAudioDevice> devices;
 
@@ -39,14 +51,17 @@ public class OpenALAudioEngine implements AudioEngine {
 	private boolean inited;
 	private boolean closed;
 
-	public OpenALAudioEngine() {
+	public OpenALAudioEngine(@NotNull AudioEngineContext context) {
+		super(context);
+
 		this.defaultDeviceIdentity = NamedAudioDeviceIdentity.EMPTY;
 
 		this.devicesIdentityList = List.of();
 
-		this.currentDevice = new EmptyAudioDevice();
-		this.currentContext = null;
-		this.contextChanged = false;
+		this.activeDevice = new NoopAudioDevice(NamedAudioDeviceIdentity.EMPTY);
+		this.activeDeviceStatus = DeviceStatus.OPENED;
+		this.activeContext = null;
+		this.activeDeviceIdentity = NamedAudioDeviceIdentity.EMPTY;
 
 		this.devices = new ConcurrentHashMap<>();
 
@@ -69,13 +84,6 @@ public class OpenALAudioEngine implements AudioEngine {
 		this.inited = true;
 
 		this.scanDevices();
-
-		try {
-			this.setOutputDevice(this.defaultDeviceIdentity);
-		} catch (AudioDeviceException e) {
-			this.setOutputDevice(NamedAudioDeviceIdentity.EMPTY);
-			LOGGER.warn("Cannot set the output device to {}, Set the empty device as placeholder", this.defaultDeviceIdentity, e);
-		}
 	}
 
 	protected void checkAvailable() {
@@ -90,32 +98,70 @@ public class OpenALAudioEngine implements AudioEngine {
 
 	@Override
 	public int getLoopPreSec() {
-		return 20;
+		return 20;  // TODO: 2026/2/1
 	}
 
 	@Override
 	public void loopTick() {
-		if (this.currentContext == null) {
-			if (this.contextChanged) {
-				alcMakeContextCurrent(NULL);
-				this.contextChanged = false;
-			}
-			return;
-		}
+		super.loopTick();
 
-		if (this.contextChanged) {
-			this.currentContext.use();
-			this.contextChanged = false;
-		}
+		this.updateDevice();
+
+		if (this.activeDeviceStatus != DeviceStatus.OPENED)
+			return;
 
 		this.updateListener();
 	}
 
+	protected void updateDevice() {
+		if (this.activeDeviceIdentity.equals(this.activeDevice.getIdentity()) && this.activeDeviceStatus != DeviceStatus.PENDING)
+			return;
+
+		this.activeDeviceStatus = DeviceStatus.PENDING;
+
+		alcMakeContextCurrent(NULL);
+
+		if (this.activeContext != null)
+			this.activeContext.close();
+		this.activeContext = null;
+
+		OpenALAudioDevice device;
+		OpenALContext context;
+
+		try {
+			device = this.openDevice(this.activeDeviceIdentity);
+			context = device.createContext();
+			this.activeDeviceStatus = DeviceStatus.OPENED;
+		} catch (AudioDeviceException e) {
+			LOGGER.warn("Failed to open the device {}", this.activeDeviceIdentity, e);
+			device = new NoopAudioDevice(this.activeDeviceIdentity);
+			context = device.createContext();
+			this.activeDeviceStatus = DeviceStatus.ERROR;
+		}
+
+		this.activeDevice = device;
+		this.activeContext = context;
+
+		context.use();
+
+		LOGGER.trace("Changed the active device to {} ({}), active context {}",
+			lazy(device),
+			this.activeDeviceIdentity,
+			lazy(context));
+	}
+
 	protected void updateListener() {
-		Vector3fc position = this.listener.getPosition();
+		if (!this.listener.isChanged())
+			return;
+
+		Vector3fc position = this.listener.getPositionRaw();
 		alListener3f(AL_POSITION, position.x(), position.y(), position.z());
 
-		// TODO: 2026/2/1 listener
+		Vector3fc velocity = this.listener.getVelocityRaw();
+		alListener3f(AL_VELOCITY, velocity.x(), velocity.y(), velocity.z());
+
+		FloatBuffer orientationBuffer = this.listener.getOrientationBuffer();
+		alListenerfv(AL_ORIENTATION, orientationBuffer);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
@@ -127,14 +173,14 @@ public class OpenALAudioEngine implements AudioEngine {
 		this.checkAvailable();
 
 		if (identity.isEmpty())
-			throw new IllegalArgumentException("Device identity " + identity + " is empty");
+			return new NoopAudioDevice(identity);
 
 		synchronized (this.devices) {
 			OpenALAudioDevice cachedDevice = this.devices.get(identity);
 			if (cachedDevice != null && !cachedDevice.isClosed())
 				return cachedDevice;
 
-			OpenALAudioDevice device = new OpenALAudioDevice(identity);
+			OpenALAudioDevice device = new OpenALAudioDeviceImpl(identity);
 			this.devices.put(identity, device);
 			return device;
 		}
@@ -195,6 +241,12 @@ public class OpenALAudioEngine implements AudioEngine {
 	@NotNull
 	@Override
 	public AudioListener getListener() {
+		return this.listener;
+	}
+
+	@NotNull
+	@Override
+	public AudioPlayer createPlayer(@NotNull Audio audio) {
 		return null;
 	}
 
@@ -203,11 +255,6 @@ public class OpenALAudioEngine implements AudioEngine {
 	@Override
 	public List<AudioPlayer> getAudioPlayers() {
 		return List.of();
-	}
-
-	@Override
-	public @NotNull AudioPlayer createPlayer(@NotNull Audio audio) {
-		return null;
 	}
 
 	@Override
@@ -229,33 +276,24 @@ public class OpenALAudioEngine implements AudioEngine {
 	}
 
 	@Override
-	public void setOutputDevice(@NotNull AudioDeviceIdentity device) throws AudioDeviceException {
+	public void setActiveDevice(@NotNull AudioDeviceIdentity device) {
 		Objects.requireNonNull(device, "device is null");
 
-		if (this.currentDevice.getIdentity().equals(device))
+		this.checkAvailable();
+
+		this.activeDeviceStatus = DeviceStatus.PENDING;
+
+		if (this.activeDeviceIdentity.equals(device))
 			return;
 
-		LOGGER.debug("Current output device: {}", device);
-
-		if (this.currentContext != null)
-			this.currentContext.close();
-		this.currentContext = null;
-
-		if (device.isEmpty()) {
-			this.currentDevice = new EmptyAudioDevice();
-			return;
-		}
-
-		OpenALAudioDevice audioDevice = this.openDevice(device);
-		this.currentDevice = audioDevice;
-		this.currentContext = audioDevice.createContext();
-		this.contextChanged = true;
+		LOGGER.debug("Set active device {}, old {}", device, this.activeDeviceIdentity);
+		this.activeDeviceIdentity = device;
 	}
 
 	@NotNull
 	@Override
-	public AudioDeviceIdentity getOutputDevice() {
-		return this.currentDevice.getIdentity();
+	public AudioDeviceIdentity getActiveDevice() {
+		return this.activeDevice.getIdentity();
 	}
 
 	@NotNull
@@ -268,8 +306,20 @@ public class OpenALAudioEngine implements AudioEngine {
 	@Override
 	public AudioDevice getDevice(@NotNull AudioDeviceIdentity identity) throws AudioDeviceException {
 		Objects.requireNonNull(identity, "identity is null");
+
 		this.checkAvailable();
-		return this.openDevice(identity);
+		try {
+			return this.taskHandler.runBlocking(() -> this.openDevice(identity));
+		} catch (ExecutionException e) {
+			Throwable cause = e.getCause();
+			if (cause instanceof AudioDeviceException ex)
+				throw ex;
+
+			throw new AudioDeviceOpenException("Failed to get the device", cause);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new AudioDeviceOpenException("Failed to get the device", e);
+		}
 	}
 
 	@Override
@@ -278,17 +328,29 @@ public class OpenALAudioEngine implements AudioEngine {
 			return;
 		this.closed = true;
 
-		alcMakeContextCurrent(NULL);
+		try {
+			alcMakeContextCurrent(NULL);
 
-		if (this.currentContext != null)
-			this.currentContext.close();
-		this.currentContext = null;
+			this.listener.close();
 
-		this.currentDevice.close();
-		this.currentDevice = null;
+			if (this.activeContext != null)
+				this.activeContext.close();
+			this.activeContext = null;
 
-		for (AudioDevice device : this.devices.values())
-			device.close();
-		this.devices.clear();
+			this.activeDevice.close();
+			this.activeDevice = null;
+
+			for (AudioDevice device : this.devices.values())
+				device.close();
+			this.devices.clear();
+		} finally {
+			super.close();
+		}
+	}
+
+	private enum DeviceStatus {
+		PENDING,
+		OPENED,
+		ERROR
 	}
 }

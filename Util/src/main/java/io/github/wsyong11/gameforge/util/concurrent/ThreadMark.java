@@ -48,6 +48,8 @@ public class ThreadMark {
 
 	@Override
 	public String toString() {
-		return "Mark[" + this.thread + "]";
+		return "Mark[\"%s\" 0x%08X]".formatted(
+			this.thread.getName(),
+			this.thread.getId());
 	}
 }

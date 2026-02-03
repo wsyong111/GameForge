@@ -50,8 +50,8 @@ public class TaskHandler {
 	public static class Task<T> implements Runnable {
 		private final Callable<T> task;
 		private final ThreadSignal signal;
-		private Throwable exception;
-		private T value;
+		private volatile Throwable exception;
+		private volatile T value;
 
 		public Task(@NotNull Runnable task) {
 			this(FunctionUtils.toCallable(task));
@@ -71,7 +71,7 @@ public class TaskHandler {
 		public void run() {
 			try {
 				this.value = this.task.call();
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				this.exception = e;
 			}
 			this.signal.set();
@@ -90,6 +90,7 @@ public class TaskHandler {
 		}
 
 		public T get(long timeout, @NotNull TimeUnit unit) throws ExecutionException, InterruptedException {
+			Objects.requireNonNull(unit, "unit is null");
 			this.signal.await(timeout, unit);
 			return this.getValue();
 		}

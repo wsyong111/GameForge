@@ -1,5 +1,7 @@
 package io.github.wsyong11.gameforge.framework.system.audio;
 
+import io.github.wsyong11.gameforge.framework.system.audio.engine.AudioEngine;
+import io.github.wsyong11.gameforge.framework.system.audio.ex.AudioDeviceException;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.util.Ticker;
@@ -27,6 +29,14 @@ class AudioThread extends Thread {
 	public void run() {
 		LOGGER.debug("Audio thread init...");
 		this.engine.init();
+
+		AudioDeviceIdentity defaultDevice = this.engine.getDefaultDevice();
+		try {
+			this.engine.setActiveDevice(defaultDevice);
+		} catch (AudioDeviceException e) {
+			this.engine.setActiveDevice(AudioDeviceIdentity.empty());
+			LOGGER.warn("Cannot set the output device to {}, Set the empty device as placeholder", defaultDevice, e);
+		}
 
 		LOGGER.debug("Audio thread init completed");
 		try {

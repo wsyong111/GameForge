@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import static org.lwjgl.openal.ALC11.*;
 
 @UtilityClass
-class ErrorUtil {
+public class ErrorUtil {
 	@NotNull
 	public static String getErrorType(int code) {
 		return switch (code) {

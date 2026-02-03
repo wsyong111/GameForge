@@ -1,5 +1,10 @@
-package io.github.wsyong11.gameforge.framework.system.audio;
+package io.github.wsyong11.gameforge.framework.system.audio.engine;
 
+import io.github.wsyong11.gameforge.framework.system.audio.AudioDevice;
+import io.github.wsyong11.gameforge.framework.system.audio.AudioDeviceIdentity;
+import io.github.wsyong11.gameforge.framework.system.audio.AudioListener;
+import io.github.wsyong11.gameforge.framework.system.audio.AudioPlayer;
+import io.github.wsyong11.gameforge.framework.system.audio.audio.Audio;
 import io.github.wsyong11.gameforge.framework.system.audio.ex.AudioDeviceException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,11 +28,11 @@ public interface AudioEngine extends AutoCloseable {
 	AudioListener getListener();
 
 	@NotNull
-	@Unmodifiable
-	List<AudioPlayer> getAudioPlayers();
+	AudioPlayer createPlayer(@NotNull Audio audio);
 
 	@NotNull
-	AudioPlayer createPlayer(@NotNull Audio audio);
+	@Unmodifiable
+	List<AudioPlayer> getAudioPlayers();
 
 	float getGlobalVolume();
 
@@ -40,11 +45,11 @@ public interface AudioEngine extends AutoCloseable {
 	@NotNull
 	List<AudioDeviceIdentity> getDevices();
 
-	void setOutputDevice(@NotNull AudioDeviceIdentity device) throws AudioDeviceException;
+	void setActiveDevice(@NotNull AudioDeviceIdentity device);
 
 	// 默认返回系统默认输出设备
 	@NotNull
-	AudioDeviceIdentity getOutputDevice();
+	AudioDeviceIdentity getActiveDevice();
 
 	@NotNull
 	AudioDeviceIdentity getDefaultDevice();

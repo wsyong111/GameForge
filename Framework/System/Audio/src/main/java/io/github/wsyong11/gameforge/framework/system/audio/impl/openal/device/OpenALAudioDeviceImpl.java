@@ -1,9 +1,11 @@
-package io.github.wsyong11.gameforge.framework.system.audio.impl.openal;
+package io.github.wsyong11.gameforge.framework.system.audio.impl.openal.device;
 
-import io.github.wsyong11.gameforge.framework.system.audio.AudioDevice;
 import io.github.wsyong11.gameforge.framework.system.audio.AudioDeviceIdentity;
+import io.github.wsyong11.gameforge.framework.system.audio.ex.AudioDeviceClosedException;
 import io.github.wsyong11.gameforge.framework.system.audio.ex.AudioDeviceException;
 import io.github.wsyong11.gameforge.framework.system.audio.ex.AudioDeviceOpenException;
+import io.github.wsyong11.gameforge.framework.system.audio.impl.openal.context.OpenALContext;
+import io.github.wsyong11.gameforge.framework.system.audio.impl.openal.context.OpenALContextImpl;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +18,7 @@ import static org.lwjgl.openal.ALC11.alcCloseDevice;
 import static org.lwjgl.openal.ALC11.alcOpenDevice;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
-public class OpenALAudioDevice implements AudioDevice {
+public class OpenALAudioDeviceImpl implements OpenALAudioDevice {
 	private static final Logger LOGGER = Log.getLogger();
 
 	private final long handler;
@@ -26,12 +28,12 @@ public class OpenALAudioDevice implements AudioDevice {
 
 	private final List<OpenALContext> contexts;
 
-	public OpenALAudioDevice(@NotNull AudioDeviceIdentity identity) throws AudioDeviceOpenException {
+	public OpenALAudioDeviceImpl(@NotNull AudioDeviceIdentity identity) throws AudioDeviceOpenException {
 		Objects.requireNonNull(identity, "identity is null");
 
 		this.handler = alcOpenDevice(identity.getName());
 		if (this.handler == NULL)
-			throw new AudioDeviceOpenException("Failed to open the audio device");
+			throw new AudioDeviceOpenException("Failed to open the audio device " + identity);
 
 		this.identity = identity;
 
@@ -49,6 +51,25 @@ public class OpenALAudioDevice implements AudioDevice {
 	@Override
 	public boolean isClosed() {
 		return this.closed;
+	}
+
+	private void checkState() {
+		if (this.closed)
+			throw new AudioDeviceClosedException("Audio device closed");
+	}
+
+	public long getHandler() {
+		return this.handler;
+	}
+
+	@Override
+	@NotNull
+	public OpenALContext createContext() throws AudioDeviceException {
+		this.checkState();
+
+		OpenALContext context = new OpenALContextImpl(this.handler, this.identity);
+		this.contexts.add(context);
+		return context;
 	}
 
 	@Override
@@ -70,21 +91,10 @@ public class OpenALAudioDevice implements AudioDevice {
 		}
 	}
 
-	private void checkState() {
-		if (this.closed)
-			throw new IllegalStateException("Audio device closed");
-	}
-
-	public long getHandler() {
-		return this.handler;
-	}
-
-	@NotNull
-	public OpenALContext createContext() throws AudioDeviceException {
-		this.checkState();
-
-		OpenALContext context = new OpenALContext(this);
-		this.contexts.add(context);
-		return context;
+	@Override
+	public String toString() {
+		return "OpenALDevice{%s 0x%08X}".formatted(
+			this.identity,
+			this.handler);
 	}
 }

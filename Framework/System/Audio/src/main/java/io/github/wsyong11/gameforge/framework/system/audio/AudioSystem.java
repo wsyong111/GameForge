@@ -1,5 +1,7 @@
 package io.github.wsyong11.gameforge.framework.system.audio;
 
+import io.github.wsyong11.gameforge.framework.system.audio.engine.AudioEngine;
+import io.github.wsyong11.gameforge.framework.system.audio.engine.AudioEngineContext;
 import io.github.wsyong11.gameforge.framework.system.audio.provider.AudioEngineProvider;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
@@ -70,16 +72,36 @@ public final class AudioSystem {
 	private final AudioEngine engine;
 	private final AudioThread thread;
 
+	private volatile boolean closed;
+
 	private AudioSystem(@NotNull AudioEngineProvider engineProvider) {
 		Objects.requireNonNull(engineProvider, "engineProvider is null");
 
-		this.engine = engineProvider.getFactory().get();
+		this.engine = engineProvider.getFactory().apply(new Context());
 		this.thread = new AudioThread(this.engine);
 
 		this.thread.start();
 	}
 
-	private void shutdownThis() {
+	@NotNull
+	public AudioListener getListener() {
+		this.checkState();
+		return this.engine.getListener();
+	}
+
+	private void checkState() {
+		if (this.closed)
+			throw new IllegalStateException("Audio system closed");
+	}
+
+	private synchronized void shutdownThis() {
+		if (this.closed)
+			return;
+		this.closed = true;
+
 		this.thread.shutdown();
+	}
+
+	private static class Context implements AudioEngineContext {
 	}
 }
