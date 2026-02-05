@@ -3,11 +3,27 @@ package io.github.wsyong11.gameforge.framework.system.audio.audio;
 import io.github.wsyong11.gameforge.framework.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
+
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 public interface AudioManager {
 	@Nullable
 	Audio getAudio(@NotNull Identifier location);
 
 	@Nullable
-	Audio getAudioAsync(@NotNull Identifier location);
+	CompletableFuture<Audio> getAudioAsync(@NotNull Identifier location);
+
+	boolean isLoaded(@NotNull Identifier location);
+
+	void unload(@NotNull Identifier location);
+
+	void unloadAll();
+
+	@NotNull
+	@Unmodifiable
+	Set<Identifier> getLoadedAudios();
+
+	void preload(@NotNull Identifier location);
 }
