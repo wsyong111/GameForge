@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+@SuppressWarnings("resource")
 public class ResourceManagerServiceStub extends Wrapper<ResourceManager> implements ResourceManagerService {
 	public ResourceManagerServiceStub(@NotNull ResourceManager delegate) {
 		super(Objects.requireNonNull(delegate, "delegate is null"));
@@ -62,8 +63,9 @@ public class ResourceManagerServiceStub extends Wrapper<ResourceManager> impleme
 		return this.delegate().getResources(name);
 	}
 
+	@NotNull
 	@Override
-	public @NotNull Optional<Resource> getResourceOptional(@NotNull Identifier name) {
+	public Optional<Resource> getResourceOptional(@NotNull Identifier name) {
 		return this.delegate().getResourceOptional(name);
 	}
 

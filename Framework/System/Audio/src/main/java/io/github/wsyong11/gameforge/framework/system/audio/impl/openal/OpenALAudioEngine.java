@@ -5,6 +5,7 @@ import io.github.wsyong11.gameforge.framework.system.audio.AudioDeviceIdentity;
 import io.github.wsyong11.gameforge.framework.system.audio.AudioListener;
 import io.github.wsyong11.gameforge.framework.system.audio.AudioPlayer;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.Audio;
+import io.github.wsyong11.gameforge.framework.system.audio.audio.AudioManager;
 import io.github.wsyong11.gameforge.framework.system.audio.engine.AudioEngineContext;
 import io.github.wsyong11.gameforge.framework.system.audio.ex.AudioDeviceException;
 import io.github.wsyong11.gameforge.framework.system.audio.ex.AudioDeviceOpenException;
@@ -13,6 +14,7 @@ import io.github.wsyong11.gameforge.framework.system.audio.impl.openal.device.No
 import io.github.wsyong11.gameforge.framework.system.audio.impl.openal.device.OpenALAudioDevice;
 import io.github.wsyong11.gameforge.framework.system.audio.impl.openal.device.OpenALAudioDeviceImpl;
 import io.github.wsyong11.gameforge.framework.system.audio.impl.simple.AbstractAudioEngine;
+import io.github.wsyong11.gameforge.framework.system.audio.impl.simple.DefaultAudioManager;
 import io.github.wsyong11.gameforge.framework.system.audio.impl.simple.NamedAudioDeviceIdentity;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
@@ -35,6 +37,8 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 public class OpenALAudioEngine extends AbstractAudioEngine {
 	private static final Logger LOGGER = Log.getLogger();
 
+	private final DefaultAudioManager audioManager;
+
 	private AudioDeviceIdentity defaultDeviceIdentity;
 	private List<AudioDeviceIdentity> devicesIdentityList;
 
@@ -53,6 +57,8 @@ public class OpenALAudioEngine extends AbstractAudioEngine {
 
 	public OpenALAudioEngine(@NotNull AudioEngineContext context) {
 		super(context);
+
+		this.audioManager = new DefaultAudioManager();
 
 		this.defaultDeviceIdentity = NamedAudioDeviceIdentity.EMPTY;
 
@@ -111,6 +117,12 @@ public class OpenALAudioEngine extends AbstractAudioEngine {
 			return;
 
 		this.updateListener();
+	}
+
+	@NotNull
+	@Override
+	public AudioManager getAudioManager() {
+		return this.audioManager;
 	}
 
 	protected void updateDevice() {
@@ -329,6 +341,8 @@ public class OpenALAudioEngine extends AbstractAudioEngine {
 		this.closed = true;
 
 		try {
+			this.audioManager.close();
+
 			alcMakeContextCurrent(NULL);
 
 			this.listener.close();

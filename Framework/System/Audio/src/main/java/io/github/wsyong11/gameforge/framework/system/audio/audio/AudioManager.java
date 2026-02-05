@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public interface AudioManager {
 	@Nullable
@@ -26,4 +27,8 @@ public interface AudioManager {
 	Set<Identifier> getLoadedAudios();
 
 	void preload(@NotNull Identifier location);
+
+	void awaitPreload() throws InterruptedException;
+
+	void awaitPreload(long timeout, @NotNull TimeUnit unit) throws InterruptedException;
 }

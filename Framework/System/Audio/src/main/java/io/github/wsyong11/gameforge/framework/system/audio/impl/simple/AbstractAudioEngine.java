@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 public abstract class AbstractAudioEngine implements AudioEngine {
-	private final AudioEngineContext context;
+	protected final AudioEngineContext context;
 
 	private final TaskQueueExecutor taskQueue;
 	protected final TaskHandler taskHandler;

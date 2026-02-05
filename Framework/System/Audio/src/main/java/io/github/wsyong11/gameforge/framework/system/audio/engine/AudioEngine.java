@@ -5,6 +5,7 @@ import io.github.wsyong11.gameforge.framework.system.audio.AudioDeviceIdentity;
 import io.github.wsyong11.gameforge.framework.system.audio.AudioListener;
 import io.github.wsyong11.gameforge.framework.system.audio.AudioPlayer;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.Audio;
+import io.github.wsyong11.gameforge.framework.system.audio.audio.AudioManager;
 import io.github.wsyong11.gameforge.framework.system.audio.ex.AudioDeviceException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,6 +22,9 @@ public interface AudioEngine extends AutoCloseable {
 	int getLoopPreSec();
 
 	void loopTick();
+
+	@NotNull
+	AudioManager getAudioManager();
 
 	// -------------------------------------------------------------------------------------------------------------- //
 

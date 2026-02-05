@@ -1,10 +1,12 @@
 package io.github.wsyong11.gameforge.framework.system.audio;
 
+import io.github.wsyong11.gameforge.framework.system.audio.audio.AudioManager;
 import io.github.wsyong11.gameforge.framework.system.audio.engine.AudioEngine;
 import io.github.wsyong11.gameforge.framework.system.audio.engine.AudioEngineContext;
 import io.github.wsyong11.gameforge.framework.system.audio.provider.AudioEngineProvider;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
+import io.github.wsyong11.gameforge.framework.system.resource.ResourceProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,8 +18,9 @@ public final class AudioSystem {
 	private static volatile AudioSystem INSTANCE = null;
 
 	@NotNull
-	public static AudioSystem init(@NotNull AudioEngineProvider engineProvider) {
+	public static AudioSystem init(@NotNull AudioEngineProvider engineProvider, @NotNull ResourceProvider resourceProvider) {
 		Objects.requireNonNull(engineProvider, "engineProvider is null");
+		Objects.requireNonNull(resourceProvider, "resourceProvider is null");
 
 		AudioSystem globalInstance = getInstanceSafe();
 		if (globalInstance != null)
@@ -28,7 +31,7 @@ public final class AudioSystem {
 		synchronized (AudioSystem.class) {
 			LOGGER.debug("Initialize audio system");
 
-			instance = new AudioSystem(engineProvider);
+			instance = new AudioSystem(engineProvider, resourceProvider);
 			INSTANCE = instance;
 		}
 
@@ -72,13 +75,20 @@ public final class AudioSystem {
 	private final AudioEngine engine;
 	private final AudioThread thread;
 
+	private final AudioManager audioManager;
+
 	private volatile boolean closed;
 
-	private AudioSystem(@NotNull AudioEngineProvider engineProvider) {
+	private AudioSystem(@NotNull AudioEngineProvider engineProvider, @NotNull ResourceProvider resourceProvider) {
 		Objects.requireNonNull(engineProvider, "engineProvider is null");
+		Objects.requireNonNull(resourceProvider, "resourceProvider is null");
 
-		this.engine = engineProvider.getFactory().apply(new Context());
+		Context context = new Context(resourceProvider);
+
+		this.engine = engineProvider.getFactory().apply(context);
 		this.thread = new AudioThread(this.engine);
+
+		this.audioManager = this.engine.getAudioManager();
 
 		this.thread.start();
 	}
@@ -87,6 +97,12 @@ public final class AudioSystem {
 	public AudioListener getListener() {
 		this.checkState();
 		return this.engine.getListener();
+	}
+
+	@NotNull
+	public AudioManager getAudioManager() {
+		this.checkState();
+		return this.audioManager;
 	}
 
 	private void checkState() {
@@ -103,5 +119,17 @@ public final class AudioSystem {
 	}
 
 	private static class Context implements AudioEngineContext {
+		private final ResourceProvider resourceProvider;
+
+		private Context(@NotNull ResourceProvider resourceProvider) {
+			Objects.requireNonNull(resourceProvider, "resourceProvider is null");
+			this.resourceProvider = resourceProvider;
+		}
+
+		@NotNull
+		@Override
+		public ResourceProvider getResourceProvider() {
+			return this.resourceProvider;
+		}
 	}
 }

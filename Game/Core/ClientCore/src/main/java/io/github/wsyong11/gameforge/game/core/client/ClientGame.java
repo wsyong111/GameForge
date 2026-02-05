@@ -7,6 +7,8 @@ import io.github.wsyong11.gameforge.framework.i18n.SimpleI18nManager;
 import io.github.wsyong11.gameforge.framework.key.KeyAction;
 import io.github.wsyong11.gameforge.framework.key.KeyCode;
 import io.github.wsyong11.gameforge.framework.system.audio.AudioSystem;
+import io.github.wsyong11.gameforge.framework.system.audio.audio.Audio;
+import io.github.wsyong11.gameforge.framework.system.audio.audio.AudioManager;
 import io.github.wsyong11.gameforge.framework.system.audio.impl.openal.OpenALAudioEngine;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
@@ -41,6 +43,8 @@ public class ClientGame extends AbstractGame {
 	private static final Logger LOGGER = Log.getLogger();
 
 	private static final Identifier ICON_PATH = Identifier.withDefaultNamespace("texture/icon.png");
+
+	private static final Identifier TEST_BGM = Identifier.withDefaultNamespace("sound/test_bgm.ogg");
 
 	private final I18nManager i18nManager;
 
@@ -99,13 +103,17 @@ public class ClientGame extends AbstractGame {
 	protected void onStarting() throws Throwable {
 		super.onStarting();
 
+		ResourceManager resourceManager = this.getResourceManager();
+
 		ServiceRegistry serviceRegistry = this.getServiceRegistry();
 		serviceRegistry.register(I18nService.class, new I18nServiceStub(this.i18nManager));
 
-		AudioSystem.init(() -> OpenALAudioEngine::new);
+		AudioSystem audioSystem = AudioSystem.init(() -> OpenALAudioEngine::new, resourceManager);
+		AudioManager audioManager = audioSystem.getAudioManager();
+		audioManager.preload(TEST_BGM);
+		audioManager.awaitPreload();
 
 		// TODO: 2025/11/19 I18n keys load
-//		ResourceManager resourceManager = this.getResourceManager();
 //		resourceManager.registerReloadListener(this.i18nManager::reload);
 
 //		this.renderThread = new RenderThread(resourceManager, new Vector2i(800, 600), this.isDebug());
@@ -164,6 +172,11 @@ public class ClientGame extends AbstractGame {
 		});
 
 //		renderSystem.registerRenderer(new TestRenderer());
+
+		AudioSystem audioSystem = AudioSystem.getInstance();
+		AudioManager audioManager = audioSystem.getAudioManager();
+		Audio bgm = audioManager.getAudio(TEST_BGM);
+		System.out.println(bgm);
 
 		RenderSystem.loop();
 	}
