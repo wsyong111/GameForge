@@ -8,16 +8,36 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public abstract class Context {
+	public static void setGlobal(@Nullable Context ctx) {
+		ContextStack.setGlobal(ctx);
+	}
+
+	@Nullable
+	public static Context getGlobal() {
+		return ContextStack.getGlobal();
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
 	public static void begin(@NotNull Context ctx, @NotNull Runnable action) {
 		Objects.requireNonNull(ctx, "ctx is null");
 		Objects.requireNonNull(action, "action is null");
 
 		try (ContextScope ignored = scope(ctx)) {
 			action.run();
+		}
+	}
+
+	public static <T> T begin(@NotNull Context ctx, @NotNull Supplier<T> action) {
+		Objects.requireNonNull(ctx, "ctx is null");
+		Objects.requireNonNull(action, "action is null");
+
+		try (ContextScope ignored = scope(ctx)) {
+			return action.get();
 		}
 	}
 
@@ -29,6 +49,18 @@ public abstract class Context {
 		return () -> {
 			try (ContextScope ignored = scope(ctx)) {
 				action.run();
+			}
+		};
+	}
+
+	@NotNull
+	public static <T> Supplier<T> inherit(@NotNull Context ctx, @NotNull Supplier<T> action) {
+		Objects.requireNonNull(ctx, "ctx is null");
+		Objects.requireNonNull(action, "action is null");
+
+		return () -> {
+			try (ContextScope ignored = scope(ctx)) {
+				return action.get();
 			}
 		};
 	}
@@ -95,19 +127,19 @@ public abstract class Context {
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
-	@UsingContext
-	public static void dump(@NotNull Consumer<String> logger) {
-		Objects.requireNonNull(logger, "logger is null");
-
-		ContextStack stack = ContextStack.getInstance();
-		stack.getStackSnapshot()
-	}
+//	@UsingContext
+//	public static void dump(@NotNull Consumer<String> logger) {
+//		Objects.requireNonNull(logger, "logger is null");
+//
+//		ContextStack stack = ContextStack.getInstance();
+//		stack.getStackSnapshot()
+//	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
 	@UsingContext
-	public static boolean isDebugCurrent() {
-		return ContextStack.getInstance().isDebug();
+	public static boolean isEffectiveDebug() {
+		return ContextStack.getInstance().isEffectiveDebug();
 	}
 
 	public abstract boolean isDebug();
