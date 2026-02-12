@@ -70,7 +70,7 @@ class ContextStack {
 
 	@CallerSensitive
 	private ContextStack() {
-		this.stack = new LinkedList<>();
+		this.stack = new ArrayDeque<>();
 		this.owner = Thread.currentThread();
 		this.localGlobalContext = globalContext;
 
@@ -79,6 +79,11 @@ class ContextStack {
 
 	private void updateGlobal() {
 		this.localGlobalContext = globalContext;
+	}
+
+	@NotNull
+	public Thread getOwner() {
+		return this.owner;
 	}
 
 	@ThreadSensitive
@@ -90,51 +95,46 @@ class ContextStack {
 			throw new IllegalCallerException("Cannot invoke " + methodName + " in thread " + currentThread + ", owner thread is " + this.owner);
 	}
 
-	public void pushHidden() {
-		this.checkThread("pushHidden");
-
-		StackItem parentItem = this.stack.peek();
-
-		boolean parentDebug = parentItem != null && parentItem.isDebug();
-
-		StackItem item = new HiddenStackItem(this.owner, parentDebug);
-		this.stack.push(item);
-
-		if (item.isEffectiveDebug())
-			LOGGER.trace("Push hidden layer in thread {}", this.owner);
-	}
-
 	@ThreadSensitive
-	public void push(@Nullable Context ctx) {
+	protected void push(@NotNull StackItemType type, @Nullable Context ctx) {
+		Objects.requireNonNull(type, "type is null");
+
+		if (type == StackItemType.DISABLE && ctx != null)
+			throw new IllegalArgumentException("Stack item type is DISABLE, but ctx parameter is not null");
+
 		this.checkThread("push");
 
 		StackItem parentItem = this.stack.peek();
 
-		boolean parentDebug = parentItem != null && parentItem.isDebug();
+		boolean effectiveDebug = parentItem != null && parentItem.isEffectiveDebug();
 		boolean debug = ctx != null && ctx.isDebug();
 
-		StackItem item = new ContextStackItem(
+		StackItem item = new StackItem(
 			ctx,
+			type,
 			this.owner,
 			debug,
-			parentDebug
+			effectiveDebug
 		);
 
 		this.stack.push(item);
 
 		if (item.isEffectiveDebug())
-			LOGGER.trace("Push context in thread {}: {}", this.owner, lazy(ctx));
+			LOGGER.trace("Push stack {} in thread {}: {}", type, this.owner, lazy(ctx));
 	}
 
-	public void pop(@Nullable Context ctx) {
+	public void pop(@NotNull StackItemType type, @Nullable Context ctx) {
+		Objects.requireNonNull(type, "type is null");
+
 		this.checkThread("pop");
 
 		StackItem item = this.stack.peek();
 		if (item == null)
 			throw new IllegalStateException("Context stack is empty");
 
-		if (item instanceof HiddenStackItem)
-			throw new IllegalStateException("Stack item is a hidden layer, not a context");
+		StackItemType itemType = item.getType();
+		if (itemType != type)
+			throw new IllegalStateException("Stack item is a " + itemType + ", but type parameter is " + type);
 
 		Context itemContext = item.getContext();
 		if (itemContext != ctx)
@@ -143,23 +143,47 @@ class ContextStack {
 		this.stack.pop();
 
 		if (item.isEffectiveDebug())
-			LOGGER.trace("Pop context in thread {}: {}", this.owner, itemContext);
+			LOGGER.trace("Pop stack {} in thread {}: {}", itemType, this.owner, itemContext);
 	}
 
-	public void popHidden() {
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	@ThreadSensitive
+	public void pushHidden(@Nullable Context ctx) {
+		this.checkThread("pushHidden");
+		this.push(StackItemType.HIDDEN, ctx);
+	}
+
+	@ThreadSensitive
+	public void push(@NotNull Context ctx) {
+		Objects.requireNonNull(ctx, "ctx is null");
+		this.checkThread("push");
+		this.push(StackItemType.CONTEXT, ctx);
+	}
+
+	@ThreadSensitive
+	public void pushDisable() {
+		this.checkThread("pushDisable");
+		this.push(StackItemType.DISABLE, null);
+	}
+
+	@ThreadSensitive
+	public void pop(@NotNull Context ctx) {
+		Objects.requireNonNull(ctx, "ctx is null");
+		this.checkThread("pop");
+		this.pop(StackItemType.CONTEXT, ctx);
+	}
+
+	@ThreadSensitive
+	public void popHidden(@Nullable Context ctx) {
 		this.checkThread("popHidden");
+		this.pop(StackItemType.HIDDEN, ctx);
+	}
 
-		StackItem item = this.stack.peek();
-		if (item == null)
-			throw new IllegalStateException("Context stack is empty");
-
-		if (!(item instanceof HiddenStackItem))
-			throw new IllegalStateException("Stack item is a context, not a hidden layer");
-
-		this.stack.pop();
-
-		if (item.isEffectiveDebug())
-			LOGGER.trace("Pop hidden layer in thread {}", this.owner);
+	@ThreadSensitive
+	public void popDisable() {
+		this.checkThread("popDisable");
+		this.pop(StackItemType.DISABLE, null);
 	}
 
 	@Nullable
@@ -174,11 +198,6 @@ class ContextStack {
 	}
 
 	public boolean isDebug() {
-		StackItem item = this.getCurrentItem();
-		return item != null && item.isDebug();
-	}
-
-	public boolean isEffectiveDebug() {
 		StackItem item = this.getCurrentItem();
 		Context localGlobalContext = this.localGlobalContext;
 
@@ -195,9 +214,9 @@ class ContextStack {
 			.copyOf(this.stack)
 			.stream()
 			.filter(i -> {
-				if (i instanceof HiddenStackItem) {
+				if (i.getType()==StackItemType.HIDDEN) {
 					foundHiddenItem[0] = true;
-					return false;
+					return true;
 				}
 
 				return !foundHiddenItem[0];
@@ -228,19 +247,31 @@ class ContextStack {
 		return this.stack.size();
 	}
 
-	protected static abstract class StackItem {
+	protected static class StackItem {
+		@Nullable
+		private final Context context;
 		private final Thread owner;
+		private final StackItemType type;
 
 		private final boolean debug;
-		private final boolean parentDebug;
+		private final boolean effectiveDebug;
+
 		@Nullable
 		private final ThreadSnapshot pushThreadSnapshot;
 
-		public StackItem(@NotNull Thread owner, boolean debug, boolean parentDebug) {
+		public StackItem(@Nullable Context ctx, @NotNull StackItemType type, @NotNull Thread owner, boolean debug, boolean effectiveDebug) {
+			Objects.requireNonNull(owner, "owner is null");
+			Objects.requireNonNull(type, "type is null");
+
+			this.context = ctx;
 			this.owner = owner;
+			this.type = type;
+
+			if (type == StackItemType.DISABLE && ctx != null)
+				throw new IllegalArgumentException("Stack item type is DISABLE, but ctx parameter is not null");
 
 			this.debug = debug;
-			this.parentDebug = parentDebug;
+			this.effectiveDebug = effectiveDebug;
 
 			this.pushThreadSnapshot = this.isEffectiveDebug()
 				? ThreadSnapshot.snapshot(owner)
@@ -248,11 +279,18 @@ class ContextStack {
 		}
 
 		@Nullable
-		public abstract Context getContext();
+		public Context getContext() {
+			return this.context;
+		}
 
 		@NotNull
 		public Thread getOwner() {
 			return this.owner;
+		}
+
+		@NotNull
+		public StackItemType getType() {
+			return this.type;
 		}
 
 		public boolean isDebug() {
@@ -260,7 +298,7 @@ class ContextStack {
 		}
 
 		public boolean isEffectiveDebug() {
-			return this.debug || this.parentDebug;
+			return this.debug || this.effectiveDebug;
 		}
 
 //		@Nullable
@@ -269,30 +307,9 @@ class ContextStack {
 //		}
 	}
 
-	protected static class ContextStackItem extends StackItem {
-		private final Context context;
-
-		protected ContextStackItem(@Nullable Context context, @NotNull Thread owner, boolean debug, boolean parentDebug) {
-			super(owner, debug, parentDebug);
-			this.context = context;
-		}
-
-		@Nullable
-		@Override
-		public Context getContext() {
-			return this.context;
-		}
-	}
-
-	protected static class HiddenStackItem extends StackItem {
-		protected HiddenStackItem(@NotNull Thread owner, boolean parentDebug) {
-			super(owner, false, parentDebug);
-		}
-
-		@Nullable
-		@Override
-		public Context getContext() {
-			return null;
-		}
+	protected enum StackItemType {
+		CONTEXT,
+		DISABLE,
+		HIDDEN
 	}
 }
