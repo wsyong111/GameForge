@@ -9,7 +9,6 @@ import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.util.debug.ThreadSnapshot;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -18,6 +17,7 @@ import java.util.stream.Stream;
 import static io.github.wsyong11.gameforge.framework.system.log.LogTemplate.currentStackTrace;
 import static io.github.wsyong11.gameforge.framework.system.log.LogTemplate.lazy;
 
+// TODO: 2026/2/13 Dump
 @Internal
 class ContextStack {
 	private static final Logger LOGGER = Log.getLogger();
@@ -206,7 +206,6 @@ class ContextStack {
 	}
 
 	@NotNull
-	@Unmodifiable
 	public Stream<Context> getStackSnapshot() {
 		boolean[] foundHiddenItem = new boolean[]{false};
 

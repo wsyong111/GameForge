@@ -14,6 +14,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 /**
  * 上下文管理类，用于管理线程内上下文栈以及全局上下文。
@@ -363,7 +364,7 @@ public abstract class Context {
 
 	/**
 	 * 按从近到远（栈顶到栈底）的顺序，
-	 * 获取所有满足条件的上下文快照。
+	 * 获取所有满足条件的上下文。
 	 *
 	 * @param predicate 过滤条件
 	 * @return 不可修改的上下文列表
@@ -379,6 +380,19 @@ public abstract class Context {
 			.getStackSnapshot()
 			.filter(predicate)
 			.toList();
+	}
+
+	/**
+	 * 按从近到远（栈顶到栈底）的顺序，
+	 * 获取当前上下文堆栈的快照并作为流返回
+	 *
+	 * @return 上下文流
+	 */
+	@UsingContext
+	@NotNull
+	public static Stream<Context> getEachStream() {
+		ContextStack stack = ContextStack.getInstance();
+		return stack.getStackSnapshot();
 	}
 
 	/**
@@ -422,6 +436,14 @@ public abstract class Context {
 		return ContextStack.getInstance().isDebug();
 	}
 
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	private final boolean debug;
+
+	protected Context(boolean debug) {
+		this.debug = debug;
+	}
+
 	/**
 	 * 返回当前上下文自身声明的调试状态。
 	 *
@@ -429,10 +451,34 @@ public abstract class Context {
 	 *
 	 * @return 是否声明为调试模式
 	 */
-	public abstract boolean isDebug();
+	public boolean isDebug() {
+		return this.debug;
+	}
 
 	@NotNull
-	public abstract <T> Optional<T> getInstance(@NotNull Class<T> type);
+	public <T extends Context> T as(@NotNull Class<T> type) {
+		Objects.requireNonNull(type, "type is null");
 
+		if (!type.isInstance(this))
+			throw new IllegalStateException("Cannot get as " + type.getName());
+		return type.cast(this);
+	}
 
+	@Nullable
+	public <T extends Context> T asUnsafe(@NotNull Class<T> type) {
+		Objects.requireNonNull(type, "type is null");
+
+		if (!type.isInstance(this))
+			return null;
+		return type.cast(this);
+	}
+
+	@NotNull
+	public <T extends Context> Optional<T> asOptional(@NotNull Class<T> type) {
+		Objects.requireNonNull(type, "type is null");
+
+		if (!type.isInstance(this))
+			return Optional.empty();
+		return Optional.of(type.cast(this));
+	}
 }
