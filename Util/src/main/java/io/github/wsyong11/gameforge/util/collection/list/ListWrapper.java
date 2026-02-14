@@ -11,6 +11,11 @@ import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
+/**
+ * @param <T>
+ * @deprecated Using {@link com.google.common.collect.ForwardingList}
+ */
+@Deprecated
 public class ListWrapper<T> extends Wrapper<List<T>> implements List<T> {
 	public ListWrapper() {
 	}

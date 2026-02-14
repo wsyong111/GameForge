@@ -1,8 +1,10 @@
-package io.github.wsyong11.gameforge.framework.system.audio.impl.simple;
+package io.github.wsyong11.gameforge.framework.system.audio.impl.simple.audio;
 
 import io.github.wsyong11.gameforge.framework.Identifier;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.Audio;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.AudioManager;
+import io.github.wsyong11.gameforge.framework.system.resource.Resource;
+import io.github.wsyong11.gameforge.framework.system.resource.ResourceProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -10,24 +12,27 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 public class DefaultAudioManager implements AudioManager, AutoCloseable {
-	private final ExecutorService decoderThreadPool;
+	private final ResourceProvider resourceProvider;
+	private final AudioDecoderPool decoderPool;
 
 	private final Map<Identifier, Audio> audioCache;
 
-	public DefaultAudioManager() {
+	public DefaultAudioManager(@NotNull ResourceProvider resourceProvider) {
+		Objects.requireNonNull(resourceProvider, "resourceProvider is null");
+
+		this.resourceProvider = resourceProvider;
+
 		int decoderThreadCount = Math.max(1, Math.min(Runtime.getRuntime().availableProcessors() - 2, 4));
-		this.decoderThreadPool = new ThreadPoolExecutor(
-			1,
+		this.decoderPool = new AudioDecoderPool(
+			128,
 			decoderThreadCount,
 			10,
-			TimeUnit.SECONDS,
-			new ArrayBlockingQueue<>(128),
-			new AudioDecoderThreadFactory(),
-			new ThreadPoolExecutor.CallerRunsPolicy()
+			TimeUnit.SECONDS
 		);
 
 		this.audioCache = new ConcurrentHashMap<>();
@@ -36,6 +41,8 @@ public class DefaultAudioManager implements AudioManager, AutoCloseable {
 	@Nullable
 	@Override
 	public Audio getAudio(@NotNull Identifier location) {
+		Resource resource = this.resourceProvider.getResource(location);
+
 		return null;
 	}
 
@@ -84,33 +91,6 @@ public class DefaultAudioManager implements AudioManager, AutoCloseable {
 
 	@Override
 	public void close() {
-		this.decoderThreadPool.shutdown();
-		try {
-			if (!this.decoderThreadPool.awaitTermination(5, TimeUnit.SECONDS)) {
-				this.decoderThreadPool.shutdownNow();
-			}
-		} catch (InterruptedException e) {
-			this.decoderThreadPool.shutdownNow();
-			Thread.currentThread().interrupt();
-		}
-	}
-
-	private static class AudioDecoderThreadFactory implements ThreadFactory {
-		private final AtomicInteger id;
-
-		public AudioDecoderThreadFactory() {
-			this.id = new AtomicInteger(0);
-		}
-
-		@NotNull
-		@Override
-		public Thread newThread(@NotNull Runnable r) {
-			Objects.requireNonNull(r, "r is null");
-
-			Thread thread = new Thread(r);
-			thread.setDaemon(false);
-			thread.setName("AudioDecoder-" + this.id.getAndIncrement());
-			return thread;
-		}
+		this.decoderPool.shutdown();
 	}
 }

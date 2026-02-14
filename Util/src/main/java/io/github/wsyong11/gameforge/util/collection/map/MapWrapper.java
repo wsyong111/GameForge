@@ -11,6 +11,12 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+/**
+ * @param <K>
+ * @param <V>
+ * @deprecated Using {@link com.google.common.collect.ForwardingMap}
+ */
+@Deprecated
 public class MapWrapper<K, V> extends Wrapper<Map<K, V>> implements Map<K, V> {
 	public MapWrapper() {
 	}

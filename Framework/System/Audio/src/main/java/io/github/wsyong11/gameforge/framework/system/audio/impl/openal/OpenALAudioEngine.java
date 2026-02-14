@@ -14,8 +14,8 @@ import io.github.wsyong11.gameforge.framework.system.audio.impl.openal.device.No
 import io.github.wsyong11.gameforge.framework.system.audio.impl.openal.device.OpenALAudioDevice;
 import io.github.wsyong11.gameforge.framework.system.audio.impl.openal.device.OpenALAudioDeviceImpl;
 import io.github.wsyong11.gameforge.framework.system.audio.impl.simple.AbstractAudioEngine;
-import io.github.wsyong11.gameforge.framework.system.audio.impl.simple.DefaultAudioManager;
 import io.github.wsyong11.gameforge.framework.system.audio.impl.simple.NamedAudioDeviceIdentity;
+import io.github.wsyong11.gameforge.framework.system.audio.impl.simple.audio.DefaultAudioManager;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import org.jetbrains.annotations.NotNull;
