@@ -66,7 +66,7 @@ public class Identifier implements Comparable<Identifier> {
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
-	public static boolean validPathChar(char c) {
+	public static boolean isPathChar(char c) {
 		return (c == '_')
 			|| (c == '-')
 			|| (c >= 'a' && c <= 'z')
@@ -80,12 +80,13 @@ public class Identifier implements Comparable<Identifier> {
 		Objects.requireNonNull(path, "path is null");
 
 		for (int i = 0; i < path.length(); ++i)
-			if (!validPathChar(path.charAt(i))) return false;
+			if (!isPathChar(path.charAt(i)))
+				return false;
 
 		return true;
 	}
 
-	public static boolean validNamespaceChar(char c) {
+	public static boolean isNamespaceChar(char c) {
 		return (c == '_')
 			|| (c == '-')
 			|| (c >= 'a' && c <= 'z')
@@ -97,7 +98,7 @@ public class Identifier implements Comparable<Identifier> {
 		Objects.requireNonNull(namespace, "namespace is null");
 
 		for (int i = 0; i < namespace.length(); ++i)
-			if (!validNamespaceChar(namespace.charAt(i))) return false;
+			if (!isNamespaceChar(namespace.charAt(i))) return false;
 
 		return true;
 	}

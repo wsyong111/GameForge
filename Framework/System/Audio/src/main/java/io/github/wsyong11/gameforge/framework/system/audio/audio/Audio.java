@@ -1,5 +1,6 @@
 package io.github.wsyong11.gameforge.framework.system.audio.audio;
 
+import io.github.wsyong11.gameforge.framework.system.audio.audio.stream.AudioStream;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Closeable;
@@ -9,25 +10,11 @@ public interface Audio extends Closeable {
 	@NotNull
 	UUID getId();
 
-	default float getDurationMs() {
-		long totalSamples = this.getTotalSamples();
-		if (totalSamples <= 0L)
-			return 0.0F;
+	@NotNull
+	AudioMetadata getMetadata();
 
-		return ((float) totalSamples / this.getSampleRate()) * 1000.0F;
-	}
-
-	default boolean isStreamable() {
-		return this.getTotalSamples() <= 0L;
-	}
-
-	long getTotalSamples();
-
-	int getSampleRate();
-
-	int getChannels();
-
-	int getBitDepth();
+	@NotNull
+	AudioStatus getStatus();
 
 	@NotNull
 	AudioStream newStream();

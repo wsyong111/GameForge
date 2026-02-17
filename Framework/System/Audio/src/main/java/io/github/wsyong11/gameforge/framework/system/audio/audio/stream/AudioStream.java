@@ -1,5 +1,6 @@
-package io.github.wsyong11.gameforge.framework.system.audio.audio;
+package io.github.wsyong11.gameforge.framework.system.audio.audio.stream;
 
+import io.github.wsyong11.gameforge.framework.system.audio.audio.Audio;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Closeable;
@@ -7,13 +8,15 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 public interface AudioStream extends Closeable {
-	long getTotalSamples();
+	@NotNull
+	Audio getAudio();
 
-	long getPosition();
+	@NotNull
+	AudioStreamStatus getStatus();
 
-	boolean isFinished();
+	long getPositionSamples();
 
-	float availableMs();
+	long getAvailableSamples();
 
 	void seek(long sampleIndex) throws UnsupportedOperationException;
 
