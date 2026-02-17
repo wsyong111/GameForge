@@ -168,12 +168,6 @@ public class MimeType implements Comparable<MimeType> {
 	}
 
 	@NotNull
-	public static MimeType application(@NotNull String subtype) {
-		Objects.requireNonNull(subtype, "subtype is null");
-		return of("application", subtype);
-	}
-
-	@NotNull
 	public static MimeType of(@NotNull String type, @NotNull String subtype) {
 		Objects.requireNonNull(type, "type is null");
 		Objects.requireNonNull(subtype, "subtype is null");
@@ -203,6 +197,34 @@ public class MimeType implements Comparable<MimeType> {
 
 		return new MimeType(type, subtype, parameters);
 	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	@NotNull
+	public static MimeType application(@NotNull String subtype) {
+		Objects.requireNonNull(subtype, "subtype is null");
+		return of("application", subtype);
+	}
+
+	@NotNull
+	public static MimeType text(@NotNull String subtype) {
+		Objects.requireNonNull(subtype, "subtype is null");
+		return of("text", subtype);
+	}
+
+	@NotNull
+	public static MimeType audio(@NotNull String subtype) {
+		Objects.requireNonNull(subtype, "subtype is null");
+		return of("audio", subtype);
+	}
+
+	@NotNull
+	public static MimeType video(@NotNull String subtype) {
+		Objects.requireNonNull(subtype, "subtype is null");
+		return of("video", subtype);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
 
 	private final String type;
 	private final String subtype;

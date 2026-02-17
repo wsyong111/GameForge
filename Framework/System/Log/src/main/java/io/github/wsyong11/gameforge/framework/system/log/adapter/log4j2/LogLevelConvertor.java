@@ -17,6 +17,7 @@ public class LogLevelConvertor {
 			return null;
 
 		return switch (level) {
+			case VERBOSE -> VerboseLevel.VERBOSE;
 			case TRACE -> Level.TRACE;
 			case DEBUG -> Level.DEBUG;
 			case INFO -> Level.INFO;

@@ -32,6 +32,7 @@ tasks.compileJava {
 enum class LogLevel(
 	val localeName: String,
 ) {
+	VERBOSE("详细"),
 	TRACE("追踪"),
 	DEBUG("调试"),
 	INFO("信息"),
@@ -163,11 +164,8 @@ codegen {
 
 					+"return "
 					controlFlow("switch (level)") {
-						-"case TRACE -> this.isTraceEnabled();"
-						-"case DEBUG -> this.isDebugEnabled();"
-						-"case INFO -> this.isInfoEnabled();"
-						-"case WARN -> this.isWarnEnabled();"
-						-"case ERROR -> this.isErrorEnabled();"
+						for (value in LogLevel.values())
+							-"case ${value.name} -> this.is${value.name.lowercase().uppercaseFirstChar()}Enabled();"
 					}
 					+";"
 				}

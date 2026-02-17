@@ -1,5 +1,6 @@
 package io.github.wsyong11.gameforge.framework.system.log.core;
 
+import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
@@ -7,27 +8,31 @@ import java.util.Locale;
 import java.util.Map;
 
 public enum LogLevel {
+	VERBOSE(-1),
 	TRACE(0),
 	DEBUG(1),
 	INFO(2),
 	WARN(3),
 	ERROR(4);
 
-	private static final Map<String, LogLevel> STRING_LOG_LEVEL_MAP = Map.of(
-		"trace", LogLevel.TRACE,
-		"t", LogLevel.TRACE,
-		"debug", LogLevel.DEBUG,
-		"d", LogLevel.DEBUG,
-		"info", LogLevel.INFO,
-		"i", LogLevel.INFO,
-		"warn", LogLevel.WARN,
-		"w", LogLevel.WARN,
-		"error", LogLevel.ERROR,
-		"e", LogLevel.ERROR
-	);
+	private static final Map<String, LogLevel> STRING_LOG_LEVEL_MAP = ImmutableMap
+		.<String, LogLevel>builder()
+		.put("verbose", LogLevel.VERBOSE)
+		.put("v", LogLevel.VERBOSE)
+		.put("trace", LogLevel.TRACE)
+		.put("t", LogLevel.TRACE)
+		.put("debug", LogLevel.DEBUG)
+		.put("d", LogLevel.DEBUG)
+		.put("info", LogLevel.INFO)
+		.put("i", LogLevel.INFO)
+		.put("warn", LogLevel.WARN)
+		.put("w", LogLevel.WARN)
+		.put("error", LogLevel.ERROR)
+		.put("e", LogLevel.ERROR)
+		.build();
 
 	/**
-	 * 通过字符串获取日志等级枚举, 兼容单个字符 {@code t, d, i, w, e} 和字符串 {@code trace, debug, info, warn, error}，
+	 * 通过字符串获取日志等级枚举, 兼容单个字符 {@code v, t, d, i, w, e} 和字符串 {@code verbose, trace, debug, info, warn, error}，
 	 * 不区分大小写，此函数是空指针安全的
 	 *
 	 * @param type 日志等级字符串, 如果为 {@code null} 则返回 {@code null}

@@ -32,6 +32,11 @@ public class Log4jLogger extends AbstractLogger {
 	}
 
 	@Override
+	public boolean isVerboseEnabled() {
+		return this.logger.isEnabled(VerboseLevel.VERBOSE);
+	}
+
+	@Override
 	public boolean isTraceEnabled() {
 		return this.logger.isTraceEnabled();
 	}

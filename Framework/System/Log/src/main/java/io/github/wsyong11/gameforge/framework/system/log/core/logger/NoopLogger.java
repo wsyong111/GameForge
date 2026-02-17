@@ -22,6 +22,47 @@ public class NoopLogger implements Logger {
 	}
 
 	@Override
+	public boolean isVerboseEnabled() {
+		return false;
+	}
+
+	@Override
+	public void verbose(@NotNull String message) { /* no-op */ }
+
+	@Override
+	public void verbose(@NotNull String message, @Nullable Object arg0) { /* no-op */ }
+
+	@Override
+	public void verbose(@NotNull String message, @Nullable Object arg0, @Nullable Object arg1) { /* no-op */ }
+
+	@Override
+	public void verbose(@NotNull String message, @Nullable Object arg0, @Nullable Object arg1, @Nullable Object arg2) { /* no-op */ }
+
+	@Override
+	public void verbose(@NotNull String message, @Nullable Object arg0, @Nullable Object arg1, @Nullable Object arg2, @Nullable Object arg3) { /* no-op */ }
+
+	@Override
+	public void verbose(@NotNull String message, @Nullable Object arg0, @Nullable Object arg1, @Nullable Object arg2, @Nullable Object arg3, @Nullable Object arg4) { /* no-op */ }
+
+	@Override
+	public void verbose(@NotNull String message, @Nullable Object arg0, @Nullable Object arg1, @Nullable Object arg2, @Nullable Object arg3, @Nullable Object arg4, @Nullable Object arg5) { /* no-op */ }
+
+	@Override
+	public void verbose(@NotNull String message, @Nullable Object arg0, @Nullable Object arg1, @Nullable Object arg2, @Nullable Object arg3, @Nullable Object arg4, @Nullable Object arg5, @Nullable Object arg6) { /* no-op */ }
+
+	@Override
+	public void verbose(@NotNull String message, @Nullable Object arg0, @Nullable Object arg1, @Nullable Object arg2, @Nullable Object arg3, @Nullable Object arg4, @Nullable Object arg5, @Nullable Object arg6, @Nullable Object arg7) { /* no-op */ }
+
+	@Override
+	public void verbose(@NotNull String message, @Nullable Object arg0, @Nullable Object arg1, @Nullable Object arg2, @Nullable Object arg3, @Nullable Object arg4, @Nullable Object arg5, @Nullable Object arg6, @Nullable Object arg7, @Nullable Object arg8) { /* no-op */ }
+
+	@Override
+	public void verbose(@NotNull String message, @Nullable Object arg0, @Nullable Object arg1, @Nullable Object arg2, @Nullable Object arg3, @Nullable Object arg4, @Nullable Object arg5, @Nullable Object arg6, @Nullable Object arg7, @Nullable Object arg8, @Nullable Object arg9) { /* no-op */ }
+
+	@Override
+	public void verbose(@NotNull String message, @Nullable Object... args) { /* no-op */ }
+
+	@Override
 	public boolean isTraceEnabled() {
 		return false;
 	}
