@@ -1,5 +1,6 @@
 package io.github.wsyong11.gameforge.framework.system.audio.impl.simple.audio;
 
+import io.github.wsyong11.gameforge.framework.system.audio.audio.Audio;
 import io.github.wsyong11.gameforge.util.concurrent.LimitedCapacityBlockingQueue;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,7 +31,7 @@ public class AudioDecoderPool {
 	}
 
 	@NotNull
-	public SimpleAudioImpl decode(int priority, @NotNull InputStream dataStream) {
+	public Audio decode(int priority, @NotNull InputStream dataStream) {
 		Objects.requireNonNull(dataStream, "dataStream is null");
 		return null;
 	}
