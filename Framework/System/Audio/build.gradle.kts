@@ -11,5 +11,6 @@ dependencies {
 	implementation(project(":Util"))
 	implementation(project(":Framework:System:Log"))
 	implementation(project(":Framework:Common"))
+	implementation(project(":Framework:Mime"))
 	implementation(project(":Framework:System:Resource"))
 }

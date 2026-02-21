@@ -2,7 +2,6 @@ package io.github.wsyong11.gameforge.plugin
 
 import io.github.wsyong11.gameforge.plugin.project.ProjectConfigExtension
 import io.github.wsyong11.gameforge.plugin.project.configurator.*
-import io.github.wsyong11.gameforge.project.ignoreDefaultConfig
 import io.github.wsyong11.gameforge.project.visual
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -20,9 +19,6 @@ class ProjectPlugin : Plugin<Project> {
             project.logger.debug("Skip visual project ${project.path}")
             return
         }
-
-        if (project.ignoreDefaultConfig)
-            return
 
         project.pluginManager.apply("java")
 

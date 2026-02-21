@@ -1,6 +1,7 @@
 package io.github.wsyong11.gameforge.project
 
 import org.gradle.api.Project
+import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import kotlin.reflect.KProperty
 
 val Project.visual: Boolean
@@ -17,15 +18,18 @@ fun Project.getOutputFile(name: String) =
 private object NullObj
 
 operator fun Project.get(property: String): Any? {
-    if (!this.hasProperty(property))
-        return null
+	if (!this.hasProperty(property)) {
+		if (!this.extraProperties.has(property))
+			return null
+		return this.extraProperties.get(property)
+	}
 
     val propertyValue = this.property(property)
     return if (propertyValue === NullObj) null else propertyValue
 }
 
 operator fun Project.set(property: String, value: Any?) =
-    this.setProperty(property, value ?: NullObj)
+	this.extraProperties.set(property, value ?: NullObj)
 
 
 @Suppress("UNCHECKED_CAST")

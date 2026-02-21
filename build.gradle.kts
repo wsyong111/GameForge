@@ -1,5 +1,4 @@
 import io.github.wsyong11.gameforge.plugin.project.ProjectConfigExtension
-import io.github.wsyong11.gameforge.project.ignoreDefaultConfig
 import io.github.wsyong11.gameforge.project.includeDebug
 import io.github.wsyong11.gameforge.project.includeRelease
 import io.github.wsyong11.gameforge.project.visual
@@ -16,6 +15,9 @@ allprojects {
 	group = "io.github.wsyong11.gameforge"
 	version = "0.0.0-beta"
 
+	if (project.path.startsWith(":Native"))
+		return@allprojects
+
 	apply(plugin = "io.github.wsyong11.gameforge.plugin")
 
     extensions.findByType(ProjectConfigExtension::class.java)?.apply {
@@ -26,10 +28,10 @@ allprojects {
 }
 
 subprojects {
-	if (project.visual || project.ignoreDefaultConfig)
+	if (project.visual)
 		return@subprojects
 
-	if (project.path == ":Assets")
+	if (project.path == ":Assets" || project.path.startsWith(":Native"))
 		return@subprojects
 
 	dependencies {
