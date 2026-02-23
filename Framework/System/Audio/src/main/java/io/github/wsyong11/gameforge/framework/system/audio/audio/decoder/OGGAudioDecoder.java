@@ -4,17 +4,24 @@ import io.github.wsyong11.gameforge.framework.mime.MimeType;
 import io.github.wsyong11.gameforge.framework.mime.MimeTypes;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.AudioMetadata;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.ex.AudioDecodeException;
+import io.github.wsyong11.gameforge.util.io.SeekableInputStream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
+import org.lwjgl.system.MemoryStack;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.IntBuffer;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.lwjgl.system.MemoryUtil.NULL;
+
 public class OGGAudioDecoder implements AudioDecoder {
+	private static final int INITIAL_BUFFER_SIZE = 4096;
+	private static final int DATA_STREAM_BUFFER_SIZE = 1024 * 1024 * 4; // 4MiB
+
 	public static final AudioDecoderFactory FACTORY = new AudioDecoderFactory() {
 		@NotNull
 		@Override
@@ -37,11 +44,13 @@ public class OGGAudioDecoder implements AudioDecoder {
 		}
 	};
 
-	private final InputStream dataStream;
+	private final SeekableInputStream dataStream;
 
 	private final Set<AudioDecodeHint> hints;
 	private final boolean streamingDecode;
 	private final boolean preloadMetadata;
+
+	private long decoderHandler;
 
 	public OGGAudioDecoder(@NotNull DecodeInfo info) {
 		Objects.requireNonNull(info, "info is null");
@@ -49,7 +58,7 @@ public class OGGAudioDecoder implements AudioDecoder {
 		if (!MimeTypes.Audio.OGG.equals(info.getMime()))
 			throw new UnsupportedOperationException("Unsupported mime type " + info.getMime());
 
-		this.dataStream = info.openStream();
+		this.dataStream = new SeekableInputStream(info.openStream());
 
 		Set<AudioDecodeHint> hints = info.getHints();
 		this.streamingDecode = hints.contains(AudioDecodeHint.STREAMING);
@@ -59,16 +68,26 @@ public class OGGAudioDecoder implements AudioDecoder {
 			.stream()
 			.filter(h -> h == AudioDecodeHint.STREAMING || h == AudioDecodeHint.PRELOAD_METADATA)
 			.collect(Collectors.toUnmodifiableSet());
+
+		this.decoderHandler = NULL;
+	}
+
+	private void openDecoder() throws AudioDecodeException, IOException {
+		if (this.decoderHandler != NULL)
+			return;
+
+		try (MemoryStack stack = MemoryStack.stackPush()) {
+			IntBuffer errorBuf = stack.mallocInt(1);
+			IntBuffer consumedDataByteBuf = stack.mallocInt(1);
+		}
 	}
 
 	@NotNull
 	@UnmodifiableView
 	@Override
 	public Set<AudioDecodeHint> getActivatedHints() {
-
+		return this.hints;
 	}
-
-	protected
 
 	@NotNull
 	@Override

@@ -14,18 +14,24 @@ public class SeekableInputStream extends FilterInputStream {
 	private static final int BUFFER_SIZE = 8192;
 
 	private final ByteList buffer;
+	private final int maxCapacity;
 
-	private int position;
+	private long position;
 	private boolean eof;
 
 	private final byte[] tempBuf;
 
 	public SeekableInputStream(@NotNull InputStream stream) {
+		this(stream, Integer.MAX_VALUE);
+	}
+
+	public SeekableInputStream(@NotNull InputStream stream, int maxCapacity) {
 		super(Objects.requireNonNull(stream, "stream is null"));
 
 		this.buffer = new ByteArrayList();
+		this.maxCapacity = maxCapacity;
 
-		this.position = 0;
+		this.position = 0L;
 		this.eof = false;
 
 		this.tempBuf = new byte[BUFFER_SIZE];
@@ -36,18 +42,24 @@ public class SeekableInputStream extends FilterInputStream {
 			throw new IOException("Stream closed");
 	}
 
-	private void ensureAvailable(int pos) throws IOException {
+	private void ensureAvailable(long pos) throws IOException {
 		this.ensureOpen();
 
 		if (pos <= this.buffer.size() || this.eof)
 			return;
 
-		int available = pos - this.buffer.size();
-		while (available > 0) {
-			int len = this.in.read(this.tempBuf, 0, Math.min(BUFFER_SIZE, available));
+		long available = pos - this.buffer.size();
+		while (available > 0L) {
+			int len = this.in.read(this.tempBuf, 0, (int) Math.min(BUFFER_SIZE, available));
 			if (len == -1) {
 				this.eof = true;
 				break;
+			}
+
+			long newSize = this.buffer.size() + len;
+			if (newSize > this.maxCapacity) {
+				int toRemove = (int) (newSize - this.maxCapacity);
+				this.buffer.removeElements(0, toRemove); // 移除最老字节
 			}
 
 			this.buffer.addElements(this.buffer.size(), this.tempBuf, 0, len);
@@ -63,7 +75,7 @@ public class SeekableInputStream extends FilterInputStream {
 		if (this.position >= this.buffer.size())
 			return -1;
 
-		int data = this.buffer.getByte(this.position) & 0xFF;
+		int data = this.buffer.getByte((int) this.position) & 0xFF;
 		this.position++;
 
 		return data;
@@ -81,20 +93,20 @@ public class SeekableInputStream extends FilterInputStream {
 
 		this.ensureAvailable(this.position + len);
 
-		int available = Math.min(len, this.buffer.size() - this.position);
+		int available = (int) Math.min(len, this.buffer.size() - this.position);
 
 		if (available <= 0)
 			return -1;
 
-		this.buffer.getElements(this.position, b, off, available);
+		this.buffer.getElements((int) this.position, b, off, available);
 
 		this.position += available;
 		return available;
 	}
 
-	public void seek(int pos) throws IOException {
-		if (pos < 0)
-			throw new IllegalArgumentException("The index is negative");
+	public void seek(long pos) throws IOException {
+		if (pos < 0L)
+			throw new IllegalArgumentException("The position is negative");
 
 		this.ensureOpen();
 
@@ -105,8 +117,22 @@ public class SeekableInputStream extends FilterInputStream {
 		this.position = pos;
 	}
 
-	public int getPosition() {
+	public long getPosition() {
 		return this.position;
+	}
+
+	public int getBufferSize() {
+		return this.buffer.size();
+	}
+
+	public int getMaxCapacity() {
+		return this.maxCapacity;
+	}
+
+	@Override
+	public int available() throws IOException {
+		int inputAvailable = this.in != null ? this.in.available() : 0;
+		return this.buffer.size() - ((int) this.position) + inputAvailable;
 	}
 
 	@Override
