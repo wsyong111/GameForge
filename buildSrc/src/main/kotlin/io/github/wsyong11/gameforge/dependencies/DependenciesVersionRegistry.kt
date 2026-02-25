@@ -133,16 +133,16 @@ val LWJGL_OPENAL_NATIVE   = "org.lwjgl" dependsOn "lwjgl-openal::${lwjglNatives}
 val LWJGL_OPENGL_NATIVE   = "org.lwjgl" dependsOn "lwjgl-opengl::${lwjglNatives}"   addImpl LWJGL_BOM
 val LWJGL_STB_NATIVE      = "org.lwjgl" dependsOn "lwjgl-stb::${lwjglNatives}"      addImpl LWJGL_BOM
 
-val LWJGL          = "org.lwjgl" dependsOn "lwjgl"          addImpl LWJGL_BOM addImpl LWJGL_NATIVE
-val LWJGL_ASSIMP   = "org.lwjgl" dependsOn "lwjgl-assimp"   addImpl LWJGL_BOM addImpl LWJGL_ASSIMP_NATIVE
-val LWJGL_FMOD     = "org.lwjgl" dependsOn "lwjgl-fmod"     addImpl LWJGL_BOM
-val LWJGL_GLFW     = "org.lwjgl" dependsOn "lwjgl-glfw"     addImpl LWJGL_BOM addImpl LWJGL_GLFW_NATIVE
-val LWJGL_HARFBUZZ = "org.lwjgl" dependsOn "lwjgl-harfbuzz" addImpl LWJGL_BOM addImpl LWJGL_HARFBUZZ_NATIVE
-val LWJGL_MEOW     = "org.lwjgl" dependsOn "lwjgl-meow"     addImpl LWJGL_BOM addImpl LWJGL_MEOW_NATIVE
-val LWJGL_NFD      = "org.lwjgl" dependsOn "lwjgl-nfd"      addImpl LWJGL_BOM addImpl LWJGL_NFD_NATIVE
-val LWJGL_OPENAL   = "org.lwjgl" dependsOn "lwjgl-openal"   addImpl LWJGL_BOM addImpl LWJGL_OPENAL_NATIVE
-val LWJGL_OPENGL   = "org.lwjgl" dependsOn "lwjgl-opengl"   addImpl LWJGL_BOM addImpl LWJGL_OPENGL_NATIVE
-val LWJGL_STB      = "org.lwjgl" dependsOn "lwjgl-stb"      addImpl LWJGL_BOM addImpl LWJGL_STB_NATIVE
+val LWJGL          = "org.lwjgl" dependsOn "lwjgl"          addImpl LWJGL_BOM addImpl LWJGL_NATIVE addImpl LWJGL_NATIVE
+val LWJGL_ASSIMP   = "org.lwjgl" dependsOn "lwjgl-assimp"   addImpl LWJGL_BOM addImpl LWJGL_NATIVE addImpl LWJGL_ASSIMP_NATIVE
+val LWJGL_FMOD     = "org.lwjgl" dependsOn "lwjgl-fmod"     addImpl LWJGL_BOM addImpl LWJGL_NATIVE
+val LWJGL_GLFW     = "org.lwjgl" dependsOn "lwjgl-glfw"     addImpl LWJGL_BOM addImpl LWJGL_NATIVE addImpl LWJGL_GLFW_NATIVE
+val LWJGL_HARFBUZZ = "org.lwjgl" dependsOn "lwjgl-harfbuzz" addImpl LWJGL_BOM addImpl LWJGL_NATIVE addImpl LWJGL_HARFBUZZ_NATIVE
+val LWJGL_MEOW     = "org.lwjgl" dependsOn "lwjgl-meow"     addImpl LWJGL_BOM addImpl LWJGL_NATIVE addImpl LWJGL_MEOW_NATIVE
+val LWJGL_NFD      = "org.lwjgl" dependsOn "lwjgl-nfd"      addImpl LWJGL_BOM addImpl LWJGL_NATIVE addImpl LWJGL_NFD_NATIVE
+val LWJGL_OPENAL   = "org.lwjgl" dependsOn "lwjgl-openal"   addImpl LWJGL_BOM addImpl LWJGL_NATIVE addImpl LWJGL_OPENAL_NATIVE
+val LWJGL_OPENGL   = "org.lwjgl" dependsOn "lwjgl-opengl"   addImpl LWJGL_BOM addImpl LWJGL_NATIVE addImpl LWJGL_OPENGL_NATIVE
+val LWJGL_STB      = "org.lwjgl" dependsOn "lwjgl-stb"      addImpl LWJGL_BOM addImpl LWJGL_NATIVE addImpl LWJGL_STB_NATIVE
 
 
 // Serialization / JSON / Config
