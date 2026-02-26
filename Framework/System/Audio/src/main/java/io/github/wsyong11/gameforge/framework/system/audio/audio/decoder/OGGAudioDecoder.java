@@ -2,7 +2,6 @@ package io.github.wsyong11.gameforge.framework.system.audio.audio.decoder;
 
 import io.github.wsyong11.gameforge.framework.mime.MimeType;
 import io.github.wsyong11.gameforge.framework.mime.MimeTypes;
-import io.github.wsyong11.gameforge.framework.system.audio.audio.AudioCategory;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.AudioMetadata;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.ex.AudioDecodeException;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.ex.AudioDecodeIOException;
@@ -11,12 +10,10 @@ import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.util.io.SeekableInputStream;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.lwjgl.stb.STBVorbisInfo;
 import org.lwjgl.system.MemoryStack;
-import org.lwjgl.system.MemoryUtil;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -169,7 +166,7 @@ public class OGGAudioDecoder implements AudioDecoder {
 
 		try (STBVorbisInfo info = STBVorbisInfo.malloc()) {
 			stb_vorbis_get_info(this.decoderHandler, info);
-			this.metadata = new OggMetadata(info);
+//			this.metadata = new OggMetadata(info);
 		}
 	}
 
@@ -216,62 +213,62 @@ public class OGGAudioDecoder implements AudioDecoder {
 		memFree(this.headerDataBuffer);
 		this.dataStream.close();
 	}
-
-	private static class OggMetadata implements AudioMetadata {
-		private final int sampleRate;
-		private final int channels;
-
-		public OggMetadata(@NotNull STBVorbisInfo info) {
-			Objects.requireNonNull(info, "info is null");
-
-			this.sampleRate= info.sample_rate();
-			this.channels = info.channels();
-		}
-
-		@Override
-		public int getSampleRate() {
-			return 0;
-		}
-
-		@Override
-		public int getChannels() {
-			return 0;
-		}
-
-		@Override
-		public int getBitDepth() {
-			return 0;
-		}
-
-		@Override
-		public long getTotalSamples() {
-			return 0;
-		}
-
-		@Override
-		public boolean isStreamable() {
-			return false;
-		}
-
-		@Override
-		public boolean isSeekable() {
-			return false;
-		}
-
-		@NotNull
-		@Override
-		public AudioCategory getCategory() {
-			return null;
-		}
-
-		@Override
-		public <T> @Nullable T get(@NotNull Key<T> key) {
-			return null;
-		}
-
-		@Override
-		public @NotNull @UnmodifiableView Set<Key<?>> getKeys() {
-			return Set.of();
-		}
-	}
+//
+//	private static class OggMetadata implements AudioMetadata {
+//		private final int sampleRate;
+//		private final int channels;
+//
+//		public OggMetadata(@NotNull STBVorbisInfo info) {
+//			Objects.requireNonNull(info, "info is null");
+//
+//			this.sampleRate= info.sample_rate();
+//			this.channels = info.channels();
+//		}
+//
+//		@Override
+//		public int getSampleRate() {
+//			return 0;
+//		}
+//
+//		@Override
+//		public int getChannels() {
+//			return 0;
+//		}
+//
+//		@Override
+//		public int getBitDepth() {
+//			return 0;
+//		}
+//
+//		@Override
+//		public long getTotalSamples() {
+//			return 0;
+//		}
+//
+//		@Override
+//		public boolean isStreamable() {
+//			return false;
+//		}
+//
+//		@Override
+//		public boolean isSeekable() {
+//			return false;
+//		}
+//
+//		@NotNull
+//		@Override
+//		public AudioCategory getCategory() {
+//			return null;
+//		}
+//
+//		@Override
+//		public <T> @Nullable T get(@NotNull Key<T> key) {
+//			return null;
+//		}
+//
+//		@Override
+//		public @NotNull @UnmodifiableView Set<Key<?>> getKeys() {
+//			return Set.of();
+//		}
+//	}
 }

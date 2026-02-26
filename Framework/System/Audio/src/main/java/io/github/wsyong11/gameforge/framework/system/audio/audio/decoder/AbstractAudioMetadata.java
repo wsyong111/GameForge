@@ -1,38 +1,44 @@
-package io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.ogg;
+package io.github.wsyong11.gameforge.framework.system.audio.audio.decoder;
 
 import io.github.wsyong11.gameforge.framework.system.audio.audio.AudioCategory;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.AudioMetadata;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
-import org.lwjgl.stb.STBVorbisInfo;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class OggMetadata implements AudioMetadata {
+public abstract class AbstractAudioMetadata implements AudioMetadata {
 	private final int sampleRate;
 	private final int channels;
-	private final int bitDepth;
 	private final long totalSamples;
 	private final boolean streamable;
 	private final boolean seekable;
 
-	private final Map<Key<?>, String> comments;
-	private final Map<Key<?>, Object> parsedComments;
+	private final Map<String, String> comments;
+	private final Map<Key<?>, Object> parsedCommentCache;
 
-	public OggMetadata(int sampleRate, int channels, int bitDepth, long totalSamples, boolean streamable, boolean seekable, @NotNull Map<Key<?>, String> comments) {
+	public AbstractAudioMetadata(
+		int sampleRate,
+		int channels,
+		long totalSamples,
+		boolean streamable,
+		boolean seekable,
+		@NotNull Map<String, String> comments
+	) {
 		Objects.requireNonNull(comments, "comments is null");
 
 		this.sampleRate = sampleRate;
 		this.channels = channels;
-		this.bitDepth = bitDepth;
 		this.totalSamples = totalSamples;
 		this.streamable = streamable;
 		this.seekable = seekable;
 		this.comments = Map.copyOf(comments);
 
-		this.parsedComments = new ConcurrentHashMap<>();
+		this.parsedCommentCache = new ConcurrentHashMap<>();
 	}
 
 	@Override
@@ -43,11 +49,6 @@ public class OggMetadata implements AudioMetadata {
 	@Override
 	public int getChannels() {
 		return this.channels;
-	}
-
-	@Override
-	public int getBitDepth() {
-		return this.bitDepth;
 	}
 
 	@Override
@@ -65,8 +66,9 @@ public class OggMetadata implements AudioMetadata {
 		return this.seekable;
 	}
 
+	@NotNull
 	@Override
-	public @NotNull AudioCategory getCategory() {
+	public AudioCategory getCategory() {
 		return null;
 	}
 
@@ -74,7 +76,7 @@ public class OggMetadata implements AudioMetadata {
 	@Override
 	public String getRaw(@NotNull Key<?> key) {
 		Objects.requireNonNull(key, "key is null");
-		return this.comments.get(key);
+		return this.comments.get(key.getKey());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -83,14 +85,14 @@ public class OggMetadata implements AudioMetadata {
 	public <T> T get(@NotNull Key<T> key) {
 		Objects.requireNonNull(key, "key is null");
 
-		return (T) this.parsedComments.computeIfAbsent(key, k ->
-			key.getParser().apply(this.getRaw(key)));
+		return (T) this.parsedCommentCache.computeIfAbsent(key, k ->
+			k.getParser().apply(this.getRaw(key)));
 	}
 
 	@NotNull
 	@UnmodifiableView
 	@Override
-	public Set<Key<?>> getKeys() {
+	public Set<String> getKeys() {
 		return this.comments.keySet();
 	}
 }

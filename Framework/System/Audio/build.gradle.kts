@@ -1,12 +1,10 @@
-import io.github.wsyong11.gameforge.dependencies.JOML
-import io.github.wsyong11.gameforge.dependencies.LWJGL_OPENAL
-import io.github.wsyong11.gameforge.dependencies.LWJGL_STB
-import io.github.wsyong11.gameforge.dependencies.implementation
+import io.github.wsyong11.gameforge.dependencies.*
 
 dependencies {
 	implementation(project, JOML)
 	implementation(project, LWJGL_OPENAL)
 	implementation(project, LWJGL_STB)
+	implementation(project, FAST_UTIL)
 
 	implementation(project(":Util"))
 	implementation(project(":Framework:System:Log"))

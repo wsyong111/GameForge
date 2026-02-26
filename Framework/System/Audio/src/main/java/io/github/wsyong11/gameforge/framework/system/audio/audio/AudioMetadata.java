@@ -39,8 +39,7 @@ public interface AudioMetadata {
 
 	int getChannels();
 
-	int getBitDepth();
-
+	// 整体采样点数量
 	long getTotalSamples();
 
 	default long getDurationMs() {
@@ -89,12 +88,12 @@ public interface AudioMetadata {
 
 	default boolean contains(@NotNull Key<?> key) {
 		Objects.requireNonNull(key, "key is null");
-		return this.getKeys().contains(key);
+		return this.getKeys().contains(key.getKey());
 	}
 
 	@NotNull
 	@UnmodifiableView
-	Set<Key<?>> getKeys();
+	Set<String> getKeys();
 
 	class Key<T> {
 		//@formatter:off
@@ -177,12 +176,13 @@ public interface AudioMetadata {
 			if (o == null || getClass() != o.getClass()) return false;
 
 			Key<?> that = (Key<?>) o;
-			return Objects.equals(this.key, that.key);
+			return Objects.equals(this.key, that.key)
+				&& Objects.equals(this.type, that.type);
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(this.key);
+			return Objects.hash(this.key, this.type);
 		}
 
 		@Override

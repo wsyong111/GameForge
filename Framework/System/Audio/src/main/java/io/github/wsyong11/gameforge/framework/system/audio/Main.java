@@ -6,7 +6,7 @@ import io.github.wsyong11.gameforge.framework.mime.MimeTypes;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.AudioMetadata;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.AudioDecodeHint;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.AudioDecoder;
-import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.OGGAudioDecoder;
+import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.ogg.OggAudioDecoderFactory;
 import io.github.wsyong11.gameforge.framework.system.log.core.LogManager;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.manage.DefaultResourceManager;
@@ -16,8 +16,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Set;
 
 public class Main {
@@ -39,7 +37,7 @@ public class Main {
 
 				@Override
 				public @NotNull @UnmodifiableView Set<AudioDecodeHint> getHints() {
-					return Set.of(AudioDecodeHint.STREAMING);
+					return Set.of();
 				}
 
 				@Override
@@ -48,7 +46,7 @@ public class Main {
 				}
 			};
 
-			try (AudioDecoder decoder = OGGAudioDecoder.FACTORY.create(decodeInfo)) {
+			try (AudioDecoder decoder = OggAudioDecoderFactory.INSTANCE.get().create(decodeInfo)) {
 				AudioMetadata metadata = decoder.getMetadata();
 				System.out.println(metadata);
 			}
