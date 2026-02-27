@@ -8,10 +8,8 @@ import org.jetbrains.annotations.UnmodifiableView;
 
 import java.io.Closeable;
 import java.io.InputStream;
-import java.util.Objects;
+import java.nio.FloatBuffer;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 
 /**
  * 音频解码器，用于解码音频格式为 {@code PCM} 流。
@@ -34,7 +32,6 @@ public interface AudioDecoder extends Closeable {
 	 * @return 音频元数据对象
 	 * @throws AudioDecodeException 解析元数据途中发生异常
 	 * @implNote 实现应在第一次解析后缓存元数据。
-	 * @see AudioDecodeHint#PRELOAD_METADATA
 	 */
 	@NotNull
 	AudioMetadata getMetadata() throws AudioDecodeException;
@@ -50,18 +47,11 @@ public interface AudioDecoder extends Closeable {
 	/**
 	 * 同步解码音频数据。
 	 *
-	 * @return 音频流对象
+	 * @return 已读取的音频帧数量，没有更多数据时将返回 -1
 	 * @throws AudioDecodeException 解析 {@code PCM} 数据时发生异常
 	 * @see AudioDecodeHint#STREAMING
 	 */
-	@NotNull
-	PCMStream decode() throws AudioDecodeException;
-
-	@NotNull
-	default Future<PCMStream> decodeAsync(@NotNull ExecutorService executor) {
-		Objects.requireNonNull(executor, "executor is null");
-		return executor.submit(this::decode);
-	}
+	int decode(@NotNull FloatBuffer buffer, int maxFrame) throws AudioDecodeException;
 
 	/**
 	 * 解码基本信息对象

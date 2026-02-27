@@ -4,14 +4,12 @@ import io.github.wsyong11.gameforge.framework.system.audio.audio.AudioMetadata;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.AbstractAudioDecoder;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.AbstractAudioMetadata;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.AudioDecodeHint;
-import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.PCMStream;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.ex.AudioDecodeException;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.ex.AudioDecodeIOException;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.ex.AudioDecoderClosedException;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import it.unimi.dsi.fastutil.bytes.ByteArrayList;
-import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.stb.STBVorbisComment;
@@ -21,12 +19,11 @@ import org.lwjgl.system.MemoryStack;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 
 import static org.lwjgl.stb.STBVorbis.*;
 import static org.lwjgl.system.MemoryUtil.*;
@@ -37,7 +34,6 @@ public class OggAudioDecoder extends AbstractAudioDecoder {
 	private static final int MAX_DATA_SIZE = (Integer.MAX_VALUE - 8) / 2;  // (MAX_INT - Array overhead) / 2
 	private static final int DATA_CHUNK_SIZE = 1024 * 32; // 32KiB
 
-	private final FloatArrayList samplesBuffer;
 	private int totalSamples;
 	private int channels;
 	private int sampleRate;
@@ -52,7 +48,6 @@ public class OggAudioDecoder extends AbstractAudioDecoder {
 	public OggAudioDecoder(@NotNull DecodeInfo info) {
 		super(info);
 
-		this.samplesBuffer = new FloatArrayList();
 		this.totalSamples = 0;
 		this.channels = 0;
 		this.sampleRate = 0;
@@ -152,22 +147,6 @@ public class OggAudioDecoder extends AbstractAudioDecoder {
 		}
 	}
 
-	private synchronized void decodePCM(int pos, int length) throws AudioDecodeException {
-		this.ensureDecoder();
-		Objects.checkFromIndexSize(pos, length, this.totalSamples);
-
-		int bufferSize = this.samplesBuffer.size();
-		if (bufferSize >= pos + length)
-			return;
-
-		int available = (pos + length - bufferSize) * this.channels;
-
-		float[] buffer = new float[available];
-		int consumed = stb_vorbis_get_samples_float_interleaved(this.decoderHandler, this.channels, buffer);
-
-		this.samplesBuffer.addElements(bufferSize * this.channels, buffer, 0, consumed * this.channels);
-	}
-
 	@Override
 	protected boolean isSupportHint(@NotNull AudioDecodeHint hint) {
 		return false;
@@ -180,17 +159,22 @@ public class OggAudioDecoder extends AbstractAudioDecoder {
 		return this.metadata;
 	}
 
-	@NotNull
 	@Override
-	public PCMStream decode() throws AudioDecodeException {
-		this.ensureDecoder();
-		return new BufferPCMStream();
-	}
+	public int decode(@NotNull FloatBuffer buffer, int maxFrame) throws AudioDecodeException {
+		Objects.requireNonNull(buffer, "buffer is null");
 
-	@NotNull
-	@Override
-	public Future<PCMStream> decodeAsync(@NotNull ExecutorService executor) {
-		return super.decodeAsync(executor);
+		int maxSamples = maxFrame * this.channels;
+		if (maxSamples > buffer.capacity())
+			throw new IndexOutOfBoundsException("Float buffer cannot accommodate " + maxSamples + ", capacity=" + buffer.capacity());
+
+		float[] temp = new float[maxSamples];
+		int consumedFrame = stb_vorbis_get_samples_float_interleaved(this.decoderHandler, this.channels, temp);
+		if (consumedFrame == 0)
+			return -1;
+
+		buffer.put(temp, 0, consumedFrame * this.channels);
+
+		return consumedFrame;
 	}
 
 	@Override
@@ -202,10 +186,8 @@ public class OggAudioDecoder extends AbstractAudioDecoder {
 		if (this.decoderHandler != NULL)
 			stb_vorbis_close(this.decoderHandler);
 
-		memFree(this.dataBuffer);
-
-		this.samplesBuffer.size(0);
-		this.samplesBuffer.trim();
+		if (this.dataBuffer != null)
+			memFree(this.dataBuffer);
 	}
 
 	private static class Metadata extends AbstractAudioMetadata {

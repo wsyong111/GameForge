@@ -15,8 +15,15 @@ import io.github.wsyong11.gameforge.framework.system.resource.pack.AssetsResourc
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.SourceDataLine;
+import javax.swing.*;
 import java.io.InputStream;
+import java.nio.FloatBuffer;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
 	public static void main(String[] args) throws Throwable {
@@ -28,7 +35,10 @@ public class Main {
 		rs.addPack(new AssetsResourcePack("game"));
 		rs.reload();
 
-		try (InputStream oggInput = rs.getResource(Identifier.withDefaultNamespace("sound/test_bgm.ogg")).openStream()) {
+		JFrame frame = new JFrame("Sound test");
+		frame.setVisible(true);
+
+		try (InputStream oggInput = rs.getResource(Identifier.withDefaultNamespace("sound/out.ogg")).openStream()) {
 			AudioDecoder.DecodeInfo decodeInfo = new AudioDecoder.DecodeInfo() {
 				@Override
 				public @NotNull InputStream openStream() {
@@ -49,6 +59,70 @@ public class Main {
 			try (AudioDecoder decoder = OggAudioDecoderFactory.INSTANCE.get().create(decodeInfo)) {
 				AudioMetadata metadata = decoder.getMetadata();
 				System.out.println(metadata);
+
+				int sampleRate = metadata.getSampleRate();
+				int channels = metadata.getChannels();
+				long totalSamples = metadata.getTotalSamples();
+
+				long seekOff = 2;
+				long seekOffS = sampleRate * seekOff;
+
+				AudioFormat format = new AudioFormat(
+					sampleRate,
+					16,            // 转成 16bit
+					channels,
+					true,          // signed
+					false          // little endian
+				);
+
+				DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
+				SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info);
+				try {
+					line.open(format, channels * sampleRate * 2 * 2);
+					line.start();
+
+					int sr = sampleRate * 5;
+					int bufSize = channels * sr;
+					FloatBuffer buffer = FloatBuffer.wrap(new float[bufSize]);
+					byte[] tempBuf = new byte[bufSize * 2];
+
+					while (true) {
+						buffer.clear();
+						buffer.position(0);
+
+						System.out.println("Begin decode");
+						long start = System.nanoTime();
+						int consumed = decoder.decode(buffer, sr);
+						if (consumed == -1)
+							break;
+
+						buffer.flip();
+
+						int available = consumed * channels;
+						int idx = 0;
+						for (int i = 0; i < available; i++) {
+							float f = buffer.get(i);
+
+							// 防止爆音
+							if (f > 1f) f = 1f;
+							if (f < -1f) f = -1f;
+
+							short s = (short) (f * 32767f);
+
+							tempBuf[idx++] = (byte) (s & 0xff);
+							tempBuf[idx++] = (byte) ((s >> 8) & 0xff);
+						}
+						System.out.printf("Decoded took %dms%n",
+							TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start));
+
+						line.write(tempBuf, 0, tempBuf.length);
+					}
+				} finally {
+					line.drain();
+					line.stop();
+					line.close();
+					frame.dispose();
+				}
 			}
 		}
 	}

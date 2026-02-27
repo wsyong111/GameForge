@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.FloatBuffer;
 
+@Deprecated
 public interface PCMStream extends AutoCloseable {
 	int read(@NotNull FloatBuffer buffer, int maxSamples) throws AudioDecodeException;
 
