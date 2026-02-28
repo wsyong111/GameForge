@@ -40,18 +40,14 @@ public interface AudioMetadata {
 	int getChannels();
 
 	// 整体采样点数量
-	long getTotalSamples();
+	long getTotalFrames();
 
 	default long getDurationMs() {
-		long totalSamples = this.getTotalSamples();
-		if (totalSamples < 0)
+		long totalFrames = this.getTotalFrames();
+		if (totalFrames < 0)
 			return -1L;
-		return (totalSamples * 1000L) / this.getSampleRate();
+		return (totalFrames * 1000L) / this.getSampleRate();
 	}
-
-	boolean isStreamable();
-
-	boolean isSeekable();
 
 	// -------------------------------------------------------------------------------------------------------------- //
 

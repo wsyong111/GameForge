@@ -13,7 +13,7 @@ import java.util.Objects;
 public class SeekableInputStream extends FilterInputStream {
 	private static final int BUFFER_SIZE = 8192;
 
-	private final ByteList buffer;
+	private final ByteArrayList buffer;
 	private final int maxCapacity;
 
 	private long position;
@@ -117,6 +117,14 @@ public class SeekableInputStream extends FilterInputStream {
 		this.position = pos;
 	}
 
+	public void clearBuffer(){
+		this.buffer.size(0);
+	}
+
+	public void trim(){
+		this.buffer.trim();
+	}
+
 	public long getPosition() {
 		return this.position;
 	}
@@ -144,7 +152,8 @@ public class SeekableInputStream extends FilterInputStream {
 			this.in.close();
 		} finally {
 			this.in = null;
-			this.buffer.clear();
+			this.buffer.size(0);
+			this.buffer.trim();
 		}
 	}
 }

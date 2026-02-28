@@ -2,7 +2,7 @@ package io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.ogg;
 
 import io.github.wsyong11.gameforge.framework.system.audio.audio.AudioMetadata;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.AbstractAudioDecoder;
-import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.AbstractAudioMetadata;
+import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.SimpleAudioMetadata;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.AudioDecodeHint;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.ex.AudioDecodeException;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.ex.AudioDecodeIOException;
@@ -143,7 +143,7 @@ public class OggAudioDecoder extends AbstractAudioDecoder {
 				}
 			}
 
-			this.metadata = new Metadata(this.sampleRate, this.channels, this.totalSamples, comments);
+			this.metadata = new SimpleAudioMetadata(this.sampleRate, this.channels, this.totalSamples, comments);
 		}
 	}
 
@@ -162,6 +162,8 @@ public class OggAudioDecoder extends AbstractAudioDecoder {
 	@Override
 	public int decode(@NotNull FloatBuffer buffer, int maxFrame) throws AudioDecodeException {
 		Objects.requireNonNull(buffer, "buffer is null");
+
+		this.ensureDecoder();
 
 		int maxSamples = maxFrame * this.channels;
 		if (maxSamples > buffer.capacity())
@@ -188,11 +190,5 @@ public class OggAudioDecoder extends AbstractAudioDecoder {
 
 		if (this.dataBuffer != null)
 			memFree(this.dataBuffer);
-	}
-
-	private static class Metadata extends AbstractAudioMetadata {
-		public Metadata(int sampleRate, int channels, long totalSamples, @NotNull Map<String, String> comments) {
-			super(sampleRate, channels, totalSamples, false, true, comments);
-		}
 	}
 }

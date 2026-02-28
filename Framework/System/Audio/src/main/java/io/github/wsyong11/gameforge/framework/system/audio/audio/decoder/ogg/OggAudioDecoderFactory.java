@@ -22,7 +22,7 @@ public class OggAudioDecoderFactory implements AudioDecoderFactory {
 
 		Set<AudioDecodeHint> hints = info.getHints();
 		if (hints.contains(AudioDecodeHint.STREAMING))
-			throw new UnsupportedOperationException();
+			return new StreamingOggAudioDecoder(info);
 
 		return new OggAudioDecoder(info);
 	}

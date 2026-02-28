@@ -11,22 +11,18 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public abstract class AbstractAudioMetadata implements AudioMetadata {
+public class SimpleAudioMetadata implements AudioMetadata {
 	private final int sampleRate;
 	private final int channels;
 	private final long totalSamples;
-	private final boolean streamable;
-	private final boolean seekable;
 
 	private final Map<String, String> comments;
 	private final Map<Key<?>, Object> parsedCommentCache;
 
-	public AbstractAudioMetadata(
+	public SimpleAudioMetadata(
 		int sampleRate,
 		int channels,
 		long totalSamples,
-		boolean streamable,
-		boolean seekable,
 		@NotNull Map<String, String> comments
 	) {
 		Objects.requireNonNull(comments, "comments is null");
@@ -34,8 +30,6 @@ public abstract class AbstractAudioMetadata implements AudioMetadata {
 		this.sampleRate = sampleRate;
 		this.channels = channels;
 		this.totalSamples = totalSamples;
-		this.streamable = streamable;
-		this.seekable = seekable;
 		this.comments = Map.copyOf(comments);
 
 		this.parsedCommentCache = new ConcurrentHashMap<>();
@@ -52,18 +46,8 @@ public abstract class AbstractAudioMetadata implements AudioMetadata {
 	}
 
 	@Override
-	public long getTotalSamples() {
+	public long getTotalFrames() {
 		return this.totalSamples;
-	}
-
-	@Override
-	public boolean isStreamable() {
-		return this.streamable;
-	}
-
-	@Override
-	public boolean isSeekable() {
-		return this.seekable;
 	}
 
 	@NotNull
