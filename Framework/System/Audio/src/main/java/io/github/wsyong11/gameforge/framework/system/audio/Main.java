@@ -1,34 +1,10 @@
 package io.github.wsyong11.gameforge.framework.system.audio;
 
-import io.github.wsyong11.gameforge.framework.Identifier;
-import io.github.wsyong11.gameforge.framework.mime.MimeType;
-import io.github.wsyong11.gameforge.framework.mime.MimeTypes;
-import io.github.wsyong11.gameforge.framework.system.audio.audio.AudioMetadata;
-import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.AudioDecodeHint;
-import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.AudioDecoder;
-import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.ogg.OggAudioDecoderFactory;
 import io.github.wsyong11.gameforge.framework.system.log.LogTemplate;
-import io.github.wsyong11.gameforge.framework.system.log.core.LogManager;
 import io.github.wsyong11.gameforge.framework.system.log.templete.TemplateValueProvider;
-import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
-import io.github.wsyong11.gameforge.framework.system.resource.manage.DefaultResourceManager;
-import io.github.wsyong11.gameforge.framework.system.resource.manage.ResourceManager;
-import io.github.wsyong11.gameforge.framework.system.resource.pack.AssetsResourcePack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.UnmodifiableView;
 
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.DataLine;
-import javax.sound.sampled.SourceDataLine;
-import javax.swing.*;
-import java.io.InputStream;
-import java.nio.FloatBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.IntStream;
 
 public class Main {
 //	public static void main(String[] args) throws Throwable {
@@ -132,6 +108,14 @@ public class Main {
 //		}
 //	}
 
+	private static byte[] d(int[] v) {
+		byte[] bytes = new byte[v.length];
+		for (int i = 0; i < v.length; i++) {
+			bytes[i] = (byte) (v[i] & 0xFF);
+		}
+		return bytes;
+	}
+
 	public static void main(String[] args) {
 		Random random = new Random();
 
@@ -143,17 +127,26 @@ data: 71 bytes; offset: [0, 71) 71 bytes;
 20 | E3 95 1A 3B 02 5C 7C DB 41 C7 71 EB 7F C9 90 21 |                  |
 30 | 07 86 12 DD B6 5F C7 F6 25 07 03 65 82 73 AF 3C |                  |
 40 | AD 56 76 6C FF 85 DA                            |                  |
+
  */
 
-		byte[] data = new byte[71];
-		random.nextBytes(data);
+//		byte[] data = d(new int[]{
+//			0x01, 0x00, 0x00, 0x41, 0x40, 0x42, 0x00, 0x00, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+//			0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x00, 0x0A, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF0,
+//			0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x07, 0x00, 0x00, 0x00, 0x0B, 0x00, 0x00, 0x00, 0x0F, 0x00,
+//			0x00, 0x00, 0x00, 0x04, 0x00, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 0x00, 0x0E, 0x00, 0x00,
+//			0x00, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x0D,
+//		});
+//		random.nextInt(data);
+
+		byte[] data = "你好, Hello！🥰".getBytes(StandardCharsets.UTF_8);
 
 		TemplateValueProvider view = LogTemplate.hexView(
 			data,
-			6,
-			24,
-			8,
-			64,
+			0,
+			data.length,
+			16,
+			2,
 			true,
 			StandardCharsets.UTF_8);
 		System.out.println(view.get());
