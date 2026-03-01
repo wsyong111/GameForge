@@ -1,9 +1,12 @@
 package io.github.wsyong11.gameforge.util;
 
 import lombok.experimental.UtilityClass;
+import org.jetbrains.annotations.NotNull;
 
 @UtilityClass
 public class NumberUtils {
+	private static final char[] HEX = "0123456789ABCDEF".toCharArray();
+
 	public static int digitLength(long number, int base) {
 		return (int) Math.floor(Math.log(number) / Math.log(base)) + 1;
 	}
@@ -63,5 +66,24 @@ public class NumberUtils {
 		else length = 16;
 
 		return number < 0 ? length + 1 : length;
+	}
+
+	@NotNull
+	public static String toHexFast(long v, int width) {
+		char[] buffer = new char[Math.max(width, 16)];
+
+		int pos = buffer.length;
+
+		long value = v;
+		do {
+			buffer[--pos] = HEX[(int) (value & 0xF)];
+			value >>>= 4;
+		} while (value != 0);
+
+		// 补零
+		while (pos > buffer.length - width)
+			buffer[--pos] = '0';
+
+		return new String(buffer, pos, buffer.length - pos);
 	}
 }

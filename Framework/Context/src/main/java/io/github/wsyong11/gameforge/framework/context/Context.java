@@ -455,15 +455,6 @@ public abstract class Context {
 		return this.debug;
 	}
 
-	@NotNull
-	public <T extends Context> T as(@NotNull Class<T> type) {
-		Objects.requireNonNull(type, "type is null");
-
-		if (!type.isInstance(this))
-			throw new IllegalStateException("Cannot get as " + type.getName());
-		return type.cast(this);
-	}
-
 	@Nullable
 	public <T extends Context> T asUnsafe(@NotNull Class<T> type) {
 		Objects.requireNonNull(type, "type is null");
@@ -474,11 +465,18 @@ public abstract class Context {
 	}
 
 	@NotNull
-	public <T extends Context> Optional<T> asOptional(@NotNull Class<T> type) {
+	public <T extends Context> T as(@NotNull Class<T> type) {
 		Objects.requireNonNull(type, "type is null");
 
-		if (!type.isInstance(this))
-			return Optional.empty();
-		return Optional.of(type.cast(this));
+		T context = this.asUnsafe(type);
+		if (context == null)
+			throw new IllegalStateException("Cannot get as " + type.getName());
+		return context;
+	}
+
+	@NotNull
+	public <T extends Context> Optional<T> asOptional(@NotNull Class<T> type) {
+		Objects.requireNonNull(type, "type is null");
+		return Optional.ofNullable(this.asUnsafe(type));
 	}
 }

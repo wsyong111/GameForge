@@ -6,10 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
-import java.nio.charset.CoderResult;
-import java.nio.charset.CodingErrorAction;
+import java.nio.charset.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -18,6 +15,13 @@ public class HexViewTemplate implements TemplateValueProvider {
 	private static final char BORDER_VERTICAL = '|';
 	private static final char UNKNOWN_CHAR = '?';
 	private static final char UNPRINTABLE_CHAR = '.';
+
+	private static final char[] HEX = "0123456789ABCDEF".toCharArray();
+
+	@NotNull
+	public static HexViewTemplate.Builder builder(byte @Nullable [] data) {
+		return new Builder(data);
+	}
 
 	private final byte[] data;
 
@@ -76,7 +80,7 @@ public class HexViewTemplate implements TemplateValueProvider {
 		sb.append(' ');
 
 		for (int i = 0; i < this.offsetColumn; i++) {
-			sb.append(String.format("%02X", i));
+			sb.append(NumberUtils.toHexFast(i, 2));
 			if (i < this.offsetColumn - 1)
 				sb.append(' ');
 		}
@@ -97,23 +101,24 @@ public class HexViewTemplate implements TemplateValueProvider {
 		sb.append(BORDER_VERTICAL);
 	}
 
-	private void printLine(@NotNull StringBuilder sb, int fromIndex, int toIndex, int addressLineWidth, @Nullable List<Integer> parsedCodePoints) {
+	private void printLine(@NotNull StringBuilder sb, int fromIndex, int toIndex, int addressLineWidth, int @Nullable [] parsedCodePoints) {
 		Objects.requireNonNull(sb, "sb is null");
 
-		sb.append(String.format("%0" + addressLineWidth + "X", fromIndex));
+		sb.append(NumberUtils.toHexFast(fromIndex, addressLineWidth));
 		sb.append(' ');
 		sb.append(BORDER_VERTICAL);
 		sb.append(' ');
 
 		for (int i = fromIndex; i < toIndex; i++) {
-			byte data = this.data[i];
+			int data = this.data[i] & 0xFF;
 
-			sb.append(String.format("%02X", data));
+			sb.append(HEX[(data >>> 4) & 0xF]);
+			sb.append(HEX[data & 0xF]);
+
 			if (i < toIndex - 1)
 				sb.append(' ');
 		}
 
-		// 如果结尾有空区域则填充
 		int hexCount = toIndex - fromIndex;
 		if (hexCount < this.offsetColumn) {
 			int spaceCount = this.offsetColumn - hexCount;
@@ -129,7 +134,12 @@ public class HexViewTemplate implements TemplateValueProvider {
 		sb.append(' ');
 
 		for (int i = fromIndex; i < toIndex; i++)
-			sb.appendCodePoint(parsedCodePoints.get(i));
+			sb.appendCodePoint(parsedCodePoints[i]);
+
+		if (hexCount < this.offsetColumn) {
+			int spaceCount = this.offsetColumn - hexCount;
+			sb.append(" ".repeat(spaceCount));
+		}
 
 		sb.append(' ');
 		sb.append(BORDER_VERTICAL);
@@ -143,24 +153,35 @@ public class HexViewTemplate implements TemplateValueProvider {
 		sb.append(BORDER_VERTICAL);
 		sb.append(' ');
 
-		String message = "Folded %d bytes".formatted(remaining);
+		String message = "Folded " + remaining + " bytes";
 
 		int fullWidth = (this.offsetColumn - 1) * 3 + 2;
-		int spaceWidth = (fullWidth - message.length()) / 2;
+		float spaceWidth = (fullWidth - message.length()) / 2.0F;
 
-		sb.append(" ".repeat(spaceWidth));
+		sb.append(" ".repeat((int) spaceWidth));
 		sb.append(message);
-		sb.append(" ".repeat(spaceWidth));
-
-		if (spaceWidth % 2 != 0)
-			sb.append(' ');
+		sb.append(" ".repeat((int) Math.ceil(spaceWidth)));
 
 		sb.append(' ');
 		sb.append(BORDER_VERTICAL);
 	}
 
-	@NotNull
-	private List<Integer> parseData(@NotNull Charset charset, int fromIndex, int toIndex) {
+	private int[] parseDataAscii(int fromIndex, int toIndex) {
+		int[] result = new int[toIndex - fromIndex];
+
+		for (int i = fromIndex; i < toIndex; i++) {
+			int data = this.data[i] & 0xFF;
+
+			if (data >= 0x20 && data <= 0x7E)
+				result[i] = (char) data;
+			else
+				result[i] = UNPRINTABLE_CHAR;
+		}
+
+		return result;
+	}
+
+	private int[] parseDataCharset(@NotNull Charset charset, int fromIndex, int toIndex) {
 		Objects.requireNonNull(charset, "charset is null");
 
 		CharsetDecoder decoder = charset
@@ -202,13 +223,26 @@ public class HexViewTemplate implements TemplateValueProvider {
 
 			buffer.position(startPos + byteCount);
 			buffer.limit(this.data.length);
-			list.add(codePoint);
+
+			if (!Character.isISOControl(codePoint) && Character.getType(codePoint) != Character.FORMAT) {
+				list.add(codePoint);
+			} else {
+				list.add((int) UNPRINTABLE_CHAR);
+			}
 
 			for (int i = 0; i < byteCount - 1; i++)
 				list.add((int) ' ');
 		}
 
-		return list;
+		return list.stream().mapToInt(i -> i).toArray();
+	}
+
+	private int[] parseData(@NotNull Charset charset, int fromIndex, int toIndex) {
+		Objects.requireNonNull(charset, "charset is null");
+
+		if (charset == StandardCharsets.US_ASCII)
+			return this.parseDataAscii(fromIndex, toIndex);
+		return this.parseDataCharset(charset, fromIndex, toIndex);
 	}
 
 	@NotNull
@@ -232,8 +266,7 @@ public class HexViewTemplate implements TemplateValueProvider {
 
 		builder.append('\n');
 
-
-		List<Integer> parsedCodePoints;
+		int[] parsedCodePoints;
 		if (this.charset != null)
 			parsedCodePoints = this.parseData(this.charset, this.fromIndex, toIndexSafe);
 		else
@@ -259,5 +292,90 @@ public class HexViewTemplate implements TemplateValueProvider {
 		}
 
 		return builder;
+	}
+
+
+	public static class Builder {
+		private final byte @Nullable [] data;
+
+		private int offset = 0;
+		private int length = -1;
+		private int maxAddressLine = 128;
+		private int offsetColumn = 16;
+		private boolean showInfo = true;
+		@Nullable
+		private Charset charset = StandardCharsets.US_ASCII;
+
+		public Builder(byte @Nullable [] data) {
+			this.data = data;
+		}
+
+		@NotNull
+		public Builder offset() {
+			return this.offset(0);
+		}
+
+		@NotNull
+		public Builder offset(int offset) {
+			this.offset = offset;
+			return this;
+		}
+
+		@NotNull
+		public Builder length() {
+			return this.length(-1);
+		}
+
+		@NotNull
+		public Builder length(int length) {
+			this.length = length;
+			return this;
+		}
+
+		@NotNull
+		public Builder maxAddressLine(int maxAddressLine) {
+			this.maxAddressLine = maxAddressLine;
+			return this;
+		}
+
+		@NotNull
+		public Builder offsetColumn(int offsetColumn) {
+			this.offsetColumn = offsetColumn;
+			return this;
+		}
+
+		@NotNull
+		public Builder showInfo() {
+			return this.showInfo(true);
+		}
+
+		public Builder showInfo(boolean showInfo) {
+			this.showInfo = showInfo;
+			return this;
+		}
+
+		@NotNull
+		public Builder ascii() {
+			return this.charset(StandardCharsets.US_ASCII);
+		}
+
+		@NotNull
+		public Builder charset(@Nullable Charset charset) {
+			this.charset = charset;
+			return this;
+		}
+
+		@NotNull
+		public HexViewTemplate build() {
+			return new HexViewTemplate(
+				this.data,
+				this.offset,
+				this.length < 0 ? (this.data == null ? 0 : this.data.length) : this.length,
+				this.maxAddressLine,
+				this.offsetColumn,
+				this.showInfo,
+				this.charset
+			);
+		}
 	}
 }

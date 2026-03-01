@@ -120,7 +120,7 @@ class ContextStack {
 		this.stack.push(item);
 
 		if (item.isEffectiveDebug())
-			LOGGER.trace("Push stack {} in thread {}: {}", type, this.owner, lazy(ctx));
+			LOGGER.verbose("Push stack {} in thread {}: {}", type, this.owner, lazy(ctx));
 	}
 
 	public void pop(@NotNull StackItemType type, @Nullable Context ctx) {
@@ -143,7 +143,7 @@ class ContextStack {
 		this.stack.pop();
 
 		if (item.isEffectiveDebug())
-			LOGGER.trace("Pop stack {} in thread {}: {}", itemType, this.owner, itemContext);
+			LOGGER.verbose("Pop stack {} in thread {}: {}", itemType, this.owner, itemContext);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //

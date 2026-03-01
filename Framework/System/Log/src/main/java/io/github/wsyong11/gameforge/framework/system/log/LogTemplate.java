@@ -7,10 +7,9 @@ import lombok.experimental.UtilityClass;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @UtilityClass
@@ -39,115 +38,27 @@ public class LogTemplate {
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
-	private static final Charset HEX_VIEW_CHARSET = StandardCharsets.UTF_8;
-
-	/*
-data: 8192 bytes; offset: [0, 512) 512 bytes;
-	 | 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F | ANSI             |
-0000 | 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 | ................ |
-000F | 00 00 00 00 00 00 00 00 00                      | ................ |
-     |                Folded 412 bytes                 |
-	 */
-
-	@NotNull
-	public static TemplateValueProvider hexView(byte @Nullable [] data) {
-		return hexView(
-			data,
-			0,
-			data == null ? 0 : data.length,
-			16,
-			32,
-			true,
-			HEX_VIEW_CHARSET
-		);
-	}
-
 	@NotNull
 	public static TemplateValueProvider hexView(
 		byte @Nullable [] data,
 		int offset,
-		int length,
-		int column,
-		int maxRow,
-		boolean showInfo,
-		@Nullable Charset charset
+		int length
 	) {
-		return new HexViewTemplate(
-			data, offset, length, maxRow, column, showInfo, charset
-		);
+		return () -> new HexViewTemplate.Builder(data).length(length).offset(offset).build().getValue();
+	}
 
-//		return () -> {
-//			StringBuilder sb = new StringBuilder();
-//
-//			if (showInfo)
-//				sb.append("data: ")
-//				  .append(data == null ? "<null>" : data.length)
-//				  .append(" bytes; offset: [")
-//				  .append(offset)
-//				  .append(", ")
-//				  .append(offset + length)
-//				  .append(") ")
-//				  .append(length)
-//				  .append(" bytes;\n");
-//
-//			int offsetListWidth = NumberUtils.digitLength((long) maxRow * column);
-//
-//			sb.append(" ".repeat(offsetListWidth)).append(" | ");
-//			for (int i = 0; i < column; i++)
-//				sb.append(String.format("%02X ", i));
-//			sb.append('|');
-//
-//			if (charset != null) {
-//				String charsetName = charset.displayName(Locale.ROOT);
-//				sb.append(' ')
-//				  .append(charsetName)
-//				  .append(" ".repeat(column - charsetName.length() + 1))
-//				  .append('|');
-//			}
-//
-//			if (data == null || length <= 0 || data.length - offset <= 0)
-//				return sb;
-//
-//			for (int i = offset, row = 0; i < Math.min(offset + length, data.length); i += column, row++) {
-//				sb.append('\n');
-//
-//				if (row >= maxRow) {
-//					String message = "Folded %d bytes".formatted(data.length - offset - i);
-//					int len = column * 3 - message.length();
-//					sb.append(" ".repeat(offsetListWidth));
-//					sb.append(" | ");
-//					sb.append(message);
-//					sb.append(" ".repeat(len));
-//					sb.append('|');
-//					break;
-//				}
-//
-//				sb.append(String.format("%0" + offsetListWidth + "X", i))
-//				  .append(" | ");
-//
-//				for (int v = 0; v < column; v++) {
-//					int index = i + v;
-//
-//					if (index >= data.length)
-//						sb.append("   ");
-//					else
-//						sb.append(String.format("%02X ", data[index]));
-//				}
-//
-//				sb.append('|');
-//
-//				if (charset == null)
-//					continue;
-//
-//				sb.append(' ');
-//
-//				sb.append(".".repeat(column));
-//				// TODO: 2026/02/59 Charset display
-//
-//				sb.append(" |");
-//			}
-//
-//			return sb;
-//		};
+	@NotNull
+	public static TemplateValueProvider hexView(byte @Nullable [] data) {
+		return () -> new HexViewTemplate.Builder(data).build().getValue();
+	}
+
+	@NotNull
+	public static TemplateValueProvider hexView(byte @Nullable [] data, @NotNull Consumer<HexViewTemplate.Builder> builder) {
+		Objects.requireNonNull(builder, "builder is null");
+		return () -> {
+			HexViewTemplate.Builder b = HexViewTemplate.builder(data);
+			builder.accept(b);
+			return b.build().getValue();
+		};
 	}
 }
