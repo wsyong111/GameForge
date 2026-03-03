@@ -1,6 +1,7 @@
 package io.github.wsyong11.gameforge.framework.system.audio.audio;
 
 import io.github.wsyong11.gameforge.framework.Identifier;
+import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.AudioDecoderFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -31,4 +32,8 @@ public interface AudioManager {
 	void awaitPreload() throws InterruptedException;
 
 	void awaitPreload(long timeout, @NotNull TimeUnit unit) throws InterruptedException;
+
+	void registerAudioDecoder(@NotNull AudioDecoderFactory factory);
+
+	void unregisterAudioDecoder(@NotNull AudioDecoderFactory factory);
 }

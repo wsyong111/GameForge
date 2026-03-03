@@ -407,6 +407,10 @@ public abstract class Context {
 		return ContextStack.getInstance().size();
 	}
 
+	public static int getStackCacheId() {
+		return ContextStack.getInstance().getCacheId();
+	}
+
 	// -------------------------------------------------------------------------------------------------------------- //
 
 //	@UsingContext

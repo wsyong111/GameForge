@@ -19,6 +19,9 @@ public interface Audio extends Closeable {
 	@NotNull
 	AudioStream newStream();
 
+	@NotNull
+	AudioStream openStreamingStream();
+
 	@Override
 	void close();
 }

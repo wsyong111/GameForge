@@ -65,14 +65,19 @@ class ContextStack {
 
 	private final Deque<StackItem> stack;
 	private final Thread owner;
+
 	@Nullable
 	private volatile Context localGlobalContext;
+
+	private long cacheVersion;
 
 	@CallerSensitive
 	private ContextStack() {
 		this.stack = new ArrayDeque<>();
 		this.owner = Thread.currentThread();
 		this.localGlobalContext = globalContext;
+
+		this.cacheVersion = 0L;
 
 		INSTANCE_MAP.put(this.owner, this);
 	}
@@ -121,6 +126,8 @@ class ContextStack {
 
 		if (item.isEffectiveDebug())
 			LOGGER.verbose("Push stack {} in thread {}: {}", type, this.owner, lazy(ctx));
+
+		this.cacheVersion++;
 	}
 
 	public void pop(@NotNull StackItemType type, @Nullable Context ctx) {
@@ -144,6 +151,8 @@ class ContextStack {
 
 		if (item.isEffectiveDebug())
 			LOGGER.verbose("Pop stack {} in thread {}: {}", itemType, this.owner, itemContext);
+
+		this.cacheVersion++;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
@@ -213,7 +222,7 @@ class ContextStack {
 			.copyOf(this.stack)
 			.stream()
 			.filter(i -> {
-				if (i.getType()==StackItemType.HIDDEN) {
+				if (i.getType() == StackItemType.HIDDEN) {
 					foundHiddenItem[0] = true;
 					return true;
 				}
@@ -244,6 +253,18 @@ class ContextStack {
 
 	public int size() {
 		return this.stack.size();
+	}
+
+	public long getCacheVersion() {
+		return this.cacheVersion;
+	}
+
+	public int getCacheId() {
+		int result = 17;
+		result = 31 * result + this.stack.hashCode();
+		result = 31 * result + System.identityHashCode(this.getCurrent());
+		result = 31 * result + Long.hashCode(this.cacheVersion);
+		return result;
 	}
 
 	protected static class StackItem {

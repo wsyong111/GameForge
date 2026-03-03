@@ -51,7 +51,7 @@ public class EnvConfig extends ServiceContext.Instance {
 		return getInstances(EnvConfig.class);
 	}
 
-	@UsingContext(require = true)
+	@UsingContext
 	@NotNull
 	public static <T> Optional<T> getOptional(@NotNull Entry<T> config) {
 		return getInstances()
@@ -62,13 +62,20 @@ public class EnvConfig extends ServiceContext.Instance {
 			.flatMap(Function.identity());
 	}
 
-	@UsingContext(require = true)
+	@UsingContext
 	@Nullable
 	public static <T> T get(@NotNull Entry<T> config) {
 		return getOptional(config).orElse(null);
 	}
 
-	@UsingContext(require = true)
+	@UsingContext
+	public static boolean exists(@NotNull Entry<?> config) {
+		return getInstances()
+			.stream()
+			.anyMatch(c -> c.contain(config));
+	}
+
+	@UsingContext
 	@Nullable
 	@Contract("_, _ -> param2")
 	public static <T> T get(@NotNull Entry<T> config, @Nullable T defaultValue) {

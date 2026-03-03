@@ -31,6 +31,11 @@ public class SimpleAudioImpl implements Audio {
 	}
 
 	@Override
+	public @NotNull AudioStream openStreamingStream() {
+		return null;
+	}
+
+	@Override
 	public void close() {
 
 	}

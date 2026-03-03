@@ -10,4 +10,5 @@ dependencies {
 	implementation(project(":Framework:RichText"))
 
 	implementation(project(":Util"))
+	implementation(project(":Framework:Mime"))
 }

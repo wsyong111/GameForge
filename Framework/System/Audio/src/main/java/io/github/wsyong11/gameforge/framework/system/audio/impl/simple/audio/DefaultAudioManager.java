@@ -14,12 +14,15 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 public class DefaultAudioManager implements AudioManager, AutoCloseable {
 	private final ResourceProvider resourceProvider;
 	private final AudioDecoderPool decoderPool;
 
+
+	private final Map<Identifier, Future<Audio>> pendingAudio;
 	private final Map<Identifier, Audio> audioCache;
 
 	public DefaultAudioManager(@NotNull ResourceProvider resourceProvider) {
@@ -35,6 +38,7 @@ public class DefaultAudioManager implements AudioManager, AutoCloseable {
 			TimeUnit.SECONDS
 		);
 
+		this.pendingAudio = new ConcurrentHashMap<>();
 		this.audioCache = new ConcurrentHashMap<>();
 	}
 
@@ -42,6 +46,10 @@ public class DefaultAudioManager implements AudioManager, AutoCloseable {
 	@Override
 	public Audio getAudio(@NotNull Identifier location) {
 		Resource resource = this.resourceProvider.getResource(location);
+		if (resource == null)
+			return null;
+
+		this.decoderPool.decode()
 
 		return null;
 	}

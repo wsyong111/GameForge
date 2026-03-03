@@ -1,11 +1,14 @@
 package io.github.wsyong11.gameforge.framework.context;
 
 import io.github.wsyong11.gameforge.framework.context.annotation.UsingContext;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
+import java.lang.ref.WeakReference;
 import java.util.*;
+import java.util.function.Function;
 
 public class ServiceContext extends Context {
 	@NotNull
@@ -51,18 +54,54 @@ public class ServiceContext extends Context {
 	}
 
 	public static abstract class Instance {
+		private static final Object NULL = new Object();
+
+		private static final ThreadLocal<Integer> lastContextStackId = ThreadLocal.withInitial(() -> 0);
+		private static final ThreadLocal<Map<Pair<Object, Class<?>>, WeakReference<Object>>> instanceCache = ThreadLocal.withInitial(HashMap::new);
+
+		@SuppressWarnings("unchecked")
+		@UsingContext
+		@Nullable
+		private static <T extends Instance, R> R getCache(@NotNull Object key, @NotNull Class<T> type, @NotNull Function<Class<T>, R> getter) {
+			Objects.requireNonNull(key, "key is null");
+			Objects.requireNonNull(type, "type is null");
+			Objects.requireNonNull(getter, "getter is null");
+
+			Map<Pair<Object, Class<?>>, WeakReference<Object>> cache = instanceCache.get();
+
+			int currentStackSize = Context.getStackCacheId();
+			if (lastContextStackId.get() != currentStackSize) {
+				cache.clear();
+				lastContextStackId.set(currentStackSize);
+			}
+
+			Pair<Object, Class<?>> keyPair = Pair.of(key, type);
+
+			WeakReference<Object> cachedValueRef = cache.get(keyPair);
+			Object cachedValue;
+			if (cachedValueRef == null || (cachedValue = cachedValueRef.get()) == null) {
+				R value = getter.apply(type);
+				cachedValue = value == null ? NULL : value;
+				cache.put(keyPair, new WeakReference<>(cachedValue));
+			}
+
+			return (R) (cachedValue == NULL ? null : cachedValue);
+		}
+
+		private static final Object SINGLE_INSTANCE_KEY = new Object();
+
 		@Nullable
 		@UsingContext
 		protected static <T extends Instance> T getInstanceUnsafe(@NotNull Class<T> type) {
 			Objects.requireNonNull(type, "type is null");
-			return Context
+			return getCache(SINGLE_INSTANCE_KEY, type, (t) -> Context
 				.getEachStream()
 				.map(c -> c.asUnsafe(ServiceContext.class))
 				.filter(Objects::nonNull)
-				.map(c -> c.getUnsafe(type))
+				.map(c -> c.getUnsafe(t))
 				.filter(Objects::nonNull)
 				.findFirst()
-				.orElse(null);
+				.orElse(null));
 		}
 
 		@NotNull
@@ -76,19 +115,23 @@ public class ServiceContext extends Context {
 			return instance;
 		}
 
+		private static final Object MULTI_INSTANCE_KEY = new Object();
+
 		@NotNull
 		@UsingContext
 		@Unmodifiable
 		protected static <T extends Instance> List<T> getInstances(@NotNull Class<T> type) {
 			Objects.requireNonNull(type, "type is null");
 
-			return Context
+			List<T> result = getCache(MULTI_INSTANCE_KEY, type, (t) -> Context
 				.getEachStream()
 				.map(c -> c.asUnsafe(ServiceContext.class))
 				.filter(Objects::nonNull)
-				.map(c -> c.getUnsafe(type))
+				.map(c -> c.getUnsafe(t))
 				.filter(Objects::nonNull)
-				.toList();
+				.toList());
+			assert result != null;
+			return result;
 		}
 	}
 
