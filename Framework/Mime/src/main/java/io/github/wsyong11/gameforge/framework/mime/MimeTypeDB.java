@@ -82,6 +82,10 @@ public class MimeTypeDB {
 		EXTENSION_MIME_MAP = Collections.unmodifiableMap(castMap);
 	}
 
+	static {
+		init();
+	}
+
 	@NotNull
 	public static MimeType get(@NotNull String extension) {
 		Objects.requireNonNull(extension, "extension is null");

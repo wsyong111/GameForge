@@ -31,7 +31,7 @@ public class AudioDecoderMap {
 		this.lock = new Object();
 	}
 
-	@Nullable
+	@NotNull
 	@Unmodifiable
 	public List<FactoryInfo> get(@NotNull MimeType mimeType) {
 		Objects.requireNonNull(mimeType, "mimeType is null");
@@ -75,6 +75,8 @@ public class AudioDecoderMap {
 
 			this.infoMap.put(factory, info);
 			this.list.add(factory);
+
+			this.cacheMap.clear();
 		}
 	}
 
@@ -85,15 +87,17 @@ public class AudioDecoderMap {
 			if (!this.list.remove(factory))
 				return;
 
-			FactoryInfo info = this.infoMap.remove(factory);
-			for (Map.Entry<MimeType, List<FactoryInfo>> entry : List.copyOf(this.cacheMap.entrySet())) {
-				MimeType type = entry.getKey();
-				List<FactoryInfo> infos = entry.getValue();
-				if (!infos.contains(info))
-					continue;
+			this.infoMap.remove(factory);
 
-				this.cacheMap.remove(type);
-			}
+			this.cacheMap.clear();
+		}
+	}
+
+	public void clear() {
+		synchronized (this.lock){
+			this.list.clear();
+			this.infoMap.clear();
+			this.cacheMap.clear();
 		}
 	}
 

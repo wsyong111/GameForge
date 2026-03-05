@@ -31,8 +31,8 @@ public class ResourcePath {
 			return ArrayUtils.EMPTY_STRING_ARRAY;
 
 		return Arrays.stream(path.replace('\\', separatorChar).split(separator))
-		             .filter(s -> !s.isEmpty())
-		             .toArray(String[]::new);
+			.filter(s -> !s.isEmpty())
+			.toArray(String[]::new);
 	}
 
 	private static boolean isDirectory(@NotNull String path) {
@@ -234,5 +234,18 @@ public class ResourcePath {
 				+ (this.directory ? separator : "");
 
 		return this.fullPath;
+	}
+
+	@NotNull
+	public String getExtension() {
+		if (this.directory)
+			return "";
+
+		String name = this.getName();
+		int extensionIndex = name.lastIndexOf('.');
+		if (extensionIndex == -1)
+			return "";
+
+		return name.substring(extensionIndex);
 	}
 }

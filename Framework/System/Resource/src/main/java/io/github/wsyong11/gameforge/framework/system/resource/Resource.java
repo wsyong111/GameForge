@@ -18,6 +18,6 @@ public interface Resource {
 
 	@NotNull
 	default MimeType getType() {
-		return MimeTypeDB.get(this.getPath().getName());
+		return MimeTypeDB.get(this.getPath().getExtension());
 	}
 }
