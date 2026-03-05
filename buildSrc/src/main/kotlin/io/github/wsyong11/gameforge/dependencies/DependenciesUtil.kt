@@ -40,10 +40,10 @@ fun DependencyHandler.addDependency(
 		DependencyType.DEPENDENCY -> dependency.toString()
 	}
 
-	val mavenDenepdencyItem = this.add(configuration, dependencyName) as? ModuleDependency
+	val mavenDependencyItem = this.add(configuration, dependencyName) as? ModuleDependency
 
 	dependency.exclude.forEach {
-		mavenDenepdencyItem?.exclude(it.group, it.artifact)
+		mavenDependencyItem?.exclude(it.group, it.artifact)
 	}
 
 	dependency.additionDependency.forEach {
@@ -72,3 +72,7 @@ fun DependencyHandler.testCompileOnly(project: Project, id: Dependency) =
 
 fun DependencyHandler.testAnnotationProcessor(project: Project, id: Dependency) =
 	addDependency(project, ImportType.ANNOTATION_PROCESSOR, id, true)
+
+
+//fun DependencyHandler.api(o: Any): org.gradle.api.artifacts.Dependency? =
+//	add("api", o)

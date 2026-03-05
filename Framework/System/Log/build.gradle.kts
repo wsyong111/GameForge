@@ -16,7 +16,6 @@ dependencies {
 	annotationProcessor(project, LOG4J2_CORE)
 
 	implementation(project(":Framework:Annotation"))
-	implementation(project(":Framework:EnvConfig"))
 
 	implementation(project(":Util"))
 

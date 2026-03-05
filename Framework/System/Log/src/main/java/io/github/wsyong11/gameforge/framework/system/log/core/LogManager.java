@@ -70,6 +70,7 @@ public final class LogManager {
 		currentAdapter.setDefaultStdout(defaultStdout);
 		currentAdapter.setDefaultStderr(defaultStderr);
 		currentAdapter.setLogDir(logDir);
+		currentAdapter.setDebug(debug);
 	}
 
 	private static void uninitAdapter() {
@@ -130,6 +131,20 @@ public final class LogManager {
 	@NotNull
 	public static Path getLogDir() {
 		return logDir;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	private static boolean debug;
+
+	public static void setDebug(boolean enable) {
+		debug = enable;
+		if (currentAdapter != null)
+			currentAdapter.setDebug(enable);
+	}
+
+	public static boolean isDebug() {
+		return debug;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //

@@ -1,174 +1,233 @@
 package io.github.wsyong11.gameforge.framework.env;
 
-import io.github.wsyong11.gameforge.util.StreamUtils;
-import io.github.wsyong11.gameforge.util.debug.MapDebugPrinter;
-import lombok.experimental.UtilityClass;
-import org.apache.commons.lang3.ClassUtils;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnknownNullability;
+import io.github.wsyong11.gameforge.framework.context.ServiceContext;
+import io.github.wsyong11.gameforge.framework.context.annotation.UsingContext;
+import org.apache.commons.text.StringEscapeUtils;
+import org.jetbrains.annotations.*;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import java.util.function.Supplier;
 
-@UtilityClass
-public class EnvConfig {
-	private static final Map<String, ConfigItem<?>> configItems = new ConcurrentHashMap<>();
-
-	private static boolean inited = false;
-
-	public static final EnvConfigItem<Boolean> DEBUG = addItem("debug", false, Boolean.class);
-	public static final EnvConfigItem<Boolean> PRINT_CONFIG = addItem("print_config", false, Boolean.class);
+public class EnvConfig extends ServiceContext.Instance {
+	public static final Entry<Boolean> DEBUG = entry("debug", Boolean.class, false);
 
 	@NotNull
-	private static <T> ConfigItem<T> addItem(@NotNull String id, @Nullable T defaultValue, @NotNull Class<T> type) {
-		Objects.requireNonNull(id, "id is null");
-		Objects.requireNonNull(type, "type is null");
+	public static <T> Entry<T> entry(@NotNull String name, @NotNull Class<T> type) {
+		return new Entry<>(name, type, null);
+	}
 
-		if (!configItems.containsKey(id)) {
-			if (inited)
-				throw new IllegalStateException("Unable to create an item after initialization");
+	@NotNull
+	public static <T> Entry<T> entry(@NotNull String name, @NotNull Class<T> type, @Nullable T initialValue) {
+		return new Entry<>(name, type, () -> initialValue);
+	}
 
-			ConfigItem<T> item = new ConfigItem<>(id, type);
-			item.setValue(defaultValue);
-			configItems.put(id, item);
-			return item;
+	@NotNull
+	public static <T> Entry<T> entry(@NotNull String name, @NotNull Class<T> type, @Nullable Supplier<T> initialValue) {
+		return new Entry<>(name, type, initialValue);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	@UsingContext
+	@Nullable
+	public static EnvConfig getInstanceUnsafe() {
+		return getInstanceUnsafe(EnvConfig.class);
+	}
+
+	@UsingContext
+	@NotNull
+	public static EnvConfig getInstance() {
+		return getInstance(EnvConfig.class);
+	}
+
+	@UsingContext
+	@NotNull
+	@Unmodifiable
+	public static List<EnvConfig> getInstances() {
+		return getInstances(EnvConfig.class);
+	}
+
+	@UsingContext
+	@NotNull
+	public static <T> Optional<T> getOptional(@NotNull Entry<T> entry) {
+		return getInstances()
+			.stream()
+			.filter(c -> c.contain(entry))
+			.map(c -> c.getValue(entry))
+			.findFirst()
+			.flatMap(Function.identity());
+	}
+
+	@UsingContext
+	@Nullable
+	public static <T> T get(@NotNull Entry<T> entry) {
+		return getOptional(entry).orElse(null);
+	}
+
+	@UsingContext
+	public static boolean exists(@NotNull Entry<?> entry) {
+		return getInstances()
+			.stream()
+			.anyMatch(c -> c.contain(entry));
+	}
+
+	@UsingContext
+	@Nullable
+	@Contract("_, null -> null; _, !null -> !null")
+	public static <T> T get(@NotNull Entry<T> entry, @Nullable T defaultValue) {
+		return getOptional(entry).orElse(defaultValue);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	private static final Object NULL = new Object();
+
+	@NotNull
+	public static Builder builder() {
+		return new Builder();
+	}
+
+	private final Map<Entry<?>, Object> configs;
+
+	public EnvConfig(@NotNull Map<Entry<?>, ?> configs) {
+		Objects.requireNonNull(configs, "configs is null");
+
+		Map<Entry<?>, Object> configMap = new HashMap<>();
+
+		for (Map.Entry<Entry<?>, ?> entry : configs.entrySet()) {
+			Entry<?> key = entry.getKey();
+			Object value = entry.getValue();
+
+			Class<?> type = key.getType();
+			if (value != null && !type.isInstance(value))
+				throw new IllegalArgumentException("Instance type " + type.getName() + " is not an instance of " + value);
+
+			configMap.put(key, value == null ? NULL : value);
 		}
 
-		ConfigItem<?> item = configItems.get(id);
-		return item.cast(type);
+		this.configs = Collections.unmodifiableMap(configMap);
 	}
 
-	public static boolean isInited() {
-		return inited;
+	private EnvConfig(@NotNull Map<Entry<?>, Object> configs, boolean ignoredDummy) {
+		Objects.requireNonNull(configs, "configs is null");
+		this.configs = Collections.unmodifiableMap(configs);
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
-	private static void applySystemProperties() {
-		Properties properties = System.getProperties();
-		for (Map.Entry<String, ConfigItem<?>> entry : configItems.entrySet()) {
-			String key = entry.getKey();
-			ConfigItem item = entry.getValue();
+	@NotNull
+	public <T> Optional<T> getValue(@NotNull Entry<T> entry) {
+		Objects.requireNonNull(entry, "entry is null");
 
-			String propertyKey = EnvConfig.class.getName() + "." + key;
-			String propertyValue = properties.getProperty(propertyKey);
-			if (propertyValue == null)
-				continue;
+		Object value = this.configs.get(entry);
+		if (value == null)
+			return Optional.empty();
 
-			try {
-				Class<?> itemType = Objects.requireNonNullElse(ClassUtils.wrapperToPrimitive(item.getType()), item.getType());
-				if (itemType == boolean.class) {
-					item.setValue(Boolean.valueOf(propertyValue.toLowerCase(Locale.ROOT)));
-				} else if (itemType == byte.class) {
-					item.setValue(Byte.valueOf(propertyValue));
-				} else if (itemType == char.class) {
-					item.setValue(propertyValue.isEmpty() ? 0 : propertyValue.charAt(0));
-				} else if (itemType == short.class) {
-					item.setValue(Short.valueOf(propertyValue));
-				} else if (itemType == int.class) {
-					item.setValue(Integer.valueOf(propertyValue));
-				} else if (itemType == long.class) {
-					item.setValue(Long.valueOf(propertyValue));
-				} else if (itemType == double.class) {
-					item.setValue(Double.valueOf(propertyValue));
-				} else if (itemType == float.class) {
-					item.setValue(Float.valueOf(propertyValue));
-				} else if (itemType == String.class) {
-					item.setValue(propertyValue);
-				} else {
-					System.err.println("Failed to apply env config " + key + ", can't find method to convert String to " + itemType.getName());
-				}
-			} catch (Exception e) {
-				System.err.println("Failed to apply env config " + key);
-				e.printStackTrace();
-			}
-		}
+		if (value == NULL)
+			return Optional.ofNullable(entry.getInitialValue());
+
+		return Optional.of(entry.getType().cast(value));
 	}
 
-	private static void init() {
-		if (inited) return;
-
-		applySystemProperties();
-		invokeConfigurator();
-
-		inited = true;
-
-		if (PRINT_CONFIG.getValue())
-			MapDebugPrinter.print(configItems, Function.identity(), item -> Objects.toString(item.getValue()));
+	public boolean contain(@NotNull Entry<?> entry) {
+		Objects.requireNonNull(entry, "entry is null");
+		return this.configs.containsKey(entry);
 	}
 
-	private static void invokeConfigurator() {
-		ServiceLoader<EnvConfigConfigurator> configurators = ServiceLoader.load(EnvConfigConfigurator.class, EnvConfig.class.getClassLoader());
-		Iterator<EnvConfigConfigurator> iterator = configurators.iterator();
-		if (!iterator.hasNext())
-			return;
-
-		EnvConfigConfigurator configurator = iterator.next();
-		if (iterator.hasNext()) {
-			String items = StreamSupport
-				.stream(Spliterators.spliteratorUnknownSize(iterator, 0), false)
-				.map(Object::getClass)
-				.map(Class::getName)
-				.map(StreamUtils.wrapText("\"", "\""))
-				.collect(Collectors.joining(", "));
-			throw new IllegalArgumentException("Discover multiple Configurators: [" + items + "]");
-		}
-
-		configurator.initConfig();
+	@NotNull
+	@UnmodifiableView
+	public Map<Entry<?>, Object> getConfigs() {
+		return this.configs;
 	}
 
-	static {
-		init();
+	@NotNull
+	public Builder asBuilder() {
+		return new Builder(this);
 	}
 
-	private static class ConfigItem<T> implements EnvConfigItem<T> {
-		private final String id;
+	public static class Entry<T> {
+		private final String name;
 		private final Class<T> type;
-		private T value;
+		private final Supplier<T> initialValue;
 
-		public ConfigItem(@NotNull String id, @NotNull Class<T> type) {
-			Objects.requireNonNull(id, "id is null");
-			this.id = id;
+		protected Entry(@NotNull String name, @NotNull Class<T> type, @Nullable Supplier<T> initialValue) {
+			Objects.requireNonNull(name, "name is null");
+			Objects.requireNonNull(type, "type is null");
+			this.name = name;
 			this.type = type;
+			this.initialValue = initialValue;
 		}
 
 		@NotNull
-		@Override
-		public String getId() {
-			return this.id;
+		public String getName() {
+			return this.name;
 		}
 
 		@NotNull
-		@Override
 		public Class<T> getType() {
 			return this.type;
 		}
 
-		@UnknownNullability
-		@Override
-		public T getValue() {
-			return this.value;
+		@Nullable
+		public T getInitialValue() {
+			return this.initialValue == null ? null : this.initialValue.get();
 		}
 
 		@Override
-		public void setValue(@UnknownNullability T value) {
-			if (inited)
-				throw new IllegalStateException("Unable to modify configuration values after initialization");
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
 
-			this.value = value;
+			Entry<?> entry = (Entry<?>) o;
+			return Objects.equals(this.name, entry.name)
+				&& Objects.equals(this.type, entry.type);
 		}
 
-		@SuppressWarnings("unchecked")
+		@Override
+		public int hashCode() {
+			return Objects.hash(this.name, this.type);
+		}
+
+		@Override
+		public String toString() {
+			return "EnvConfig.Entry<" + this.type.getName() + ">(\"" + StringEscapeUtils.escapeJava(this.name) + "\")";
+		}
+	}
+
+	public static class Builder {
+		private final Map<Entry<?>, Object> configs;
+
+		public Builder() {
+			this.configs = new HashMap<>();
+		}
+
+		public Builder(@NotNull EnvConfig entry) {
+			Objects.requireNonNull(entry, "entry is null");
+			this.configs = new HashMap<>(entry.getConfigs());
+		}
+
 		@NotNull
-		public <V> ConfigItem<V> cast(@NotNull Class<V> type) {
-			Objects.requireNonNull(type, "type is null");
+		public Builder item(@NotNull Entry<?> entry) {
+			Objects.requireNonNull(entry, "entry is null");
+			this.configs.put(entry, NULL);
+			return this;
+		}
 
-			if (!type.isAssignableFrom(this.type))
-				throw new ClassCastException("Cannot cast " + this.type + " to " + type);
-			return (ConfigItem<V>) this;
+		@NotNull
+		public <T> Builder item(@NotNull Entry<T> entry, @Nullable T value) {
+			Objects.requireNonNull(entry, "entry is null");
+			this.configs.put(entry, value == null ? NULL : value);
+			return this;
+		}
+
+		@NotNull
+		public Builder remove(@NotNull Entry<?> entry) {
+			this.configs.remove(entry);
+			return this;
+		}
+
+		@NotNull
+		public EnvConfig build() {
+			return new EnvConfig(this.configs, true);
 		}
 	}
 }

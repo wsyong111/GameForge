@@ -33,7 +33,7 @@ public interface AudioManager {
 
 	void awaitPreload(long timeout, @NotNull TimeUnit unit) throws InterruptedException;
 
-	void registerAudioDecoder(@NotNull AudioDecoderFactory factory);
+	boolean registerAudioDecoder(@NotNull AudioDecoderFactory factory, int priority);
 
-	void unregisterAudioDecoder(@NotNull AudioDecoderFactory factory);
+	boolean unregisterAudioDecoder(@NotNull AudioDecoderFactory factory);
 }

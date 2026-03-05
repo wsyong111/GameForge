@@ -1,6 +1,5 @@
 package io.github.wsyong11.gameforge.framework.debug;
 
-import io.github.wsyong11.gameforge.framework.env.EnvConfig;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.util.collection.CollectionUtils;
@@ -17,7 +16,7 @@ public final class Debug {
 	private static final Logger LOGGER = Log.getLogger();
 
 	@Nullable
-	private static final Debug INSTANCE = EnvConfig.DEBUG.getValue()
+	private static final Debug INSTANCE = false
 		? new Debug()
 		: null;
 

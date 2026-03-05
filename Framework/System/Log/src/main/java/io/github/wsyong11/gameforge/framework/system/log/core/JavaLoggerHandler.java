@@ -32,11 +32,14 @@ class JavaLoggerHandler extends Handler {
 		if (level == Level.INFO || level == Level.CONFIG)
 			return LogLevel.INFO;
 
-		if (level == Level.FINE || level == Level.FINER)
+		if (level == Level.FINE)
 			return LogLevel.DEBUG;
 
-		if (level == Level.FINEST || level.intValue() <= Level.FINEST.intValue())
+		if (level == Level.FINER)
 			return LogLevel.TRACE;
+
+		if (level == Level.FINEST || level.intValue() <= Level.FINEST.intValue())
+			return LogLevel.VERBOSE;
 
 		return LogLevel.INFO;
 	}

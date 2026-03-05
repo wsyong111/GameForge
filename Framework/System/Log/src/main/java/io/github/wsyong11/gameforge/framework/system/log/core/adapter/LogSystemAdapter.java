@@ -30,4 +30,6 @@ public interface LogSystemAdapter {
 	void destroy();
 
 	void setLogDir(@NotNull Path logDir);
+
+	void setDebug(boolean enable);
 }

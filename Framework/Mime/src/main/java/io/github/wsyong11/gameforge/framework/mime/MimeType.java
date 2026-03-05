@@ -375,6 +375,38 @@ public class MimeType implements Comparable<MimeType> {
 		return score;
 	}
 
+	public int distance(@NotNull MimeType other) {
+		Objects.requireNonNull(other, "other is null");
+
+		int distance = 0;
+
+		if (!this.getType().equals(other.getType())) {
+			if (this.isWildcardType() || other.isWildcardType())
+				distance += 100;
+			else
+				return Integer.MAX_VALUE;
+		}
+
+		if (!this.getSubtype().equals(other.getSubtype())) {
+			if (this.isWildcardSubtype() || other.isWildcardSubtype())
+				distance += 10;
+			else
+				return Integer.MAX_VALUE;
+		}
+
+		Map<String, String> otherParameters = other.getParameters();
+		for (Map.Entry<String, String> e : this.getParameters().entrySet()) {
+			String key = e.getKey();
+			String value = e.getValue();
+
+			String otherValue = otherParameters.get(key);
+			if (!Objects.equals(value, otherValue))
+				distance += 1;
+		}
+
+		return distance;
+	}
+
 	@Override
 	public int compareTo(@NotNull MimeType o) {
 		Objects.requireNonNull(o, "o is null");
@@ -409,8 +441,8 @@ public class MimeType implements Comparable<MimeType> {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.type)
-			.append('/')
-			.append(this.subtype);
+		  .append('/')
+		  .append(this.subtype);
 
 		for (Map.Entry<String, String> entry : this.parameters.entrySet()) {
 			sb.append("; ");
@@ -423,10 +455,10 @@ public class MimeType implements Comparable<MimeType> {
 				sb.append(value);
 			else
 				sb.append('"')
-					.append(value
-						.replace("\\", "\\\\")
-						.replace("\"", "\\\""))
-					.append('"');
+				  .append(value
+					  .replace("\\", "\\\\")
+					  .replace("\"", "\\\""))
+				  .append('"');
 		}
 
 		return sb.toString();

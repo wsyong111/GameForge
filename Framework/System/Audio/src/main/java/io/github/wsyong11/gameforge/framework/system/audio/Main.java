@@ -1,13 +1,7 @@
 package io.github.wsyong11.gameforge.framework.system.audio;
 
 import io.github.wsyong11.gameforge.framework.Identifier;
-import io.github.wsyong11.gameforge.framework.mime.MimeType;
-import io.github.wsyong11.gameforge.framework.mime.MimeTypes;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.Audio;
-import io.github.wsyong11.gameforge.framework.system.audio.audio.AudioManager;
-import io.github.wsyong11.gameforge.framework.system.audio.audio.AudioMetadata;
-import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.AudioDecodeHint;
-import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.AudioDecoder;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.ogg.OggAudioDecoderFactory;
 import io.github.wsyong11.gameforge.framework.system.audio.impl.simple.audio.DefaultAudioManager;
 import io.github.wsyong11.gameforge.framework.system.log.core.LogManager;
@@ -15,18 +9,6 @@ import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.manage.DefaultResourceManager;
 import io.github.wsyong11.gameforge.framework.system.resource.manage.ResourceManager;
 import io.github.wsyong11.gameforge.framework.system.resource.pack.AssetsResourcePack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.UnmodifiableView;
-
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.DataLine;
-import javax.sound.sampled.SourceDataLine;
-import javax.swing.*;
-import java.io.InputStream;
-import java.nio.FloatBuffer;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 public class Main {
 	private static final Identifier TEST_SOUND = Identifier.withDefaultNamespace("sound/out.ogg");
@@ -41,7 +23,7 @@ public class Main {
 			rs.reload();
 
 			try (DefaultAudioManager manager = new DefaultAudioManager(rs)) {
-				manager.registerAudioDecoder(OggAudioDecoderFactory.INSTANCE.get());
+				manager.registerAudioDecoder(OggAudioDecoderFactory.INSTANCE.get(), 0);
 				
 				Audio audio = manager.getAudio(TEST_SOUND);
 				System.out.println(audio);

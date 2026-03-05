@@ -30,7 +30,7 @@ public class DebugEventBus extends EventBusWrapper {
 		if (delegate instanceof DebugEventBus debugEventBus)
 			return debugEventBus;
 
-		return ignoreConfig || EnvConfig.DEBUG.getValue()
+		return ignoreConfig || EnvConfig.get(EnvConfig.DEBUG, false)
 			? new DebugEventBus(delegate, debugName)
 			: delegate;
 	}

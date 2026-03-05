@@ -2,7 +2,6 @@ package io.github.wsyong11.gameforge.framework.system.log.adapter.log4j2;
 
 import com.google.auto.service.AutoService;
 import io.github.wsyong11.gameforge.framework.annotation.Internal;
-import io.github.wsyong11.gameforge.framework.env.EnvConfig;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.log.adapter.log4j2.plugin.LogDirContextProvider;
 import io.github.wsyong11.gameforge.framework.system.log.core.adapter.LogSystemAdapter;
@@ -17,6 +16,7 @@ import org.apache.logging.log4j.core.config.NullConfiguration;
 import org.apache.logging.log4j.core.config.xml.XmlConfiguration;
 import org.apache.logging.log4j.status.StatusLogger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,25 +32,28 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Log4jAdapter implements LogSystemAdapter {
 	private static final String CONFIG_NAME = "log4j2.xml";
 
-	private static final Logger LOGGER = EnvConfig.DEBUG.getValue()
-		? new Log4jLogger(StatusLogger.getLogger())
-		: NoopLogger.INSTANCE;
-
-	private static final Lazy<URL> CONFIG_FILE = Lazy.concurrentOf(() -> {
-		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-		URL resource = classLoader.getResource(CONFIG_NAME);
-		if (resource == null)
-			LOGGER.warn("Configuration file not found {}", CONFIG_NAME);
-		return resource;
-	});
-
 	private final Map<ClassLoader, Context> contextMap;
 
-	private Path logDir;
+	private final Lazy<URL> configFile;
+
+	private volatile Path logDir;
+	private volatile boolean debug;
+	private volatile Logger logger;
 
 	public Log4jAdapter() {
 		this.contextMap = new ConcurrentHashMap<>();
-		this.logDir=Path.of("log");
+
+		this.configFile = Lazy.concurrentOf(() -> {
+			ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+			URL resource = classLoader.getResource(CONFIG_NAME);
+			if (resource == null)
+				this.logger.warn("Configuration file not found {}", CONFIG_NAME);
+			return resource;
+		});
+
+		this.logDir = Path.of("log");
+		this.debug = false;
+		this.logger = NoopLogger.INSTANCE;
 	}
 
 	@NotNull
@@ -86,28 +89,36 @@ public class Log4jAdapter implements LogSystemAdapter {
 	@Override
 	public void bindClassLoader(@NotNull ClassLoader classLoader) {
 		Objects.requireNonNull(classLoader, "classLoader is null");
-		this.contextMap.computeIfAbsent(classLoader, Context::new);
-		LOGGER.debug("Bind class loader {}", classLoader);
+
+		this.contextMap.computeIfAbsent(classLoader, this::createContext);
+		this.logger.debug("Bind class loader {}", classLoader);
+	}
+
+	@NotNull
+	private Context createContext(@NotNull ClassLoader classLoader) {
+		URL configFile = this.configFile.get();
+		return new Context(configFile, classLoader);
 	}
 
 	@Override
 	public void unbindClassLoader(@NotNull ClassLoader classLoader) {
 		Objects.requireNonNull(classLoader, "classLoader is null");
+
 		Context context = this.contextMap.remove(classLoader);
 		if (context != null)
 			context.free();
 
-		LOGGER.debug("Unbind class loader {}", classLoader);
+		this.logger.debug("Unbind class loader {}", classLoader);
 	}
 
 	@Override
 	public void setDefaultStdout(@NotNull PrintStream stdout) {
-		LOGGER.debug("Set default stdout to {}", stdout);
+		this.logger.debug("Set default stdout to {}", stdout);
 	}
 
 	@Override
 	public void setDefaultStderr(@NotNull PrintStream stderr) {
-		LOGGER.debug("Set default stderr to {}", stderr);
+		this.logger.debug("Set default stderr to {}", stderr);
 	}
 
 	@Override
@@ -133,36 +144,51 @@ public class Log4jAdapter implements LogSystemAdapter {
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
-	private static class Context {
-		@NotNull
-		private static Configuration loadConfigFile(@NotNull LoggerContext loggerContext) {
-			URL configFile = CONFIG_FILE.get();
-			if (configFile == null) return new NullConfiguration();
+	@Override
+	public void setDebug(boolean enable) {
+		this.debug = enable;
+		this.logger = enable
+			? new Log4jLogger(StatusLogger.getLogger())
+			: NoopLogger.INSTANCE;
+	}
 
-			try (InputStream stream = configFile.openStream()) {
-				return new XmlConfiguration(loggerContext, new ConfigurationSource(stream));
-			} catch (IOException e) {
-				LOGGER.error("Cannot read " + CONFIG_NAME, e);
-				return new NullConfiguration();
-			}
-		}
+	public boolean isDebug() {
+		return this.debug;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	private class Context {
 
 		private final LoggerContext loggerContext;
 
 		private final Log4jLoggerFactory loggerFactory;
 		private final Log4jLogConfigManager configManager;
 
-		public Context(@NotNull ClassLoader classLoader) {
+		public Context(@Nullable URL configFile, @NotNull ClassLoader classLoader) {
 			Objects.requireNonNull(classLoader, "classLoader is null");
 
-			LOGGER.info("Create context from class loader {}", classLoader.getName());
+			logger.info("Create context from class loader {}", classLoader.getName());
 
 			this.loggerContext = new LoggerContext("Context_" + classLoader.getName());
 			this.loggerContext.setExternalContext(classLoader);
-			this.loggerContext.start(loadConfigFile(this.loggerContext));
+			this.loggerContext.start(loadConfigFile(configFile));
 
 			this.loggerFactory = new Log4jLoggerFactory(this.loggerContext);
 			this.configManager = new Log4jLogConfigManager(this.loggerContext);
+		}
+
+		@NotNull
+		private Configuration loadConfigFile(@Nullable URL configFile) {
+			if (configFile == null)
+				return new NullConfiguration();
+
+			try (InputStream stream = configFile.openStream()) {
+				return new XmlConfiguration(this.loggerContext, new ConfigurationSource(stream));
+			} catch (IOException e) {
+				logger.error("Cannot read {}", CONFIG_NAME, e);
+				return new NullConfiguration();
+			}
 		}
 
 		@NotNull

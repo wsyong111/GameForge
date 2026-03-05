@@ -25,7 +25,7 @@ public class DebugLifecycle implements Lifecycle {
 		if (delegate instanceof DebugLifecycle debugLifecycle)
 			return debugLifecycle;
 
-		return ignoreConfig || EnvConfig.DEBUG.getValue()
+		return ignoreConfig || EnvConfig.get(EnvConfig.DEBUG, false)
 			? new DebugLifecycle(delegate, debugName)
 			: delegate;
 	}
