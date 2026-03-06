@@ -1,14 +1,12 @@
 package io.github.wsyong11.gameforge.framework.system.audio;
 
 import io.github.wsyong11.gameforge.framework.Identifier;
-import io.github.wsyong11.gameforge.framework.system.audio.audio.Audio;
-import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.ogg.OggAudioDecoderFactory;
-import io.github.wsyong11.gameforge.framework.system.audio.impl.simple.audio.DefaultAudioManager;
+import io.github.wsyong11.gameforge.framework.system.audio.audio.pcm.BufferPCMArray;
+import io.github.wsyong11.gameforge.framework.system.audio.audio.pcm.PCMArray;
 import io.github.wsyong11.gameforge.framework.system.log.core.LogManager;
-import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
-import io.github.wsyong11.gameforge.framework.system.resource.manage.DefaultResourceManager;
-import io.github.wsyong11.gameforge.framework.system.resource.manage.ResourceManager;
-import io.github.wsyong11.gameforge.framework.system.resource.pack.AssetsResourcePack;
+
+import java.nio.FloatBuffer;
+import java.util.Arrays;
 
 public class Main {
 	private static final Identifier TEST_SOUND = Identifier.withDefaultNamespace("sound/out.ogg");
@@ -18,17 +16,38 @@ public class Main {
 		LogManager.setAdapter("log4j2");
 		LogManager.bind(classLoader);
 
-		try (ResourceManager rs = new DefaultResourceManager(ResourcePath.of("assets"))) {
-			rs.addPack(new AssetsResourcePack("game"));
-			rs.reload();
+//		try (ResourceManager rs = new DefaultResourceManager(ResourcePath.of("assets"))) {
+//			rs.addPack(new AssetsResourcePack("game"));
+//			rs.reload();
+//
+//			try (DefaultAudioManager manager = new DefaultAudioManager(rs)) {
+//				manager.registerAudioDecoder(OggAudioDecoderFactory.INSTANCE.get(), 0);
+//
+//				Audio audio = manager.getAudio(TEST_SOUND);
+//				System.out.println(audio);
+//			}
+//		}
 
-			try (DefaultAudioManager manager = new DefaultAudioManager(rs)) {
-				manager.registerAudioDecoder(OggAudioDecoderFactory.INSTANCE.get(), 0);
-				
-				Audio audio = manager.getAudio(TEST_SOUND);
-				System.out.println(audio);
-			}
-		}
+		FloatBuffer buf = FloatBuffer.wrap(new float[]{
+			0.0F, 0.05F,
+			0.1F, 0.15F,
+			0.2F, 0.25F,
+			0.3F, 0.35F,
+			0.4F, 0.45F,
+			0.5F, 0.55F,
+			0.6F, 0.65F,
+			0.7F, 0.75F,
+			0.8F, 0.85F,
+			0.9F, 0.95F,
+			0.0F
+		});
+
+		PCMArray array = new BufferPCMArray(buf, 2, 1);
+		System.out.println(array.getFrames());
+
+		FloatBuffer a = FloatBuffer.wrap(new float[]{999.0F, 999.0F, 999.0F, 999.0F});
+		System.out.println(array.getFrame(a, 1, Integer.MAX_VALUE));
+		System.out.println(Arrays.toString(a.array()));
 
 //		JFrame frame = new JFrame("Sound test");
 //		frame.setVisible(true);

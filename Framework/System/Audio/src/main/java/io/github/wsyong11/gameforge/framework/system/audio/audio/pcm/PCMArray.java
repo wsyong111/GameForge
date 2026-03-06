@@ -3,6 +3,9 @@ package io.github.wsyong11.gameforge.framework.system.audio.audio.pcm;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.FloatBuffer;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * PCMArray 表示一个多通道 PCM 音频数据的抽象。
@@ -170,4 +173,14 @@ public interface PCMArray {
 	 * @throws IndexOutOfBoundsException 如果起始帧索引超出范围
 	 */
 	int setFrame(@NotNull FloatBuffer src, long frame, int frameCount);
+
+	@NotNull
+	DoubleStream sampleStream(int channel);
+
+	@NotNull
+	default Stream<DoubleStream> sampleStream() {
+		return IntStream
+			.range(0, this.getChannels())
+			.mapToObj(this::sampleStream);
+	}
 }

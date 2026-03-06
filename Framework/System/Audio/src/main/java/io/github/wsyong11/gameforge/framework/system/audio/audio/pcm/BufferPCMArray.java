@@ -4,6 +4,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.FloatBuffer;
 import java.util.Objects;
+import java.util.PrimitiveIterator;
+import java.util.Spliterators;
+import java.util.stream.DoubleStream;
+import java.util.stream.StreamSupport;
 
 public class BufferPCMArray implements PCMArray {
 	private final FloatBuffer buffer;
@@ -75,7 +79,7 @@ public class BufferPCMArray implements PCMArray {
 		Objects.checkFromIndexSize(index, length, array.length);
 		this.checkBoundsFrame(frame);
 
-		if (frame == 0 || length < this.channels)
+		if (length == 0 || length < this.channels)
 			return 0;
 
 		long totalFrames = this.getFrames();
@@ -84,7 +88,8 @@ public class BufferPCMArray implements PCMArray {
 		int start = (int) (frame * this.channels);
 		int count = availableFrames * this.channels;
 
-		this.buffer.get(array, start, count);
+		this.buffer.position(start);
+		this.buffer.get(array, index, count);
 		this.buffer.position(0);
 
 		return availableFrames;
@@ -95,28 +100,78 @@ public class BufferPCMArray implements PCMArray {
 		Objects.requireNonNull(dest, "dest is null");
 		this.checkBoundsFrame(frame);
 
+		int remainingFrames = dest.remaining() / this.channels;
+
 		long totalFrames = this.getFrames();
-		int availableFrames = (int) Math.min(frameCount, totalFrames - frame);
+		int availableFrames = (int) Math.min(frameCount, Math.min(remainingFrames, totalFrames - frame));
+
+		int start = (int) (frame * this.channels);
 		int count = availableFrames * this.channels;
 
-		int position = (int) (frame * this.channels);
-		int writable = Math.min(dest.remaining(), count);
-		if (writable == 0)
-			return 0;
+		dest.put(this.buffer.slice(start, count));
 
-		FloatBuffer slice = this.buffer.slice(position, count);
-		dest.put(slice);
-
-		return writable / this.channels;
+		return availableFrames;
 	}
 
 	@Override
 	public int setFrame(float @NotNull [] array, int index, int length, long frame) {
-		return 0;
+		Objects.requireNonNull(array, "array is null");
+		Objects.checkFromIndexSize(index, length, array.length);
+		this.checkBoundsFrame(frame);
+
+		if (length == 0 || length < this.channels)
+			return 0;
+
+		long totalFrames = this.getFrames();
+		int availableFrames = (int) Math.min(length / this.channels, totalFrames - frame);
+
+		int start = (int) (frame * this.channels);
+		int count = availableFrames * this.channels;
+
+		this.buffer.position(start);
+		this.buffer.put(array, index, count);
+		this.buffer.position(0);
+
+		return availableFrames;
 	}
 
 	@Override
-	public int setFrame(@NotNull FloatBuffer buffer, long frame, int frameCount) {
-		return 0;
+	public int setFrame(@NotNull FloatBuffer src, long frame, int frameCount) {
+		Objects.requireNonNull(src, "src is null");
+		this.checkBoundsFrame(frame);
+
+		int remainingFrames = src.remaining() / this.channels;
+
+		long totalFrames = this.getFrames();
+		int availableFrames = (int) Math.min(frameCount, Math.min(remainingFrames, totalFrames - frame));
+
+		int start = (int) (frame * this.channels);
+		int count = availableFrames * this.channels;
+
+		this.buffer.slice(start, count).put(src);
+
+		return availableFrames;
+	}
+
+	@NotNull
+	@Override
+	public DoubleStream sampleStream(int channel) {
+		class IteratorImpl implements PrimitiveIterator.OfDouble {
+
+			@Override
+			public double nextDouble() {
+				return 0;
+			}
+
+			@Override
+			public boolean hasNext() {
+				return false;
+			}
+		}
+
+		return StreamSupport.doubleStream(
+			Spliterators.spliteratorUnknownSize(new IteratorImpl(), 0),
+			false
+		);
 	}
 }
