@@ -3,6 +3,7 @@ package io.github.wsyong11.gameforge.framework.system.audio.audio.decoder;
 import io.github.wsyong11.gameforge.framework.mime.MimeType;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.InputStream;
 import java.util.Set;
 
 public interface AudioDecoderFactory {
@@ -14,4 +15,8 @@ public interface AudioDecoderFactory {
 
 	@NotNull
 	Set<AudioDecodeHint> getSupportHints();
+
+	default boolean checkMagic(@NotNull InputStream stream) {
+		return true;
+	}
 }

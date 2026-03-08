@@ -8,12 +8,15 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @UtilityClass
 public class LogTemplate {
+	private static final TemplateValueProvider NULL_PROVIDER = () -> null;
+
 	@NotNull
 	public static TemplateValueProvider lazy(@NotNull TemplateValueProvider supplier) {
 		Objects.requireNonNull(supplier, "supplier is null");
@@ -22,7 +25,7 @@ public class LogTemplate {
 
 	@NotNull
 	public static TemplateValueProvider lazy(@Nullable Object object) {
-		return lazy(() -> object);
+		return object != null ? lazy(() -> object) : NULL_PROVIDER;
 	}
 
 	@CallerSensitive
@@ -34,6 +37,26 @@ public class LogTemplate {
 			.stream(stackTrace)
 			.map(e -> "\tat " + e)
 			.collect(Collectors.joining("\n"));
+	}
+
+	@NotNull
+	public static TemplateValueProvider className(@Nullable Object clazz) {
+		return clazz != null ? () -> clazz.getClass().getName() : NULL_PROVIDER;
+	}
+
+	@NotNull
+	public static TemplateValueProvider hex(long value) {
+		return () -> "0x" + Long.toHexString(value).toUpperCase(Locale.ROOT);
+	}
+
+	@NotNull
+	public static TemplateValueProvider bin(long value) {
+		return () -> "0b" + Long.toBinaryString(value);
+	}
+
+	@NotNull
+	public static TemplateValueProvider oct(long value) {
+		return () -> "0o" + Long.toOctalString(value);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //

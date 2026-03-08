@@ -1,20 +1,63 @@
 package io.github.wsyong11.gameforge.framework.system.audio.audio.pcm;
 
+import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.FloatBuffer;
+import java.util.Objects;
+import java.util.PrimitiveIterator;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
- * PCMArray 表示一个多通道 PCM 音频数据的抽象。
+ * PCMBuffer 表示一个多通道 PCM 音频数据的抽象。
  * <p>
  * PCM 数据按帧组织，每帧包含每个通道的一个采样值。
  * 所有采样值均为浮点数，范围为 {@code [-1.0, 1.0]}。
  * </p>
  */
-public interface PCMArray {
+public interface PCMBuffer {
+	@NotNull
+	static PCMBuffer wrap(@NotNull FloatBuffer buffer, int channels, int sampleRate) {
+		Objects.requireNonNull(buffer, "buffer is null");
+		return new FloatBufferPCMBuffer(buffer, channels, sampleRate);
+	}
+
+	@NotNull
+	static PCMBuffer wrap(float @NotNull [] array, int channels, int sampleRate) {
+		Objects.requireNonNull(array, "array is null");
+		return wrap(FloatBuffer.wrap(array), channels, sampleRate);
+	}
+
+	@NotNull
+	static PCMBuffer stream(@NotNull Stream<DoubleStream> samples, int sampleRate) {
+		Objects.requireNonNull(samples, "samples is null");
+
+		PrimitiveIterator.OfDouble[] channelIter = samples
+			.map(DoubleStream::iterator)
+			.toArray(PrimitiveIterator.OfDouble[]::new);
+
+		int channel = channelIter.length;
+
+		FloatArrayList buffer = new FloatArrayList(sampleRate * channel);
+		float[] frameBuffer = new float[channel];
+
+		loop:
+		while (true) {
+			for (int i = 0; i < channel; i++) {
+				PrimitiveIterator.OfDouble iterator = channelIter[i];
+				if (!iterator.hasNext())
+					break loop;
+				frameBuffer[i] = (float) iterator.nextDouble();
+			}
+
+			buffer.addElements(buffer.size(), frameBuffer);
+		}
+
+		return wrap(buffer.toFloatArray(), channel, sampleRate);
+	}
+
 	/**
 	 * 单声道。
 	 */
@@ -174,13 +217,25 @@ public interface PCMArray {
 	 */
 	int setFrame(@NotNull FloatBuffer src, long frame, int frameCount);
 
+	/**
+	 * 获取 PCM 数据流
+	 *
+	 * @param channel 通道索引
+	 * @return PCM 数据流
+	 * @throws IndexOutOfBoundsException 如果通道索引超出有效范围
+	 */
 	@NotNull
-	DoubleStream sampleStream(int channel);
+	DoubleStream stream(int channel);
 
 	@NotNull
-	default Stream<DoubleStream> sampleStream() {
+	default Stream<DoubleStream> stream() {
 		return IntStream
 			.range(0, this.getChannels())
-			.mapToObj(this::sampleStream);
+			.mapToObj(this::stream);
+	}
+
+	@NotNull
+	default PrimitiveIterator.OfDouble iterator(int channel) {
+		return new PCMIterator(this, channel);
 	}
 }

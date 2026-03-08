@@ -4,17 +4,16 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.FloatBuffer;
 import java.util.Objects;
-import java.util.PrimitiveIterator;
 import java.util.Spliterators;
 import java.util.stream.DoubleStream;
 import java.util.stream.StreamSupport;
 
-public class BufferPCMArray implements PCMArray {
+public class FloatBufferPCMBuffer implements PCMBuffer {
 	private final FloatBuffer buffer;
 	private final int channels;
 	private final int sampleRate;
 
-	public BufferPCMArray(@NotNull FloatBuffer buffer, int channels, int sampleRate) {
+	public FloatBufferPCMBuffer(@NotNull FloatBuffer buffer, int channels, int sampleRate) {
 		Objects.requireNonNull(buffer, "buffer is null");
 
 		if (channels <= 0)
@@ -155,22 +154,10 @@ public class BufferPCMArray implements PCMArray {
 
 	@NotNull
 	@Override
-	public DoubleStream sampleStream(int channel) {
-		class IteratorImpl implements PrimitiveIterator.OfDouble {
-
-			@Override
-			public double nextDouble() {
-				return 0;
-			}
-
-			@Override
-			public boolean hasNext() {
-				return false;
-			}
-		}
-
+	public DoubleStream stream(int channel) {
+		this.checkBoundsChannel(channel);
 		return StreamSupport.doubleStream(
-			Spliterators.spliteratorUnknownSize(new IteratorImpl(), 0),
+			Spliterators.spliteratorUnknownSize(new PCMIterator(this, channel), 0),
 			false
 		);
 	}

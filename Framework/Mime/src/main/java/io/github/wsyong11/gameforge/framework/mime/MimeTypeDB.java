@@ -12,6 +12,8 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import static io.github.wsyong11.gameforge.framework.system.log.LogTemplate.className;
+
 public class MimeTypeDB {
 	private static final Logger LOGGER = Log.getLogger();
 
@@ -37,7 +39,7 @@ public class MimeTypeDB {
 				JsonElement value = entry.getValue();
 
 				if (!(value instanceof JsonObject mimeInfoObject)) {
-					LOGGER.warn("Invalid JSON type {}, request JsonObject, at key \"{}\"", value.getClass().getName(), key);
+					LOGGER.warn("Invalid JSON type {}, request JsonObject, at key \"{}\"", className(value), key);
 					continue;
 				}
 
@@ -46,7 +48,7 @@ public class MimeTypeDB {
 
 				JsonElement extensionsElement = mimeInfoObject.get("extensions");
 				if (!(extensionsElement instanceof JsonArray extensionArray)) {
-					LOGGER.warn("Invalid JSON type {}, request JsonArray, at key \"{}\".extensions", extensionsElement.getClass().getName(), key);
+					LOGGER.warn("Invalid JSON type {}, request JsonArray, at key \"{}\".extensions", className(extensionsElement), key);
 					continue;
 				}
 
@@ -62,7 +64,7 @@ public class MimeTypeDB {
 				for (int i = 0; i < extensionArray.size(); i++) {
 					JsonElement extensionItem = extensionArray.get(i);
 					if (!(extensionItem instanceof JsonPrimitive primitive) || !primitive.isString()) {
-						LOGGER.warn("Invalid JSON type {}, request JsonString, at key \"{}\".extensions[{}]", extensionItem.getClass().getName(), key, i);
+						LOGGER.warn("Invalid JSON type {}, request JsonString, at key \"{}\".extensions[{}]", className(extensionItem), key, i);
 						continue;
 					}
 

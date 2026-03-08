@@ -5,77 +5,55 @@ import it.unimi.dsi.fastutil.bytes.ByteList;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.EOFException;
-import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class SeekableInputStream extends FilterInputStream {
+// TODO: 2026/3/8 优化 
+public class SeekableInputStream extends InputStream {
 	private static final int BUFFER_SIZE = 8192;
 
-	private final ByteArrayList buffer;
-	private final int maxCapacity;
+	private final SharedState state;
 
 	private long position;
-	private boolean eof;
-
-	private final byte[] tempBuf;
 
 	public SeekableInputStream(@NotNull InputStream stream) {
 		this(stream, Integer.MAX_VALUE);
 	}
 
 	public SeekableInputStream(@NotNull InputStream stream, int maxCapacity) {
-		super(Objects.requireNonNull(stream, "stream is null"));
+		Objects.requireNonNull(stream, "stream is null");
 
-		this.buffer = new ByteArrayList();
-		this.maxCapacity = maxCapacity;
-
+		this.state = new SharedState(stream, maxCapacity);
 		this.position = 0L;
-		this.eof = false;
 
-		this.tempBuf = new byte[BUFFER_SIZE];
+		this.state.increaseRef();
 	}
 
-	private void ensureOpen() throws IOException {
-		if (this.in == null)
-			throw new IOException("Stream closed");
+	protected SeekableInputStream(@NotNull SharedState state) {
+		Objects.requireNonNull(state, "state is null");
+
+		this.state = state;
+		this.position = 0L;
+
+		this.state.increaseRef();
 	}
 
-	private void ensureAvailable(long pos) throws IOException {
-		this.ensureOpen();
-
-		if (pos <= this.buffer.size() || this.eof)
-			return;
-
-		long available = pos - this.buffer.size();
-		while (available > 0L) {
-			int len = this.in.read(this.tempBuf, 0, (int) Math.min(BUFFER_SIZE, available));
-			if (len == -1) {
-				this.eof = true;
-				break;
-			}
-
-			long newSize = this.buffer.size() + len;
-			if (newSize > this.maxCapacity) {
-				int toRemove = (int) (newSize - this.maxCapacity);
-				this.buffer.removeElements(0, toRemove); // 移除最老字节
-			}
-
-			this.buffer.addElements(this.buffer.size(), this.tempBuf, 0, len);
-			available -= len;
-		}
+	@NotNull
+	protected SharedState getState() {
+		return this.state;
 	}
 
 	@Override
 	public int read() throws IOException {
-		this.ensureOpen();
-		this.ensureAvailable(this.position + 1);
+		this.state.ensureOpen();
+		this.state.ensureAvailable(this.position + 1);
 
-		if (this.position >= this.buffer.size())
+		if (this.position >= this.state.getBufferSize())
 			return -1;
 
-		int data = this.buffer.getByte((int) this.position) & 0xFF;
+		int data = this.state.getBuffer().getByte((int) this.position) & 0xFF;
 		this.position++;
 
 		return data;
@@ -86,19 +64,19 @@ public class SeekableInputStream extends FilterInputStream {
 		Objects.requireNonNull(b, "b is null");
 		Objects.checkFromIndexSize(off, len, b.length);
 
-		this.ensureOpen();
+		this.state.ensureOpen();
 
 		if (len == 0)
 			return 0;
 
-		this.ensureAvailable(this.position + len);
+		this.state.ensureAvailable(this.position + len);
 
-		int available = (int) Math.min(len, this.buffer.size() - this.position);
+		int available = (int) Math.min(len, this.state.getBufferSize() - this.position);
 
 		if (available <= 0)
 			return -1;
 
-		this.buffer.getElements((int) this.position, b, off, available);
+		this.state.getBuffer().getElements((int) this.position, b, off, available);
 
 		this.position += available;
 		return available;
@@ -108,21 +86,21 @@ public class SeekableInputStream extends FilterInputStream {
 		if (pos < 0L)
 			throw new IllegalArgumentException("The position is negative");
 
-		this.ensureOpen();
+		this.state.ensureOpen();
 
-		this.ensureAvailable(pos);
-		if (pos > this.buffer.size())
+		this.state.ensureAvailable(pos);
+		if (pos > this.getBufferSize())
 			throw new EOFException();
 
 		this.position = pos;
 	}
 
-	public void clearBuffer(){
-		this.buffer.size(0);
+	public void clearBuffer() {
+		this.state.clearBuffer();
 	}
 
-	public void trim(){
-		this.buffer.trim();
+	public void trim() {
+		this.state.trim();
 	}
 
 	public long getPosition() {
@@ -130,30 +108,128 @@ public class SeekableInputStream extends FilterInputStream {
 	}
 
 	public int getBufferSize() {
-		return this.buffer.size();
+		return this.state.getBufferSize();
 	}
 
 	public int getMaxCapacity() {
-		return this.maxCapacity;
+		return this.state.getMaxCapacity();
 	}
 
 	@Override
 	public int available() throws IOException {
-		int inputAvailable = this.in != null ? this.in.available() : 0;
-		return this.buffer.size() - ((int) this.position) + inputAvailable;
+		return this.state.getAvailable(this.position);
+	}
+
+	@NotNull
+	public SeekableInputStream duplicate() {
+		return new SeekableInputStream(this.state);
 	}
 
 	@Override
-	public synchronized void close() throws IOException {
-		if (this.in == null)
-			return;
+	public void close() throws IOException {
+		this.state.decreaseRef();
+	}
 
-		try {
-			this.in.close();
-		} finally {
-			this.in = null;
-			this.buffer.size(0);
+	protected static class SharedState {
+		private final ByteArrayList buffer;
+		private final int maxCapacity;
+
+		private volatile InputStream in;
+		private volatile boolean eof;
+		private final AtomicInteger refCount;
+
+		private final byte[] tempBuf;
+
+		public SharedState(@NotNull InputStream in, int maxCapacity) {
+			Objects.requireNonNull(in, "in is null");
+
+			this.buffer = new ByteArrayList();
+			this.maxCapacity = Math.max(0, maxCapacity);
+
+			this.in = in;
+			this.eof = false;
+			this.refCount = new AtomicInteger(0);
+
+			this.tempBuf = new byte[BUFFER_SIZE];
+		}
+
+		public void increaseRef() {
+			this.refCount.getAndIncrement();
+		}
+
+		public void decreaseRef() throws IOException {
+			if (this.refCount.decrementAndGet() <= 0)
+				this.closeForce();
+		}
+
+		public void ensureOpen() throws IOException {
+			if (this.in == null)
+				throw new IOException("Stream closed");
+		}
+
+		public synchronized void ensureAvailable(long pos) throws IOException {
+			this.ensureOpen();
+
+			if (pos <= this.buffer.size() || this.eof)
+				return;
+
+			long available = pos - this.buffer.size();
+			while (available > 0L) {
+				int len = this.in.read(this.tempBuf, 0, (int) Math.min(BUFFER_SIZE, available));
+				if (len == -1) {
+					this.eof = true;
+					break;
+				}
+
+				long newSize = this.buffer.size() + len;
+				if (newSize > this.maxCapacity) {
+					int toRemove = (int) (newSize - this.maxCapacity);
+					this.buffer.removeElements(0, toRemove); // 移除最老字节
+				}
+
+				this.buffer.addElements(this.buffer.size(), this.tempBuf, 0, len);
+				available -= len;
+			}
+		}
+
+		public int getBufferSize() {
+			return this.buffer.size();
+		}
+
+		public int getAvailable(long position) throws IOException {
+			int inputAvailable = this.in != null ? this.in.available() : 0;
+			return (int) (this.buffer.size() - position + inputAvailable);
+		}
+
+		public int getMaxCapacity() {
+			return this.maxCapacity;
+		}
+
+		public void clearBuffer() {
+			this.buffer.clear();
+		}
+
+
+		public void trim() {
 			this.buffer.trim();
+		}
+
+		@NotNull
+		public ByteList getBuffer() {
+			return this.buffer;
+		}
+
+		public synchronized void closeForce() throws IOException {
+			if (this.in == null)
+				return;
+
+			try {
+				this.in.close();
+			} finally {
+				this.in = null;
+				this.buffer.size(0);
+				this.buffer.trim();
+			}
 		}
 	}
 }

@@ -5,15 +5,21 @@ import io.github.wsyong11.gameforge.framework.mime.MimeType;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.Audio;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.AudioManager;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.AudioDecodeHint;
+import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.AudioDecoder;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.AudioDecoderFactory;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.resource.Resource;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourceProvider;
+import io.github.wsyong11.gameforge.util.io.CloseShieldInputStream;
+import io.github.wsyong11.gameforge.util.io.SeekableInputStream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import org.jetbrains.annotations.UnmodifiableView;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -22,6 +28,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+
+import static io.github.wsyong11.gameforge.framework.system.log.LogTemplate.className;
 
 public class DefaultAudioManager implements AudioManager, AutoCloseable {
 	private static final Logger LOGGER = Log.getLogger();
@@ -62,20 +70,50 @@ public class DefaultAudioManager implements AudioManager, AutoCloseable {
 		if (cachedAudio != null)
 			return cachedAudio;
 
+		return this.decode(location);
+	}
+
+	@Nullable
+	private Audio decode(@NotNull Identifier location) {
+		Objects.requireNonNull(location, "location is null");
+
 		Resource resource = this.resourceProvider.getResource(location);
-		if (resource == null)
+		if (resource == null) {
+//			LOGGER.warn("Audio resource not found {}", location);
 			return null;
+		}
+
+		InputStream stream;
+		try {
+			stream = resource.openStream();
+		} catch (IOException e) {
+			LOGGER.warn("Failed open resource stream {}", location, e);
+			return null;
+		}
 
 		MimeType mimeType = resource.getType();
 		List<AudioDecoderRegistry.FactoryInfo> factoryInfos = this.decoderMap.get(mimeType, Set.of(AudioDecodeHint.PRELOAD_METADATA));
 		if (factoryInfos.isEmpty()) {
-			LOGGER.debug("No audio decoder compatible with {} found \"{}\"", mimeType, location);
+			LOGGER.debug("No audio decoder compatible with \"{}\" [{}]", location, mimeType);
 			return null;
 		}
 
-		LOGGER.debug("Found {} audio decoder from \"{}\" [{}]", factoryInfos.size(), location, mimeType);
+		LOGGER.debug("Found {} available audio decoders with \"{}\" [{}]", factoryInfos.size(), location, mimeType);
 
-		return null;
+		SeekableInputStream seekableStream = new SeekableInputStream(stream);
+
+		for (AudioDecoderRegistry.FactoryInfo info : factoryInfos) {
+			AudioDecoderFactory factory = info.getFactory();
+			try {
+				if (!factory.checkMagic(new CloseShieldInputStream(seekableStream)))
+					continue;
+			} catch (Throwable e) {
+				LOGGER.error("Uncaught exception in checking magic, factory={}", className(factory), e);
+				continue;
+			}
+
+			factory.create()
+		}
 	}
 
 	@Nullable
@@ -137,5 +175,23 @@ public class DefaultAudioManager implements AudioManager, AutoCloseable {
 	public void close() {
 		this.decoderPool.shutdown();
 		this.decoderMap.clear();
+	}
+
+	private static class DecoderInfoImpl implements AudioDecoder.DecodeInfo {
+		@NotNull
+		@Override
+		public InputStream openStream() {
+			return null;
+		}
+
+		@Override
+		public @NotNull @UnmodifiableView Set<AudioDecodeHint> getHints() {
+			return Set.of();
+		}
+
+		@Override
+		public @NotNull MimeType getMime() {
+			return null;
+		}
 	}
 }
