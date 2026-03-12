@@ -3,7 +3,6 @@ package io.github.wsyong11.gameforge.util.io;
 import it.unimi.dsi.fastutil.bytes.ByteArrayList;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
 import java.util.Objects;
 
 public class RingByteBuffer {
@@ -17,12 +16,12 @@ public class RingByteBuffer {
 		this.endIndex = 0;
 	}
 
-	private void ensureSize(int index) {
+	private void ensureCapacity(int index) {
 		int size = this.buffer.size();
 		if (size >= index)
 			return;
 
-		this.buffer.size(Math.min(index, this.maxCapacity));
+		this.buffer.size(index);
 	}
 
 	public void put(byte @NotNull [] data, int offset, int length) {
@@ -30,7 +29,7 @@ public class RingByteBuffer {
 		Objects.checkFromIndexSize(offset, length, data.length);
 
 		if (length >= this.maxCapacity) {
-			this.ensureSize(this.maxCapacity);
+			this.ensureCapacity(this.maxCapacity);
 			System.arraycopy(
 				data, length - this.maxCapacity,
 				this.buffer.elements(), 0,
@@ -40,8 +39,9 @@ public class RingByteBuffer {
 			return;
 		}
 
-		this.ensureSize(this.endIndex + length);
-		int firstPart = Math.min(length, this.maxCapacity -this.endIndex);
+		this.ensureCapacity(Math.min(this.endIndex + length, this.maxCapacity));
+
+		int firstPart = Math.min(length, this.maxCapacity - this.endIndex);
 		System.arraycopy(
 			data, offset,
 			this.buffer.elements(), this.endIndex,
@@ -59,18 +59,99 @@ public class RingByteBuffer {
 		this.endIndex = (this.endIndex + length) % this.maxCapacity;
 	}
 
-	public byte get(int position) {
-return 0;
+	private int calcFirstIndex(int position) {
+		int size = this.buffer.size();
+		return size >= this.maxCapacity
+			? (this.endIndex + position + (this.maxCapacity - 1)) % this.maxCapacity
+			: size - 1 - position;
 	}
 
-	public int get(byte @NotNull [] data, int offset, int length, int position) {
+	private int calcLastIndex(int position) {
+		int size = this.buffer.size();
+		return size >= this.maxCapacity
+			? (this.endIndex - position) % this.maxCapacity
+			: position;
+	}
 
-return 0;
+	public byte getFirst(int position) {
+		Objects.checkIndex(position, this.buffer.size());
+
+		int index = this.calcFirstIndex(position);
+		return this.buffer.getByte(index);
+	}
+
+	public byte getLast(int position) {
+		Objects.checkIndex(position, this.buffer.size());
+
+		int index = this.calcLastIndex(position);
+		return this.buffer.getByte(index);
+	}
+
+	public int getFirst(byte @NotNull [] data, int offset, int length, int position) {
+		Objects.requireNonNull(data, "data is null");
+		Objects.checkFromIndexSize(offset, length, data.length);
+		Objects.checkIndex(position, this.buffer.size());
+
+		if (length == 0)
+			return 0;
+
+		int size = this.buffer.size();
+		int available = size < this.maxCapacity ? size - position : this.maxCapacity;
+
+		int index = this.calcFirstIndex(position);
+
+		int firstPart = Math.min(available, this.maxCapacity - index);
+		System.arraycopy(
+			this.buffer.elements(), index,
+			data, offset,
+			firstPart
+		);
+
+		int remaining = available - firstPart;
+		if (remaining > 0)
+			System.arraycopy(
+				this.buffer.elements(), 0,
+				data, offset + firstPart,
+				remaining
+			);
+
+		return available;
+	}
+
+
+	public int getLast(byte @NotNull [] data, int offset, int length, int position) {
+		Objects.requireNonNull(data, "data is null");
+		Objects.checkFromIndexSize(offset, length, data.length);
+		Objects.checkIndex(position, this.buffer.size());
+
+		if (length == 0)
+			return 0;
+
+		int size = this.buffer.size();
+		int available = size < this.maxCapacity ? size - position : this.maxCapacity;
+
+		int index = this.calcLastIndex(position);
+
+		int firstPart = Math.min(available, this.maxCapacity - index);
+		System.arraycopy(
+			this.buffer.elements(), index,
+			data, offset,
+			firstPart
+		);
+
+		int remaining = available - firstPart;
+		if (remaining > 0)
+			System.arraycopy(
+				this.buffer.elements(), 0,
+				data, offset + firstPart,
+				remaining
+			);
+
+		return available;
 	}
 
 	public int size() {
-
-return 0;
+		return this.buffer.size();
 	}
 
 	public int getMaxCapacity() {
@@ -78,19 +159,17 @@ return 0;
 	}
 
 	public void clear() {
-
+		this.buffer.clear();
+		this.buffer.trim();
+		this.endIndex = 0;
 	}
 
-	public static void main(String[] args) {
-		RingByteBuffer buffer = new RingByteBuffer(32);
+	public boolean isFull() {
+		return this.buffer.size() >= this.maxCapacity;
+	}
 
-		byte[] d = new byte[] {0, 1, 2};
-		for (int i = 0; i < 256; i++) {
-			d[0] ++;
-			d[1] ++;
-			d[2] ++;
-			buffer.put(d, 0, 3);
-			System.out.println(Arrays.toString(buffer.buffer.elements()));
-		}
+	public int testDropLength(int length) {
+		int size = this.buffer.size();
+		return size >= this.maxCapacity ? length : length - size;
 	}
 }
