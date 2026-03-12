@@ -1,12 +1,16 @@
 package io.github.wsyong11.gameforge.framework.system.audio.impl.simple.audio;
 
+import io.github.wsyong11.gameforge.framework.Identifier;
 import io.github.wsyong11.gameforge.framework.mime.MimeType;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.Audio;
+import io.github.wsyong11.gameforge.framework.system.audio.audio.AudioMetadata;
+import io.github.wsyong11.gameforge.framework.system.audio.audio.AudioStatus;
+import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.AudioDecoder;
+import io.github.wsyong11.gameforge.framework.system.audio.audio.stream.AudioStream;
 import io.github.wsyong11.gameforge.util.concurrent.LimitedCapacityBlockingQueue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.InputStream;
 import java.util.Objects;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,8 +37,11 @@ public class AudioDecoderPool {
 	}
 
 	@NotNull
-	public Audio decode(int priority, @Nullable MimeType type, @NotNull InputStream dataStream) {
-		Objects.requireNonNull(dataStream, "dataStream is null");
+	public Future<Audio> decode(int priority, @Nullable MimeType type, @NotNull AudioDecoder decoder) {
+		Objects.requireNonNull(type, "type is null");
+		Objects.requireNonNull(decoder, "decoder is null");
+
+
 		return null;
 	}
 
@@ -91,6 +98,46 @@ public class AudioDecoderPool {
 			thread.setDaemon(false);
 			thread.setName("AudioDecoder-" + this.id.getAndIncrement());
 			return thread;
+		}
+	}
+
+	protected static class AudioImpl implements Audio {
+		private final Identifier location;
+
+		private volatile AudioMetadata metadata;
+
+		public AudioImpl() {
+
+		}
+
+		@Override
+		public @NotNull Identifier getLocation() {
+			return null;
+		}
+
+		@Override
+		public @NotNull AudioMetadata getMetadata() {
+			return null;
+		}
+
+		@Override
+		public @NotNull AudioStatus getStatus() {
+			return null;
+		}
+
+		@Override
+		public @NotNull AudioStream newStream() {
+			return null;
+		}
+
+		@Override
+		public @NotNull AudioStream openStreamingStream() {
+			return null;
+		}
+
+		@Override
+		public void close() {
+
 		}
 	}
 }

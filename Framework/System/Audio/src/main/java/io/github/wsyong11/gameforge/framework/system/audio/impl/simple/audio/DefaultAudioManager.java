@@ -18,12 +18,11 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
@@ -70,12 +69,13 @@ public class DefaultAudioManager implements AudioManager, AutoCloseable {
 		if (cachedAudio != null)
 			return cachedAudio;
 
-		return this.decode(location);
+		return this.decode(0, location, Set.of(AudioDecodeHint.PRELOAD_METADATA));
 	}
 
 	@Nullable
-	private Audio decode(@NotNull Identifier location) {
+	private Future<Audio> decode(int priority, @NotNull Identifier location, @NotNull Set<AudioDecodeHint> hints) {
 		Objects.requireNonNull(location, "location is null");
+		Objects.requireNonNull(hints, "hints is null");
 
 		Resource resource = this.resourceProvider.getResource(location);
 		if (resource == null) {
@@ -83,16 +83,8 @@ public class DefaultAudioManager implements AudioManager, AutoCloseable {
 			return null;
 		}
 
-		InputStream stream;
-		try {
-			stream = resource.openStream();
-		} catch (IOException e) {
-			LOGGER.warn("Failed open resource stream {}", location, e);
-			return null;
-		}
-
 		MimeType mimeType = resource.getType();
-		List<AudioDecoderRegistry.FactoryInfo> factoryInfos = this.decoderMap.get(mimeType, Set.of(AudioDecodeHint.PRELOAD_METADATA));
+		List<AudioDecoderRegistry.FactoryInfo> factoryInfos = this.decoderMap.get(mimeType, hints);
 		if (factoryInfos.isEmpty()) {
 			LOGGER.debug("No audio decoder compatible with \"{}\" [{}]", location, mimeType);
 			return null;
@@ -100,20 +92,57 @@ public class DefaultAudioManager implements AudioManager, AutoCloseable {
 
 		LOGGER.debug("Found {} available audio decoders with \"{}\" [{}]", factoryInfos.size(), location, mimeType);
 
-		SeekableInputStream seekableStream = new SeekableInputStream(stream);
 
+		// TODO: 2026/03/70 Using seekable input stream
+//		InputStream stream;
+//		try {
+//			stream = resource.openStream();
+//		} catch (IOException e) {
+//			LOGGER.warn("Failed open resource stream {}", location, e);
+//			return null;
+//		}
+
+		byte[] data;
+		{
+			ByteArrayOutputStream byteArrayStream = new ByteArrayOutputStream();
+			int len;
+			byte[] temp = new byte[1024 * 8];
+
+			try (InputStream stream = resource.openStream()) {
+				while ((len = stream.read(temp)) != -1) {
+					byteArrayStream.write(temp, 0, len);
+				}
+			} catch (IOException e) {
+				LOGGER.warn("Failed open resource stream {}", location, e);
+				return null;
+			}
+
+			data = byteArrayStream.toByteArray();
+		}
+
+//		SeekableInputStream seekableStream = new SeekableInputStream(stream);
+
+		AudioDecoder decoder;
 		for (AudioDecoderRegistry.FactoryInfo info : factoryInfos) {
 			AudioDecoderFactory factory = info.getFactory();
 			try {
-				if (!factory.checkMagic(new CloseShieldInputStream(seekableStream)))
+				if (!factory.checkMagic(new ByteArrayInputStream(data)))
 					continue;
 			} catch (Throwable e) {
 				LOGGER.error("Uncaught exception in checking magic, factory={}", className(factory), e);
 				continue;
 			}
 
-			factory.create()
+			try {
+				decoder = factory.create(new DecoderInfoImpl(data, hints, mimeType));
+			} catch (Throwable e) {
+				LOGGER.error("Failed to create decoder, factory={}", className(factory), e);
+				continue;
+			}
+
+			break;
 		}
+		this.			decoderPool.decode()
 	}
 
 	@Nullable
@@ -178,20 +207,37 @@ public class DefaultAudioManager implements AudioManager, AutoCloseable {
 	}
 
 	private static class DecoderInfoImpl implements AudioDecoder.DecodeInfo {
+		private final byte[] data;
+		private final Set<AudioDecodeHint> hints;
+		private final MimeType mime;
+
+		private DecoderInfoImpl(byte[] data, @NotNull Set<AudioDecodeHint> hints, @NotNull MimeType mime) {
+			Objects.requireNonNull(data, "data is null");
+			Objects.requireNonNull(hints, "hints is null");
+			Objects.requireNonNull(mime, "mime is null");
+
+			this.data = data;
+			this.hints = Set.copyOf(hints);
+			this.mime = mime;
+		}
+
 		@NotNull
 		@Override
 		public InputStream openStream() {
-			return null;
+			return new ByteArrayInputStream(this.data);
 		}
 
+		@NotNull
+		@UnmodifiableView
 		@Override
-		public @NotNull @UnmodifiableView Set<AudioDecodeHint> getHints() {
-			return Set.of();
+		public Set<AudioDecodeHint> getHints() {
+			return this.hints;
 		}
 
+		@NotNull
 		@Override
-		public @NotNull MimeType getMime() {
-			return null;
+		public MimeType getMime() {
+			return this.mime;
 		}
 	}
 }
