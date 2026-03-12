@@ -47,6 +47,9 @@ public class SeekableInputStream extends InputStream {
 		Objects.requireNonNull(b, "b is null");
 		Objects.checkFromIndexSize(off, len, b.length);
 
+		if (len == 0)
+			return 0;
+
 		int n = this.state.read(this.position, b, off, len);
 		if (n > 0)
 			this.position += n;
@@ -58,7 +61,7 @@ public class SeekableInputStream extends InputStream {
 			throw new IllegalArgumentException("Negative position");
 
 		this.state.ensureOpen();
-		this.state.ensureAvailable(pos);
+		this.state.ensureAvailable(pos + 1);
 		if (!this.state.contains(pos))
 			throw new EOFException();
 
@@ -109,7 +112,7 @@ public class SeekableInputStream extends InputStream {
 			this.in = in;
 
 			this.capacity = Math.max(1, maxCapacity);
-			this.buffer = new byte[0];
+			this.buffer = new byte[1];
 
 			this.tailSeq = 0;
 			this.headSeq = 0;
@@ -122,10 +125,16 @@ public class SeekableInputStream extends InputStream {
 		}
 
 		public synchronized void increaseRef() {
+			if (this.in == null)
+				throw new IllegalStateException("Stream closed");
+
 			this.refCount++;
 		}
 
 		public synchronized void decreaseRef() throws IOException {
+			if (this.in == null)
+				return;
+
 			if (--this.refCount <= 0)
 				this.closeForce();
 		}
@@ -209,12 +218,12 @@ public class SeekableInputStream extends InputStream {
 		}
 
 		public synchronized int readByte(long pos) throws IOException {
-			this.ensureAvailable(pos);
+			this.ensureAvailable(pos + 1);
 
 			if (pos < this.dropped)
 				throw new IOException("Data has been discarded");
 
-			if (pos > this.tailSeq)
+			if (pos >= this.tailSeq)
 				return -1;
 
 			return this.buffer[this.getLocalIndex(pos)] & 0xFF;
@@ -222,6 +231,9 @@ public class SeekableInputStream extends InputStream {
 
 		public synchronized int read(long pos, byte[] dst, int off, int len) throws IOException {
 			Objects.checkFromIndexSize(off, len, dst.length); // 检查越界
+
+			if (len > this.capacity)
+				throw new IOException("Requested length exceeds buffer capacity, length=" + len + ", capacity=" + this.capacity);
 
 			this.ensureAvailable(pos + len);
 
@@ -244,7 +256,7 @@ public class SeekableInputStream extends InputStream {
 		}
 
 		public synchronized boolean contains(long pos) {
-			return pos >= this.dropped && pos < this.tailSeq;
+			return pos >= this.dropped && pos <= this.tailSeq;
 		}
 
 		public synchronized long availableFrom(long pos) throws IOException {
@@ -271,44 +283,5 @@ public class SeekableInputStream extends InputStream {
 				this.eof = true;
 			}
 		}
-	}
-
-	public static void main(String[] args) throws IOException {
-		// 小缓冲区 10 bytes
-		byte[] data = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".getBytes(); // 26 bytes
-		SeekableInputStream sis = new SeekableInputStream(new ByteArrayInputStream(data), 10);
-
-		byte[] buf = new byte[5];
-
-		// 先读前 5 个字节
-		sis.read(buf);
-		System.out.println("Read first 5: " + new String(buf)); // ABCDE
-		System.out.println("Position: " + sis.getPosition());
-
-		// 继续读 10 个字节，让缓冲区滚动
-		buf = new byte[10];
-		sis.read(buf);
-		System.out.println("Read next 10: " + new String(buf)); // FGHIJKLMNO
-		System.out.println("Position: " + sis.getPosition());
-
-		// 再读 10 个字节，触发缓冲区覆盖
-		buf = new byte[10];
-		sis.read(buf);
-		System.out.println("Read next 10: " + new String(buf)); // PQRSTUVWXY
-		System.out.println("Position: " + sis.getPosition());
-
-		// 尝试 seek 到已经丢弃的数据（比如位置 0-5），应该抛 EOFException
-		try {
-			sis.seek(0);
-		} catch (IOException e) {
-			System.out.println("Expected exception on seeking dropped data: " + e);
-		}
-
-		// 可以 seek 到还在缓冲区里的数据
-		sis.seek(15); // Q
-		int val = sis.read();
-		System.out.println("Read at position 15: " + (char) val); // Q
-
-		sis.close();
 	}
 }

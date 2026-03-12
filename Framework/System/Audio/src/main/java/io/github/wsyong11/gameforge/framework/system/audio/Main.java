@@ -51,8 +51,8 @@ public class Main {
 //		System.out.println(array.getFrame(a, 1, Integer.MAX_VALUE));
 //		System.out.println(Arrays.toString(a.array()));
 
-		array.sampleStream(0)
-			.forEachOrdered(System.out::println);
+//		array.sampleStream(0)
+//			.forEachOrdered(System.out::println);
 
 //		JFrame frame = new JFrame("Sound test");
 //		frame.setVisible(true);
