@@ -7,15 +7,11 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public interface AudioManager {
 	@Nullable
 	Audio getAudio(@NotNull Identifier location);
-
-	@Nullable
-	CompletableFuture<Audio> getAudioAsync(@NotNull Identifier location);
 
 	boolean isLoaded(@NotNull Identifier location);
 

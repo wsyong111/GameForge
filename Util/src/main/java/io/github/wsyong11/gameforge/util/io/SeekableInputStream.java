@@ -2,7 +2,6 @@ package io.github.wsyong11.gameforge.util.io;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.ByteArrayInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,13 +13,18 @@ import java.util.Objects;
 public class SeekableInputStream extends InputStream {
 	private static final int TEMP_BUF_SIZE = 8192;
 
-	private final SharedState state;
+	private SharedState state;
+	private final boolean root;
+
 	private long position;
 
 	public SeekableInputStream(@NotNull InputStream in, int maxCapacity) {
 		Objects.requireNonNull(in, "InputStream is null");
+
 		this.state = new SharedState(in, maxCapacity);
 		this.state.increaseRef();
+
+		this.root = true;
 		this.position = 0;
 	}
 
@@ -29,13 +33,33 @@ public class SeekableInputStream extends InputStream {
 	}
 
 	protected SeekableInputStream(@NotNull SharedState state, long position) {
+		Objects.requireNonNull(state, "state is null");
+
+		if (position < 0)
+			throw new IllegalArgumentException("Position cannot be negative");
+
 		this.state = state;
+
+		this.root = false;
 		this.position = position;
+
 		this.state.increaseRef();
+	}
+
+	private void ensureOpen() {
+		if (this.state == null)
+			throw new IllegalStateException("This stream closed");
+	}
+
+	private void ensureOpenIO() throws IOException {
+		if (this.state == null)
+			throw new IOException("This stream closed");
 	}
 
 	@Override
 	public int read() throws IOException {
+		this.ensureOpenIO();
+
 		int val = this.state.readByte(this.position);
 		if (val != -1)
 			this.position++;
@@ -47,6 +71,8 @@ public class SeekableInputStream extends InputStream {
 		Objects.requireNonNull(b, "b is null");
 		Objects.checkFromIndexSize(off, len, b.length);
 
+		this.ensureOpenIO();
+
 		if (len == 0)
 			return 0;
 
@@ -57,6 +83,8 @@ public class SeekableInputStream extends InputStream {
 	}
 
 	public void seek(long pos) throws IOException {
+		this.ensureOpenIO();
+
 		if (pos < 0)
 			throw new IllegalArgumentException("Negative position");
 
@@ -78,21 +106,46 @@ public class SeekableInputStream extends InputStream {
 
 	@Override
 	public int available() throws IOException {
+		this.ensureOpenIO();
 		return (int) this.state.availableFrom(this.position);
 	}
 
 	@NotNull
 	public SeekableInputStream duplicate() {
+		this.ensureOpen();
 		return new SeekableInputStream(this.state, this.position);
 	}
 
 	@Override
 	public void close() throws IOException {
-		this.state.decreaseRef();
+		if (this.state == null)
+			return;
+
+		try {
+			this.state.decreaseRef();
+		} finally {
+			this.state = null;
+		}
+	}
+
+	public void forceClose() throws IOException {
+		if (!this.root)
+			throw new IllegalStateException("This stream is not a root stream");
+
+		try {
+			this.state.closeStream();
+		} finally {
+			this.state = null;
+		}
+	}
+
+	public void setMaxCapacity(int newCapacity) {
+		this.ensureOpen();
+		this.state.setCapacity(newCapacity);
 	}
 
 	protected static class SharedState {
-		private final int capacity;
+		private int capacity;
 		private volatile byte[] buffer;
 
 		private volatile InputStream in;
@@ -124,6 +177,12 @@ public class SeekableInputStream extends InputStream {
 			this.temp = new byte[TEMP_BUF_SIZE];
 		}
 
+		public synchronized void setCapacity(int newCapacity) {
+			if (newCapacity < this.capacity)
+				throw new IllegalArgumentException("New capacity cannot be less than current capacity, cap=" + this.capacity + ", newCap=" + newCapacity);
+			this.capacity = newCapacity;
+		}
+
 		public synchronized void increaseRef() {
 			if (this.in == null)
 				throw new IllegalStateException("Stream closed");
@@ -136,7 +195,7 @@ public class SeekableInputStream extends InputStream {
 				return;
 
 			if (--this.refCount <= 0)
-				this.closeForce();
+				this.closeStream();
 		}
 
 		public void ensureOpen() throws IOException {
@@ -148,20 +207,15 @@ public class SeekableInputStream extends InputStream {
 			if (requiredCapacity <= this.buffer.length)
 				return;
 
-			int newCapacity = this.buffer.length;
-			while (newCapacity < requiredCapacity && newCapacity < this.capacity) {
-				newCapacity = Math.max(1, Math.min(newCapacity * 2, this.capacity));
-			}
-
+			int newCapacity = Math.min(Math.max(this.buffer.length * 2, requiredCapacity), this.capacity);
 			if (newCapacity == this.buffer.length)
 				return;
 
 			byte[] newBuffer = new byte[newCapacity];
 
-			int bufferSize = getBufferSize();
-			for (int i = 0; i < bufferSize; i++) {
-				newBuffer[i] = this.buffer[getLocalIndex(this.headSeq + i)];
-			}
+			int bufferSize = this.getBufferSize();
+			for (int i = 0; i < bufferSize; i++)
+				newBuffer[i] = this.buffer[this.getLocalIndex(this.headSeq + i)];
 
 			this.buffer = newBuffer;
 			this.headSeq = 0;
@@ -230,7 +284,7 @@ public class SeekableInputStream extends InputStream {
 		}
 
 		public synchronized int read(long pos, byte[] dst, int off, int len) throws IOException {
-			Objects.checkFromIndexSize(off, len, dst.length); // 检查越界
+			Objects.checkFromIndexSize(off, len, dst.length);
 
 			if (len > this.capacity)
 				throw new IOException("Requested length exceeds buffer capacity, length=" + len + ", capacity=" + this.capacity);
@@ -239,11 +293,11 @@ public class SeekableInputStream extends InputStream {
 
 			long available = this.tailSeq - pos;
 			if (available <= 0)
-				return -1; // 没有可读数据
+				return -1;
 
 			int toRead = (int) Math.min(len, available);
 
-			int startIndex = getLocalIndex(pos);
+			int startIndex = this.getLocalIndex(pos);
 			int firstPart = Math.min(toRead, this.capacity - startIndex);
 
 			System.arraycopy(this.buffer, startIndex, dst, off, firstPart);
@@ -256,20 +310,20 @@ public class SeekableInputStream extends InputStream {
 		}
 
 		public synchronized boolean contains(long pos) {
-			return pos >= this.dropped && pos <= this.tailSeq;
+			return pos >= this.dropped && pos < this.tailSeq;
 		}
 
 		public synchronized long availableFrom(long pos) throws IOException {
-			ensureOpen();
+			this.ensureOpen();
 			int inputAvailable = this.in != null ? this.in.available() : 0;
-			return this.getBufferSize() + inputAvailable;
+			return Math.max(0, this.getBufferSize() - (pos - this.dropped)) + inputAvailable;
 		}
 
 		public int getCapacity() {
 			return this.capacity;
 		}
 
-		private synchronized void closeForce() throws IOException {
+		public synchronized void closeStream() throws IOException {
 			if (this.in == null)
 				return;
 

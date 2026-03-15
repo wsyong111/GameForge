@@ -11,21 +11,19 @@ import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.resource.Resource;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourceProvider;
-import io.github.wsyong11.gameforge.util.io.CloseShieldInputStream;
 import io.github.wsyong11.gameforge.util.io.SeekableInputStream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static io.github.wsyong11.gameforge.framework.system.log.LogTemplate.className;
@@ -38,7 +36,6 @@ public class DefaultAudioManager implements AudioManager, AutoCloseable {
 
 	private final AudioDecoderRegistry decoderMap;
 
-	private final Map<Identifier, Future<Audio>> pendingAudio;
 	private final Map<Identifier, Audio> audioCache;
 
 	public DefaultAudioManager(@NotNull ResourceProvider resourceProvider) {
@@ -56,7 +53,6 @@ public class DefaultAudioManager implements AudioManager, AutoCloseable {
 
 		this.decoderMap = new AudioDecoderRegistry();
 
-		this.pendingAudio = new ConcurrentHashMap<>();
 		this.audioCache = new ConcurrentHashMap<>();
 	}
 
@@ -73,7 +69,7 @@ public class DefaultAudioManager implements AudioManager, AutoCloseable {
 	}
 
 	@Nullable
-	private Future<Audio> decode(int priority, @NotNull Identifier location, @NotNull Set<AudioDecodeHint> hints) {
+	private Audio decode(int priority, @NotNull Identifier location, @NotNull Set<AudioDecodeHint> hints) {
 		Objects.requireNonNull(location, "location is null");
 		Objects.requireNonNull(hints, "hints is null");
 
@@ -92,41 +88,22 @@ public class DefaultAudioManager implements AudioManager, AutoCloseable {
 
 		LOGGER.debug("Found {} available audio decoders with \"{}\" [{}]", factoryInfos.size(), location, mimeType);
 
-
-		// TODO: 2026/03/70 Using seekable input stream
-//		InputStream stream;
-//		try {
-//			stream = resource.openStream();
-//		} catch (IOException e) {
-//			LOGGER.warn("Failed open resource stream {}", location, e);
-//			return null;
-//		}
-
-		byte[] data;
-		{
-			ByteArrayOutputStream byteArrayStream = new ByteArrayOutputStream();
-			int len;
-			byte[] temp = new byte[1024 * 8];
-
-			try (InputStream stream = resource.openStream()) {
-				while ((len = stream.read(temp)) != -1) {
-					byteArrayStream.write(temp, 0, len);
-				}
-			} catch (IOException e) {
-				LOGGER.warn("Failed open resource stream {}", location, e);
-				return null;
-			}
-
-			data = byteArrayStream.toByteArray();
+		InputStream stream;
+		try {
+			stream = resource.openStream();
+		} catch (IOException e) {
+			LOGGER.warn("Failed open resource stream {}", location, e);
+			return null;
 		}
 
-//		SeekableInputStream seekableStream = new SeekableInputStream(stream);
+		SeekableInputStream seekableStream = new SeekableInputStream(stream);
 
 		AudioDecoder decoder;
 		for (AudioDecoderRegistry.FactoryInfo info : factoryInfos) {
 			AudioDecoderFactory factory = info.getFactory();
-			try {
-				if (!factory.checkMagic(new ByteArrayInputStream(data)))
+
+			try (SeekableInputStream duplicateStream = seekableStream.duplicate()) {
+				if (!factory.checkMagic(duplicateStream))
 					continue;
 			} catch (Throwable e) {
 				LOGGER.error("Uncaught exception in checking magic, factory={}", className(factory), e);
@@ -134,7 +111,7 @@ public class DefaultAudioManager implements AudioManager, AutoCloseable {
 			}
 
 			try {
-				decoder = factory.create(new DecoderInfoImpl(data, hints, mimeType));
+				decoder = factory.create(new DecoderInfoImpl(seekableStream, hints, mimeType));
 			} catch (Throwable e) {
 				LOGGER.error("Failed to create decoder, factory={}", className(factory), e);
 				continue;
@@ -142,13 +119,7 @@ public class DefaultAudioManager implements AudioManager, AutoCloseable {
 
 			break;
 		}
-		this.			decoderPool.decode()
-	}
-
-	@Nullable
-	@Override
-	public CompletableFuture<Audio> getAudioAsync(@NotNull Identifier location) {
-		return null;
+		return this.decoderPool.decode(priority, decoder, seekableStream);
 	}
 
 	@Override
@@ -207,16 +178,16 @@ public class DefaultAudioManager implements AudioManager, AutoCloseable {
 	}
 
 	private static class DecoderInfoImpl implements AudioDecoder.DecodeInfo {
-		private final byte[] data;
+		private final SeekableInputStream stream;
 		private final Set<AudioDecodeHint> hints;
 		private final MimeType mime;
 
-		private DecoderInfoImpl(byte[] data, @NotNull Set<AudioDecodeHint> hints, @NotNull MimeType mime) {
-			Objects.requireNonNull(data, "data is null");
+		private DecoderInfoImpl(@NotNull SeekableInputStream stream, @NotNull Set<AudioDecodeHint> hints, @NotNull MimeType mime) {
+			Objects.requireNonNull(stream, "stream is null");
 			Objects.requireNonNull(hints, "hints is null");
 			Objects.requireNonNull(mime, "mime is null");
 
-			this.data = data;
+			this.stream = stream;
 			this.hints = Set.copyOf(hints);
 			this.mime = mime;
 		}
@@ -224,7 +195,7 @@ public class DefaultAudioManager implements AudioManager, AutoCloseable {
 		@NotNull
 		@Override
 		public InputStream openStream() {
-			return new ByteArrayInputStream(this.data);
+			return this.stream.duplicate();
 		}
 
 		@NotNull

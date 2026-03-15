@@ -5,7 +5,6 @@ import io.github.wsyong11.gameforge.framework.system.audio.audio.stream.AudioStr
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Closeable;
-import java.util.UUID;
 
 public interface Audio extends Closeable {
 	@NotNull
@@ -23,6 +22,18 @@ public interface Audio extends Closeable {
 	@NotNull
 	AudioStream openStreamingStream();
 
+	void registerStatusCallback(@NotNull StatusCallback callback);
+
+	void unregisterStatusCallback(@NotNull StatusCallback callback);
+
 	@Override
 	void close();
+
+	interface StatusCallback {
+		default void onReady() { /* no-op */ }
+
+		default void onFailed(@NotNull Throwable exception) { /* no-op */ }
+
+		default void onClosed() { /* no-op */ }
+	}
 }

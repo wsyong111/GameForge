@@ -12,19 +12,39 @@ import java.util.concurrent.TimeUnit;
 
 public class TaskHandler {
 	private final Executor executor;
+	private final ThreadMark owner;
+
+	public TaskHandler(@NotNull Executor executor, @NotNull ThreadMark owner) {
+		Objects.requireNonNull(executor, "executor is null");
+		Objects.requireNonNull(owner, "owner is null");
+
+		this.executor = executor;
+		this.owner = owner;
+	}
 
 	public TaskHandler(@NotNull Executor executor) {
 		Objects.requireNonNull(executor, "executor is null");
 		this.executor = executor;
+		this.owner = ThreadMark.get();
 	}
 
 	public void run(@NotNull Runnable task) {
 		Objects.requireNonNull(task, "task is null");
+
+		if (this.owner.check()) {
+			task.run();
+			return;
+		}
 		this.executor.execute(new Task<>(task));
 	}
 
 	public void runBlocking(@NotNull Runnable task) throws ExecutionException, InterruptedException {
 		Objects.requireNonNull(task, "task is null");
+
+		if (this.owner.check()) {
+			task.run();
+			return;
+		}
 
 		Task<Void> future = new Task<>(task);
 		this.executor.execute(future);
@@ -34,6 +54,14 @@ public class TaskHandler {
 	public <T> T runBlocking(@NotNull Callable<T> task) throws ExecutionException, InterruptedException {
 		Objects.requireNonNull(task, "task is null");
 
+		if (this.owner.check()) {
+			try {
+				return task.call();
+			} catch (Exception e) {
+				throw new ExecutionException(e);
+			}
+		}
+
 		Task<T> future = new Task<>(task);
 		this.executor.execute(future);
 		return future.get();
@@ -41,6 +69,14 @@ public class TaskHandler {
 
 	public <T> T runBlocking(@NotNull Callable<T> task, long timeoutMs, @NotNull TimeUnit unit) throws ExecutionException, InterruptedException {
 		Objects.requireNonNull(task, "task is null");
+
+		if (this.owner.check()) {
+			try {
+				return task.call();
+			} catch (Exception e) {
+				throw new ExecutionException(e);
+			}
+		}
 
 		Task<T> future = new Task<>(task);
 		this.executor.execute(future);

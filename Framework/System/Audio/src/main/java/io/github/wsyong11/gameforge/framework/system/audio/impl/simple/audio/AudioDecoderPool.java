@@ -1,15 +1,10 @@
 package io.github.wsyong11.gameforge.framework.system.audio.impl.simple.audio;
 
-import io.github.wsyong11.gameforge.framework.Identifier;
-import io.github.wsyong11.gameforge.framework.mime.MimeType;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.Audio;
-import io.github.wsyong11.gameforge.framework.system.audio.audio.AudioMetadata;
-import io.github.wsyong11.gameforge.framework.system.audio.audio.AudioStatus;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.AudioDecoder;
-import io.github.wsyong11.gameforge.framework.system.audio.audio.stream.AudioStream;
 import io.github.wsyong11.gameforge.util.concurrent.LimitedCapacityBlockingQueue;
+import io.github.wsyong11.gameforge.util.io.SeekableInputStream;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.concurrent.*;
@@ -37,10 +32,9 @@ public class AudioDecoderPool {
 	}
 
 	@NotNull
-	public Future<Audio> decode(int priority, @Nullable MimeType type, @NotNull AudioDecoder decoder) {
-		Objects.requireNonNull(type, "type is null");
+	public Audio decode(int priority, @NotNull AudioDecoder decoder, @NotNull SeekableInputStream stream) {
 		Objects.requireNonNull(decoder, "decoder is null");
-
+		Objects.requireNonNull(stream, "stream is null");
 
 		return null;
 	}
@@ -57,11 +51,14 @@ public class AudioDecoderPool {
 		}
 	}
 
-	protected static class DecoderTask implements Callable<DecodedAudio>, Comparable<DecoderTask> {
+	public static class DecoderTask implements Callable<Boolean>, Comparable<DecoderTask> {
 		private final int priority;
+		private final AudioDecoder decoder;
+		private final DecodedAudio audio;
 
-		private DecoderTask(int priority) {
+		private DecoderTask(int priority, @NotNull AudioDecoder decoder) {
 			this.priority = priority;
+			this.decoder = decoder;
 		}
 
 		@Override
@@ -73,13 +70,9 @@ public class AudioDecoderPool {
 
 		@NotNull
 		@Override
-		public DecodedAudio call() throws Exception {
-			return null;
+		public Boolean call() throws Exception {
+			return false;
 		}
-	}
-
-	protected interface DecodedAudio {
-
 	}
 
 	private static class AudioDecoderThreadFactory implements ThreadFactory {
@@ -101,45 +94,6 @@ public class AudioDecoderPool {
 		}
 	}
 
-	protected static class AudioImpl implements Audio {
-		private final Identifier location;
-
-		private volatile AudioMetadata metadata;
-
-		public AudioImpl() {
-
-		}
-
-		@Override
-		public @NotNull Identifier getLocation() {
-			return null;
-		}
-
-		@Override
-		public @NotNull AudioMetadata getMetadata() {
-			return null;
-		}
-
-		@Override
-		public @NotNull AudioStatus getStatus() {
-			return null;
-		}
-
-		@Override
-		public @NotNull AudioStream newStream() {
-			return null;
-		}
-
-		@Override
-		public @NotNull AudioStream openStreamingStream() {
-			return null;
-		}
-
-		@Override
-		public void close() {
-
-		}
-	}
 }
 
 /*
