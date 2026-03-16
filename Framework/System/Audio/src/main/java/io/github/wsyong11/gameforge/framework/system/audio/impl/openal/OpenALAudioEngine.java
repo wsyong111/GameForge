@@ -58,7 +58,7 @@ public class OpenALAudioEngine extends AbstractAudioEngine {
 	public OpenALAudioEngine(@NotNull AudioEngineContext context) {
 		super(context);
 
-		this.audioManager = new DefaultAudioManager(context.getResourceProvider());
+		this.audioManager = new DefaultAudioManager(context.getResourceProvider(), context.getAudioTaskHandler());
 
 		this.defaultDeviceIdentity = NamedAudioDeviceIdentity.EMPTY;
 

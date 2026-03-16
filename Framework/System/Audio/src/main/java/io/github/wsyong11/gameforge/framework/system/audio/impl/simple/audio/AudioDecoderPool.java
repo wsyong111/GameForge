@@ -3,6 +3,7 @@ package io.github.wsyong11.gameforge.framework.system.audio.impl.simple.audio;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.Audio;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.AudioDecoder;
 import io.github.wsyong11.gameforge.util.concurrent.LimitedCapacityBlockingQueue;
+import io.github.wsyong11.gameforge.util.concurrent.TaskHandler;
 import io.github.wsyong11.gameforge.util.io.SeekableInputStream;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,14 +13,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class AudioDecoderPool {
 	private final ExecutorService executor;
+	private final TaskHandler audioTaskHandler;
 
 	public AudioDecoderPool(
+		@NotNull TaskHandler audioTaskHandler,
 		int maxCapacity,
 		int maxPoolSize,
 		long keepAliveTime,
 		@NotNull TimeUnit unit
 	) {
 		Objects.requireNonNull(unit, "unit is null");
+		Objects.requireNonNull(audioTaskHandler, "audioTaskHandler is null");
+
+		this.audioTaskHandler = audioTaskHandler;
+
 		this.executor = new ThreadPoolExecutor(
 			1,
 			maxPoolSize,
@@ -56,9 +63,13 @@ public class AudioDecoderPool {
 		private final AudioDecoder decoder;
 		private final DecodedAudio audio;
 
-		private DecoderTask(int priority, @NotNull AudioDecoder decoder) {
+		private DecoderTask(int priority, @NotNull AudioDecoder decoder, @NotNull DecodedAudio audio) {
+			Objects.requireNonNull(decoder, "decoder is null");
+			Objects.requireNonNull(audio, "audio is null");
+
 			this.priority = priority;
 			this.decoder = decoder;
+			this.audio = audio;
 		}
 
 		@Override

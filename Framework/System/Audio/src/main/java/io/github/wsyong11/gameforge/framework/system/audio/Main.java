@@ -2,8 +2,9 @@ package io.github.wsyong11.gameforge.framework.system.audio;
 
 import io.github.wsyong11.gameforge.framework.Identifier;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.Audio;
+import io.github.wsyong11.gameforge.framework.system.audio.audio.AudioManager;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.ogg.OggAudioDecoderFactory;
-import io.github.wsyong11.gameforge.framework.system.audio.impl.simple.audio.DefaultAudioManager;
+import io.github.wsyong11.gameforge.framework.system.audio.impl.openal.OpenALAudioEngine;
 import io.github.wsyong11.gameforge.framework.system.log.core.LogManager;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.manage.DefaultResourceManager;
@@ -22,12 +23,25 @@ public class Main {
 			rs.addPack(new AssetsResourcePack("game"));
 			rs.reload();
 
-			try (DefaultAudioManager manager = new DefaultAudioManager(rs)) {
-				manager.registerAudioDecoder(OggAudioDecoderFactory.INSTANCE.get(), 0);
+			AudioSystem audioSystem = AudioSystem.init(() -> OpenALAudioEngine::new, rs);
+			AudioManager audioManager = audioSystem.getAudioManager();
+			audioManager.registerAudioDecoder(OggAudioDecoderFactory.INSTANCE.get(), 1);
 
-				Audio audio = manager.getAudio(TEST_SOUND);
-				System.out.println(audio);
+			Audio audio = audioManager.getAudio(TEST_SOUND);
+			System.out.println(audio);
+			if (audio != null) {
+				System.out.println(audio.getMetadata());
 			}
+
+//			try (DefaultAudioManager manager = new DefaultAudioManager(rs)) {
+//				manager.registerAudioDecoder(OggAudioDecoderFactory.INSTANCE.get(), 0);
+//
+//				Audio audio = manager.getAudio(TEST_SOUND);
+//				System.out.println(audio);
+//			}
+			Thread.sleep(1000L);
+		} finally {
+			AudioSystem.shutdown();
 		}
 
 //		FloatBuffer buf = FloatBuffer.wrap(new float[]{

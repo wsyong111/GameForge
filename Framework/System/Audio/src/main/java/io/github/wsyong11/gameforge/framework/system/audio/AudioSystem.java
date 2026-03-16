@@ -7,6 +7,7 @@ import io.github.wsyong11.gameforge.framework.system.audio.provider.AudioEngineP
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourceProvider;
+import io.github.wsyong11.gameforge.util.concurrent.TaskHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -83,10 +84,12 @@ public final class AudioSystem {
 		Objects.requireNonNull(engineProvider, "engineProvider is null");
 		Objects.requireNonNull(resourceProvider, "resourceProvider is null");
 
-		Context context = new Context(resourceProvider);
+		this.thread = new AudioThread();
 
+		Context context = new Context(resourceProvider, this.thread.getTaskHandler());
 		this.engine = engineProvider.getFactory().apply(context);
-		this.thread = new AudioThread(this.engine);
+
+		this.thread.setEngine(this.engine);
 
 		this.audioManager = this.engine.getAudioManager();
 
@@ -120,16 +123,26 @@ public final class AudioSystem {
 
 	private static class Context implements AudioEngineContext {
 		private final ResourceProvider resourceProvider;
+		private final TaskHandler audioTaskHandler;
 
-		private Context(@NotNull ResourceProvider resourceProvider) {
+		private Context(@NotNull ResourceProvider resourceProvider, @NotNull TaskHandler audioTaskHandler) {
 			Objects.requireNonNull(resourceProvider, "resourceProvider is null");
+			Objects.requireNonNull(audioTaskHandler, "audioTaskHandler is null");
+
 			this.resourceProvider = resourceProvider;
+			this.audioTaskHandler = audioTaskHandler;
 		}
 
 		@NotNull
 		@Override
 		public ResourceProvider getResourceProvider() {
 			return this.resourceProvider;
+		}
+
+		@NotNull
+		@Override
+		public TaskHandler getAudioTaskHandler() {
+			return this.audioTaskHandler;
 		}
 	}
 }

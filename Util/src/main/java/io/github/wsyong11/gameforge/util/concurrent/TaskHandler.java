@@ -24,6 +24,7 @@ public class TaskHandler {
 
 	public TaskHandler(@NotNull Executor executor) {
 		Objects.requireNonNull(executor, "executor is null");
+
 		this.executor = executor;
 		this.owner = ThreadMark.get();
 	}

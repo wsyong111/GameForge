@@ -14,18 +14,16 @@ import java.util.Objects;
 class AudioThread extends Thread {
 	private static final Logger LOGGER = Log.getLogger();
 
-	private final AudioEngine engine;
 	private final TaskQueueExecutor taskExecutor;
 	private final TaskHandler taskHandler;
 	private final Ticker mainLoopTicker;
 
-	public AudioThread(@NotNull AudioEngine engine) {
-		Objects.requireNonNull(engine, "engine is null");
+	private volatile AudioEngine engine;
 
-		this.engine = engine;
+	public AudioThread() {
 		this.taskExecutor = new TaskQueueExecutor();
 		this.taskHandler = new TaskHandler(this.taskExecutor);
-		this.mainLoopTicker = Ticker.accumulator(engine.getLoopPreSec(), this::tick);
+		this.mainLoopTicker = Ticker.accumulator(1, this::tick);
 
 		this.setName("AudioThread");
 		this.setDaemon(true);
@@ -36,8 +34,19 @@ class AudioThread extends Thread {
 		return this.taskHandler;
 	}
 
+	public void setEngine(@NotNull AudioEngine engine) {
+		Objects.requireNonNull(engine, "engine is null");
+		if (this.engine != null)
+			throw new IllegalStateException("An AudioEngine has been set");
+
+		this.engine = engine;
+		this.mainLoopTicker.setTickSpeed(engine.getLoopPreSec());
+	}
+
 	@Override
 	public void run() {
+		assert this.engine != null;
+
 		LOGGER.debug("Audio thread init...");
 		this.engine.init();
 

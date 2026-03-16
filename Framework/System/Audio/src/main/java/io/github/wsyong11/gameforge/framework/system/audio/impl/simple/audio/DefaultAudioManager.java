@@ -11,6 +11,7 @@ import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.resource.Resource;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourceProvider;
+import io.github.wsyong11.gameforge.util.concurrent.TaskHandler;
 import io.github.wsyong11.gameforge.util.io.SeekableInputStream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,19 +33,22 @@ public class DefaultAudioManager implements AudioManager, AutoCloseable {
 	private static final Logger LOGGER = Log.getLogger();
 
 	private final ResourceProvider resourceProvider;
+
 	private final AudioDecoderPool decoderPool;
 
 	private final AudioDecoderRegistry decoderMap;
 
 	private final Map<Identifier, Audio> audioCache;
 
-	public DefaultAudioManager(@NotNull ResourceProvider resourceProvider) {
+	public DefaultAudioManager(@NotNull ResourceProvider resourceProvider, @NotNull TaskHandler taskHandler) {
 		Objects.requireNonNull(resourceProvider, "resourceProvider is null");
+		Objects.requireNonNull(taskHandler, "taskHandler is null");
 
 		this.resourceProvider = resourceProvider;
 
 		int decoderThreadCount = Math.max(1, Math.min(Runtime.getRuntime().availableProcessors() - 2, 4));
 		this.decoderPool = new AudioDecoderPool(
+			taskHandler,
 			128,
 			decoderThreadCount,
 			10,
@@ -98,7 +102,7 @@ public class DefaultAudioManager implements AudioManager, AutoCloseable {
 
 		SeekableInputStream seekableStream = new SeekableInputStream(stream);
 
-		AudioDecoder decoder;
+		AudioDecoder selectedDecoder = null;
 		for (AudioDecoderRegistry.FactoryInfo info : factoryInfos) {
 			AudioDecoderFactory factory = info.getFactory();
 
@@ -110,16 +114,25 @@ public class DefaultAudioManager implements AudioManager, AutoCloseable {
 				continue;
 			}
 
+			AudioDecoder decoder;
 			try {
+				//noinspection resource
 				decoder = factory.create(new DecoderInfoImpl(seekableStream, hints, mimeType));
 			} catch (Throwable e) {
 				LOGGER.error("Failed to create decoder, factory={}", className(factory), e);
 				continue;
 			}
 
+			selectedDecoder = decoder;
 			break;
 		}
-		return this.decoderPool.decode(priority, decoder, seekableStream);
+
+		if (selectedDecoder == null) {
+			LOGGER.warn("No available decoder found from \"{}\" [{}]", factoryInfos.size(), location, mimeType);
+			return null;
+		}
+
+		return this.decoderPool.decode(priority, selectedDecoder, seekableStream);
 	}
 
 	@Override
