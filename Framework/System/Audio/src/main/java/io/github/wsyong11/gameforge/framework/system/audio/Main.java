@@ -5,6 +5,7 @@ import io.github.wsyong11.gameforge.framework.system.audio.audio.Audio;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.AudioManager;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.ogg.OggAudioDecoderFactory;
 import io.github.wsyong11.gameforge.framework.system.audio.impl.openal.OpenALAudioEngine;
+import io.github.wsyong11.gameforge.framework.system.log.core.LogLevel;
 import io.github.wsyong11.gameforge.framework.system.log.core.LogManager;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.manage.DefaultResourceManager;
@@ -17,7 +18,7 @@ public class Main {
 	public static void main(String[] args) throws Throwable {
 		ClassLoader classLoader = Main.class.getClassLoader();
 		LogManager.setAdapter("log4j2");
-		LogManager.bind(classLoader);
+		LogManager.bind(classLoader).getRootLoggerConfig().setLevel(LogLevel.VERBOSE);
 
 		try (ResourceManager rs = new DefaultResourceManager(ResourcePath.of("assets"))) {
 			rs.addPack(new AssetsResourcePack("game"));
@@ -30,7 +31,12 @@ public class Main {
 			Audio audio = audioManager.getAudio(TEST_SOUND);
 			System.out.println(audio);
 			if (audio != null) {
-				System.out.println(audio.getMetadata());
+				audio.registerStatusCallback(new Audio.StatusCallback() {
+					@Override
+					public void onReady() {
+						System.out.println(audio.getMetadata());
+					}
+				});
 			}
 
 //			try (DefaultAudioManager manager = new DefaultAudioManager(rs)) {

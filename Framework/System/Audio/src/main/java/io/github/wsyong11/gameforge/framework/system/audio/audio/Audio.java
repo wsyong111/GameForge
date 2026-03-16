@@ -7,11 +7,24 @@ import org.jetbrains.annotations.NotNull;
 import java.io.Closeable;
 
 public interface Audio extends Closeable {
+	/**
+	 * 获取音频读取的资源路径
+	 *
+	 * @return 音频资源路径
+	 */
 	@NotNull
 	Identifier getLocation();
 
+	/**
+	 * 获取音频元数据，如果音频状态不是 {@link AudioStatus#READY} 则会抛出错误
+	 *
+	 * @return 音频元数据
+	 * @throws IllegalStateException 当音频状态不为 {@link AudioStatus#READY} 时抛出
+	 * @see #getStatus()
+	 */
 	@NotNull
 	AudioMetadata getMetadata();
+
 
 	@NotNull
 	AudioStatus getStatus();
@@ -32,7 +45,7 @@ public interface Audio extends Closeable {
 	interface StatusCallback {
 		default void onReady() { /* no-op */ }
 
-		default void onFailed(@NotNull Throwable exception) { /* no-op */ }
+		default void onFailed() { /* no-op */ }
 
 		default void onClosed() { /* no-op */ }
 	}

@@ -2,6 +2,7 @@ package io.github.wsyong11.gameforge.framework.system.audio.audio.decoder;
 
 import io.github.wsyong11.gameforge.framework.system.audio.audio.AudioCategory;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.AudioMetadata;
+import org.apache.commons.text.StringEscapeUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class SimpleAudioMetadata implements AudioMetadata {
 	private final int sampleRate;
@@ -78,5 +80,20 @@ public class SimpleAudioMetadata implements AudioMetadata {
 	@Override
 	public Set<String> getKeys() {
 		return this.comments.keySet();
+	}
+
+	@Override
+	public String toString() {
+		String comments = this.comments
+			.entrySet()
+			.stream()
+			.map(e -> e.getKey() + "=\"" + StringEscapeUtils.escapeJava(e.getValue()) + "\"")
+			.collect(Collectors.joining(", "));
+
+		return "AudioMetadata{"
+			+ "sampleRate=" + (this.sampleRate / 1000) + "K, "
+			+ "channels=" + this.channels + ", "
+			+ "totalSamples=" + this.totalSamples + ", "
+			+ "comments={" + comments + "}}";
 	}
 }

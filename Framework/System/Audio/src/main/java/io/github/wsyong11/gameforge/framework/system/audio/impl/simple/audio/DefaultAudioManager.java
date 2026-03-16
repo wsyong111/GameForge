@@ -132,7 +132,7 @@ public class DefaultAudioManager implements AudioManager, AutoCloseable {
 			return null;
 		}
 
-		return this.decoderPool.decode(priority, selectedDecoder, seekableStream);
+		return this.decoderPool.decode(location, priority, selectedDecoder, seekableStream);
 	}
 
 	@Override
