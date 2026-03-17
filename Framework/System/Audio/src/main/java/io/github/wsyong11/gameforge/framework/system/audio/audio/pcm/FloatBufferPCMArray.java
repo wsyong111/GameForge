@@ -4,16 +4,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.FloatBuffer;
 import java.util.Objects;
-import java.util.Spliterators;
-import java.util.stream.DoubleStream;
-import java.util.stream.StreamSupport;
 
-public class FloatBufferPCMBuffer implements PCMBuffer {
+public class FloatBufferPCMArray implements PCMArray {
 	private final FloatBuffer buffer;
 	private final int channels;
 	private final int sampleRate;
 
-	public FloatBufferPCMBuffer(@NotNull FloatBuffer buffer, int channels, int sampleRate) {
+	public FloatBufferPCMArray(@NotNull FloatBuffer buffer, int channels, int sampleRate) {
 		Objects.requireNonNull(buffer, "buffer is null");
 
 		if (channels <= 0)
@@ -38,14 +35,14 @@ public class FloatBufferPCMBuffer implements PCMBuffer {
 	}
 
 	@Override
-	public long getFrames() {
+	public int getFrames() {
 		return this.buffer.remaining() / this.channels;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
-	private int offset(int channel, long frame) {
-		return (int) ((frame * this.channels) + channel);
+	private int offset(int channel, int frame) {
+		return (frame * this.channels) + channel;
 	}
 
 	private void checkBoundsChannel(int channel) {
@@ -53,27 +50,27 @@ public class FloatBufferPCMBuffer implements PCMBuffer {
 			throw new IndexOutOfBoundsException("Channel out of range: " + channel);
 	}
 
-	private void checkBoundsFrame(long frame) {
+	private void checkBoundsFrame(int frame) {
 		if (frame < 0 || frame >= this.getFrames())
 			throw new IndexOutOfBoundsException("Frame out of range: " + frame);
 	}
 
 	@Override
-	public float getSample(int channel, long frame) {
+	public float getSample(int channel, int frame) {
 		this.checkBoundsChannel(channel);
 		this.checkBoundsFrame(frame);
 		return this.buffer.get(this.offset(channel, frame));
 	}
 
 	@Override
-	public void setSample(int channel, long frame, float value) {
+	public void setSample(int channel, int frame, float value) {
 		this.checkBoundsChannel(channel);
 		this.checkBoundsFrame(frame);
 		this.buffer.put(this.offset(channel, frame), value);
 	}
 
 	@Override
-	public int getFrame(float @NotNull [] array, int index, int length, long frame) {
+	public int getFrame(float @NotNull [] array, int index, int length, int frame) {
 		Objects.requireNonNull(array, "array is null");
 		Objects.checkFromIndexSize(index, length, array.length);
 		this.checkBoundsFrame(frame);
@@ -81,10 +78,10 @@ public class FloatBufferPCMBuffer implements PCMBuffer {
 		if (length == 0 || length < this.channels)
 			return 0;
 
-		long totalFrames = this.getFrames();
-		int availableFrames = (int) Math.min(length / this.channels, totalFrames - frame);
+		int totalFrames = this.getFrames();
+		int availableFrames = Math.min(length / this.channels, totalFrames - frame);
 
-		int start = (int) (frame * this.channels);
+		int start = frame * this.channels;
 		int count = availableFrames * this.channels;
 
 		this.buffer.position(start);
@@ -95,16 +92,16 @@ public class FloatBufferPCMBuffer implements PCMBuffer {
 	}
 
 	@Override
-	public int getFrame(@NotNull FloatBuffer dest, long frame, int frameCount) {
+	public int getFrame(@NotNull FloatBuffer dest, int frame, int frameCount) {
 		Objects.requireNonNull(dest, "dest is null");
 		this.checkBoundsFrame(frame);
 
 		int remainingFrames = dest.remaining() / this.channels;
 
-		long totalFrames = this.getFrames();
-		int availableFrames = (int) Math.min(frameCount, Math.min(remainingFrames, totalFrames - frame));
+		int totalFrames = this.getFrames();
+		int availableFrames = Math.min(frameCount, Math.min(remainingFrames, totalFrames - frame));
 
-		int start = (int) (frame * this.channels);
+		int start = frame * this.channels;
 		int count = availableFrames * this.channels;
 
 		dest.put(this.buffer.slice(start, count));
@@ -113,7 +110,7 @@ public class FloatBufferPCMBuffer implements PCMBuffer {
 	}
 
 	@Override
-	public int setFrame(float @NotNull [] array, int index, int length, long frame) {
+	public int setFrame(float @NotNull [] array, int index, int length, int frame) {
 		Objects.requireNonNull(array, "array is null");
 		Objects.checkFromIndexSize(index, length, array.length);
 		this.checkBoundsFrame(frame);
@@ -121,10 +118,10 @@ public class FloatBufferPCMBuffer implements PCMBuffer {
 		if (length == 0 || length < this.channels)
 			return 0;
 
-		long totalFrames = this.getFrames();
-		int availableFrames = (int) Math.min(length / this.channels, totalFrames - frame);
+		int totalFrames = this.getFrames();
+		int availableFrames = Math.min(length / this.channels, totalFrames - frame);
 
-		int start = (int) (frame * this.channels);
+		int start = frame * this.channels;
 		int count = availableFrames * this.channels;
 
 		this.buffer.position(start);
@@ -135,30 +132,20 @@ public class FloatBufferPCMBuffer implements PCMBuffer {
 	}
 
 	@Override
-	public int setFrame(@NotNull FloatBuffer src, long frame, int frameCount) {
+	public int setFrame(@NotNull FloatBuffer src, int frame, int frameCount) {
 		Objects.requireNonNull(src, "src is null");
 		this.checkBoundsFrame(frame);
 
 		int remainingFrames = src.remaining() / this.channels;
 
-		long totalFrames = this.getFrames();
-		int availableFrames = (int) Math.min(frameCount, Math.min(remainingFrames, totalFrames - frame));
+		int totalFrames = this.getFrames();
+		int availableFrames = Math.min(frameCount, Math.min(remainingFrames, totalFrames - frame));
 
-		int start = (int) (frame * this.channels);
+		int start = frame * this.channels;
 		int count = availableFrames * this.channels;
 
 		this.buffer.slice(start, count).put(src);
 
 		return availableFrames;
-	}
-
-	@NotNull
-	@Override
-	public DoubleStream stream(int channel) {
-		this.checkBoundsChannel(channel);
-		return StreamSupport.doubleStream(
-			Spliterators.spliteratorUnknownSize(new PCMIterator(this, channel), 0),
-			false
-		);
 	}
 }

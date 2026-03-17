@@ -7,12 +7,12 @@ import java.util.Objects;
 import java.util.PrimitiveIterator;
 
 public class PCMIterator implements PrimitiveIterator.OfDouble {
-	private final PCMBuffer array;
+	private final PCMArray array;
 	private final int channel;
 
-	private long frame;
+	private int frame;
 
-	public PCMIterator(@NotNull PCMBuffer array, int channel) {
+	public PCMIterator(@NotNull PCMArray array, int channel) {
 		Objects.requireNonNull(array, "array is null");
 
 		if (channel < 0 || channel >= array.getChannels())
@@ -21,7 +21,7 @@ public class PCMIterator implements PrimitiveIterator.OfDouble {
 		this.array = array;
 		this.channel = channel;
 
-		this.frame = 0L;
+		this.frame = 0;
 	}
 
 

@@ -64,7 +64,7 @@ public class Main {
 //			0.0F
 //		});
 //
-//		PCMBuffer array = new FloatBufferPCMBuffer(buf, 2, 1);
+//		PCMArray array = new FloatBufferPCMArray(buf, 2, 1);
 //		System.out.println(array.getFrames());
 //
 //		FloatBuffer a = FloatBuffer.wrap(new float[]{999.0F, 999.0F, 999.0F, 999.0F});

@@ -6,32 +6,34 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.FloatBuffer;
 import java.util.Objects;
 import java.util.PrimitiveIterator;
+import java.util.Spliterators;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
- * PCMBuffer 表示一个多通道 PCM 音频数据的抽象。
+ * PCMArray 表示一个多通道 PCM 音频数据的抽象。
  * <p>
  * PCM 数据按帧组织，每帧包含每个通道的一个采样值。
  * 所有采样值均为浮点数，范围为 {@code [-1.0, 1.0]}。
  * </p>
  */
-public interface PCMBuffer {
+public interface PCMArray {
 	@NotNull
-	static PCMBuffer wrap(@NotNull FloatBuffer buffer, int channels, int sampleRate) {
+	static PCMArray wrap(@NotNull FloatBuffer buffer, int channels, int sampleRate) {
 		Objects.requireNonNull(buffer, "buffer is null");
-		return new FloatBufferPCMBuffer(buffer, channels, sampleRate);
+		return new FloatBufferPCMArray(buffer, channels, sampleRate);
 	}
 
 	@NotNull
-	static PCMBuffer wrap(float @NotNull [] array, int channels, int sampleRate) {
+	static PCMArray wrap(float @NotNull [] array, int channels, int sampleRate) {
 		Objects.requireNonNull(array, "array is null");
 		return wrap(FloatBuffer.wrap(array), channels, sampleRate);
 	}
 
 	@NotNull
-	static PCMBuffer stream(@NotNull Stream<DoubleStream> samples, int sampleRate) {
+	static PCMArray stream(@NotNull Stream<DoubleStream> samples, int sampleRate) {
 		Objects.requireNonNull(samples, "samples is null");
 
 		PrimitiveIterator.OfDouble[] channelIter = samples
@@ -102,7 +104,19 @@ public interface PCMBuffer {
 	 *
 	 * @return 音频总帧数
 	 */
-	long getFrames();
+	int getFrames();
+
+	/**
+	 * 获取总采样数。
+	 * <p>
+	 * 等价于 {@code getFrames() * getChannels()}。
+	 * </p>
+	 *
+	 * @return 总采样数
+	 */
+	default int getSamples() {
+		return this.getFrames() * this.getChannels();
+	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
@@ -114,7 +128,7 @@ public interface PCMBuffer {
 	 * @return 指定通道和帧的采样值，范围为 {@code [-1.0, 1.0]}
 	 * @throws IndexOutOfBoundsException 如果通道索引或帧索引超出有效范围
 	 */
-	float getSample(int channel, long frame);
+	float getSample(int channel, int frame);
 
 	/**
 	 * 批量读取 PCM 数据到数组。
@@ -130,7 +144,7 @@ public interface PCMBuffer {
 	 * @return 实际读取的帧数
 	 * @throws IndexOutOfBoundsException 如果起始帧或数组索引超出范围
 	 */
-	int getFrame(float @NotNull [] array, int index, int length, long frame);
+	int getFrame(float @NotNull [] array, int index, int length, int frame);
 
 	/**
 	 * 批量读取 PCM 数据到数组，从索引 0 开始。
@@ -139,9 +153,9 @@ public interface PCMBuffer {
 	 * @param frame 起始帧索引
 	 * @return 实际读取的帧数
 	 * @throws IndexOutOfBoundsException 如果起始帧索引超出范围
-	 * @see #getFrame(float[], int, int, long)
+	 * @see #getFrame(float[], int, int, int)
 	 */
-	default int getFrame(float @NotNull [] array, long frame) {
+	default int getFrame(float @NotNull [] array, int frame) {
 		return this.getFrame(array, 0, array.length, frame);
 	}
 
@@ -157,9 +171,9 @@ public interface PCMBuffer {
 	 * @param frameCount 读取的帧数
 	 * @return 实际读取的帧数
 	 * @throws IndexOutOfBoundsException 如果起始帧超出范围
-	 * @see #getFrame(float[], int, int, long)
+	 * @see #getFrame(float[], int, int, int)
 	 */
-	int getFrame(@NotNull FloatBuffer dst, long frame, int frameCount);
+	int getFrame(@NotNull FloatBuffer dst, int frame, int frameCount);
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
@@ -171,7 +185,7 @@ public interface PCMBuffer {
 	 * @param value   采样值，写入时会被限制在 {@code [-1.0, 1.0]} 范围
 	 * @throws IndexOutOfBoundsException 如果通道索引或帧索引超出有效范围
 	 */
-	void setSample(int channel, long frame, float value);
+	void setSample(int channel, int frame, float value);
 
 	/**
 	 * 批量写入 PCM 数据到数组。
@@ -187,7 +201,7 @@ public interface PCMBuffer {
 	 * @return 实际写入的帧数
 	 * @throws IndexOutOfBoundsException 如果起始帧或数组索引超出范围
 	 */
-	int setFrame(float @NotNull [] array, int index, int length, long frame);
+	int setFrame(float @NotNull [] array, int index, int length, int frame);
 
 	/**
 	 * 批量写入 PCM 数据到数组，从索引 0 开始。
@@ -196,9 +210,9 @@ public interface PCMBuffer {
 	 * @param frame 起始帧索引
 	 * @return 实际写入的帧数
 	 * @throws IndexOutOfBoundsException 如果起始帧索引超出范围
-	 * @see #setFrame(float[], int, int, long)
+	 * @see #setFrame(float[], int, int, int)
 	 */
-	default int setFrame(float @NotNull [] array, long frame) {
+	default int setFrame(float @NotNull [] array, int frame) {
 		return this.setFrame(array, 0, array.length, frame);
 	}
 
@@ -215,18 +229,92 @@ public interface PCMBuffer {
 	 * @return 实际写入的帧数
 	 * @throws IndexOutOfBoundsException 如果起始帧索引超出范围
 	 */
-	int setFrame(@NotNull FloatBuffer src, long frame, int frameCount);
+	int setFrame(@NotNull FloatBuffer src, int frame, int frameCount);
+
+	// -------------------------------------------------------------------------------------------------------------- //
 
 	/**
-	 * 获取 PCM 数据流
+	 * 批量拷贝 PCM 数据到目标数组。
+	 * <p>
+	 * 数据按帧顺序拷贝，每帧内的采样值按通道顺序排列。
+	 * 源与目标必须具有相同的通道数，否则会抛出异常。
+	 * 实际拷贝的帧数不会超过源或目标剩余容量。
+	 * </p>
+	 *
+	 * @param dest       目标 PCM 数组
+	 * @param destFrame  目标起始帧索引
+	 * @param frame      源起始帧索引
+	 * @param frameCount 期望拷贝的帧数
+	 * @return 实际拷贝的帧数
+	 * @throws IllegalArgumentException  如果目标通道数与源不一致
+	 * @throws IndexOutOfBoundsException 如果源或目标起始帧索引超出范围
+	 */
+	default int copyTo(@NotNull PCMArray dest, int destFrame, int frame, int frameCount) {
+		Objects.requireNonNull(dest, "dest is null");
+
+		int channels = this.getChannels();
+		int destChannels = dest.getChannels();
+
+		if (destChannels != channels)
+			throw new IllegalArgumentException(
+				"The target list does not have the same number of channels as the current list, " +
+					"src=" + channels + "dest=" + destChannels);
+
+		int frames = this.getFrames();
+		int destFrames = dest.getFrames();
+
+		Objects.checkIndex(frame, frames);
+		Objects.checkIndex(destFrame, destFrames);
+
+		if (frameCount == 0)
+			return 0;
+
+		int availableFrame = Math.min(frameCount, Math.min(frames - frame, destFrames - destFrame));
+
+		int bufSize = Math.min(availableFrame, 8192);
+		FloatBuffer buf = FloatBuffer.wrap(new float[bufSize * channels]);
+
+		int copied = 0;
+		while (copied < availableFrame) {
+			int len = this.getFrame(buf, frame + copied, bufSize);
+			if (len <= 0)
+				break;
+
+			dest.setFrame(buf, destFrame + copied, len);
+			buf.clear();
+
+			copied += len;
+		}
+
+		return copied;
+	}
+
+	/**
+	 * 获取指定通道的 PCM 数据流。
+	 * <p>
+	 * 返回的流按帧顺序生成该通道的采样值。
+	 * </p>
 	 *
 	 * @param channel 通道索引
-	 * @return PCM 数据流
+	 * @return 该通道的 PCM 数据流
 	 * @throws IndexOutOfBoundsException 如果通道索引超出有效范围
 	 */
 	@NotNull
-	DoubleStream stream(int channel);
+	default DoubleStream stream(int channel) {
+		return StreamSupport.doubleStream(
+			Spliterators.spliteratorUnknownSize(this.iterator(channel), 0),
+			false
+		);
+	}
 
+	/**
+	 * 获取所有通道的 PCM 数据流。
+	 * <p>
+	 * 每个通道对应一个 {@link DoubleStream}，顺序与通道索引一致。
+	 * </p>
+	 *
+	 * @return 所有通道的 PCM 数据流
+	 */
 	@NotNull
 	default Stream<DoubleStream> stream() {
 		return IntStream
@@ -234,8 +322,57 @@ public interface PCMBuffer {
 			.mapToObj(this::stream);
 	}
 
+	/**
+	 * 获取指定通道的采样迭代器。
+	 *
+	 * @param channel 通道索引
+	 * @return 该通道的采样迭代器
+	 * @throws IndexOutOfBoundsException 如果通道索引超出有效范围
+	 */
 	@NotNull
 	default PrimitiveIterator.OfDouble iterator(int channel) {
 		return new PCMIterator(this, channel);
+	}
+
+	/**
+	 * 将 PCM 数据写入指定数组。
+	 * <p>
+	 * 从起始帧 0 开始按帧顺序写入，最多填充数组容量。
+	 * </p>
+	 *
+	 * @param a 目标数组
+	 * @return 写入后的数组（即参数本身）
+	 * @throws NullPointerException 如果数组为 {@code null}
+	 */
+	default float[] toArray(float[] a) {
+		Objects.requireNonNull(a, "a is null");
+
+		this.getFrame(a, 0, a.length, 0);
+		return a;
+	}
+
+	/**
+	 * 将 PCM 数据转换为新数组。
+	 * <p>
+	 * 返回数组长度等于 {@link #getSamples()}。
+	 * </p>
+	 *
+	 * @return 包含全部 PCM 数据的新数组
+	 */
+	default float[] toArray() {
+		return this.toArray(new float[this.getSamples()]);
+	}
+
+	/**
+	 * 将 PCM 数据转换为 {@link FloatBuffer}。
+	 * <p>
+	 * 返回的缓冲区包含完整的 PCM 数据，按帧顺序排列。
+	 * </p>
+	 *
+	 * @return 包含 PCM 数据的缓冲区
+	 */
+	@NotNull
+	default FloatBuffer toBuffer() {
+		return FloatBuffer.wrap(this.toArray());
 	}
 }
