@@ -213,13 +213,27 @@ public class SeekableInputStream extends InputStream {
 
 			byte[] newBuffer = new byte[newCapacity];
 
-			int bufferSize = this.getBufferSize();
-			for (int i = 0; i < bufferSize; i++)
-				newBuffer[i] = this.buffer[this.getLocalIndex(this.headSeq + i)];
+			int size = this.getBufferSize();
+
+			int head = this.getLocalIndex(this.headSeq);
+			int first = Math.min(size, this.buffer.length - head);
+			System.arraycopy(
+				this.buffer, head,
+				newBuffer, 0,
+				first
+			);
+
+			int remain = size - first;
+			if (remain > 0)
+				System.arraycopy(
+					this.buffer, 0,
+					newBuffer, first,
+					remain
+				);
 
 			this.buffer = newBuffer;
 			this.headSeq = 0;
-			this.tailSeq = bufferSize;
+			this.tailSeq = size;
 		}
 
 		private int getLocalIndex(long seq) {

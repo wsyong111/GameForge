@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.FloatBuffer;
 import java.util.Objects;
 
-public class FloatBufferPCMArray implements PCMArray {
+public class FloatBufferPCMArray extends AbstractPCMArray {
 	private final FloatBuffer buffer;
 	private final int channels;
 	private final int sampleRate;
@@ -41,20 +41,6 @@ public class FloatBufferPCMArray implements PCMArray {
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
-	private int offset(int channel, int frame) {
-		return (frame * this.channels) + channel;
-	}
-
-	private void checkBoundsChannel(int channel) {
-		if (channel < 0 || channel >= this.channels)
-			throw new IndexOutOfBoundsException("Channel out of range: " + channel);
-	}
-
-	private void checkBoundsFrame(int frame) {
-		if (frame < 0 || frame >= this.getFrames())
-			throw new IndexOutOfBoundsException("Frame out of range: " + frame);
-	}
-
 	@Override
 	public float getSample(int channel, int frame) {
 		this.checkBoundsChannel(channel);
@@ -70,9 +56,9 @@ public class FloatBufferPCMArray implements PCMArray {
 	}
 
 	@Override
-	public int getFrame(float @NotNull [] array, int index, int length, int frame) {
+	public int getFrame(float @NotNull [] array, int offset, int length, int frame) {
 		Objects.requireNonNull(array, "array is null");
-		Objects.checkFromIndexSize(index, length, array.length);
+		Objects.checkFromIndexSize(offset, length, array.length);
 		this.checkBoundsFrame(frame);
 
 		if (length == 0 || length < this.channels)
@@ -85,7 +71,7 @@ public class FloatBufferPCMArray implements PCMArray {
 		int count = availableFrames * this.channels;
 
 		this.buffer.position(start);
-		this.buffer.get(array, index, count);
+		this.buffer.get(array, offset, count);
 		this.buffer.position(0);
 
 		return availableFrames;
@@ -110,9 +96,9 @@ public class FloatBufferPCMArray implements PCMArray {
 	}
 
 	@Override
-	public int setFrame(float @NotNull [] array, int index, int length, int frame) {
+	public int setFrame(float @NotNull [] array, int offset, int length, int frame) {
 		Objects.requireNonNull(array, "array is null");
-		Objects.checkFromIndexSize(index, length, array.length);
+		Objects.checkFromIndexSize(offset, length, array.length);
 		this.checkBoundsFrame(frame);
 
 		if (length == 0 || length < this.channels)
@@ -125,7 +111,7 @@ public class FloatBufferPCMArray implements PCMArray {
 		int count = availableFrames * this.channels;
 
 		this.buffer.position(start);
-		this.buffer.put(array, index, count);
+		this.buffer.put(array, offset, count);
 		this.buffer.position(0);
 
 		return availableFrames;

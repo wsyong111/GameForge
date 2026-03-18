@@ -133,6 +133,20 @@ public interface PCMList extends PCMArray {
 	 */
 	void remove(int frame, int length);
 
+	default int getAndRemove(float @NotNull [] dest, int frame) {
+		Objects.requireNonNull(dest, "dest is null");
+		return this.getAndRemove(dest, 0, dest.length, frame);
+	}
+
+	default int getAndRemove(float @NotNull [] dest, int offset, int length, int frame) {
+		Objects.requireNonNull(dest, "dest is null");
+		Objects.checkFromIndexSize(offset, length, dest.length);
+
+		int consumed = this.getFrame(dest, offset, length, frame);
+		this.remove(frame, consumed);
+		return consumed;
+	}
+
 	/**
 	 * 收缩内部存储以匹配当前数据大小。
 	 * <p>

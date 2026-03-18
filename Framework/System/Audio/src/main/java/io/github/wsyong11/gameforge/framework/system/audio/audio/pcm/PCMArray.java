@@ -138,13 +138,13 @@ public interface PCMArray {
 	 * </p>
 	 *
 	 * @param array  目标数组
-	 * @param index  起始写入索引
+	 * @param offset  起始写入索引
 	 * @param length 读取的采样总数（非帧数）
 	 * @param frame  起始帧索引
 	 * @return 实际读取的帧数
 	 * @throws IndexOutOfBoundsException 如果起始帧或数组索引超出范围
 	 */
-	int getFrame(float @NotNull [] array, int index, int length, int frame);
+	int getFrame(float @NotNull [] array, int offset, int length, int frame);
 
 	/**
 	 * 批量读取 PCM 数据到数组，从索引 0 开始。
@@ -195,13 +195,13 @@ public interface PCMArray {
 	 * </p>
 	 *
 	 * @param array  源数组
-	 * @param index  起始读取索引
+	 * @param offset  起始读取索引
 	 * @param length 写入的采样总数（非帧数）
 	 * @param frame  起始帧索引
 	 * @return 实际写入的帧数
 	 * @throws IndexOutOfBoundsException 如果起始帧或数组索引超出范围
 	 */
-	int setFrame(float @NotNull [] array, int index, int length, int frame);
+	int setFrame(float @NotNull [] array, int offset, int length, int frame);
 
 	/**
 	 * 批量写入 PCM 数据到数组，从索引 0 开始。
