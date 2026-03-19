@@ -14,17 +14,17 @@ public class AudioDecodePool {
 	private static final Logger LOGGER = Log.getLogger();
 
 	private final ExecutorService poolExecutor;
-	private final ScheduledExecutorService scheduledExecutor;
+//	private final ScheduledExecutorService scheduledExecutor;
 
 	private volatile boolean isShutdown;
 
-	private final ScheduledFuture<?> schedulePoolFuture;
+//	private final ScheduledFuture<?> schedulePoolFuture;
 
 	public AudioDecodePool(
 		int maxPoolSize,
 		int queueMaxCapacity,
 		long keepAliveTime,
-		long schedulePoolDelay,
+//		long schedulePoolDelay,
 		@NotNull TimeUnit unit
 	) {
 		Objects.requireNonNull(unit, "unit is null");
@@ -39,30 +39,30 @@ public class AudioDecodePool {
 			new ThreadPoolExecutor.CallerRunsPolicy()
 		);
 
-		this.scheduledExecutor = new ScheduledThreadPoolExecutor(1);
+//		this.scheduledExecutor = new ScheduledThreadPoolExecutor(1);
 
 		this.isShutdown = false;
 
-		this.schedulePoolFuture = this.scheduledExecutor.scheduleWithFixedDelay(
-			this::schedulePool,
-			0,
-			schedulePoolDelay,
-			unit
-		);
+//		this.schedulePoolFuture = this.scheduledExecutor.scheduleWithFixedDelay(
+//			this::schedulePool,
+//			0,
+//			schedulePoolDelay,
+//			unit
+//		);
 	}
 
-	private void schedulePool() {
-		try {
+//	private void schedulePool() {
+//		try {
+//
+//		} catch (Throwable e) {
+//			LOGGER.error("Uncaught exception when scheduling pool", e);
+//		}
+//	}
 
-		} catch (Throwable e) {
-			LOGGER.error("Uncaught exception when scheduling pool", e);
-		}
-	}
-
-	@NotNull
-	public DecodeTask schedule(@NotNull AudioDecoder decoder) {
-
-	}
+//	@NotNull
+//	public DecodeTask schedule(@NotNull AudioDecoder decoder) {
+//
+//	}
 
 	public void shutdown(long timeout, @NotNull TimeUnit unit) {
 		Objects.requireNonNull(unit, "unit is null");
@@ -71,23 +71,23 @@ public class AudioDecodePool {
 			return;
 		this.isShutdown = true;
 
-		this.schedulePoolFuture.cancel(true);
-		try {
-			this.schedulePoolFuture.get(timeout, unit);
-		} catch (CancellationException | TimeoutException ignored) {
-		} catch (ExecutionException e) {
-			LOGGER.warn("Schedule pool method uncaught exception", e);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
-
-		this.scheduledExecutor.shutdown();
-		try {
-			if (!this.scheduledExecutor.awaitTermination(timeout, unit))
-				this.scheduledExecutor.shutdownNow();
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
+//		this.schedulePoolFuture.cancel(true);
+//		try {
+//			this.schedulePoolFuture.get(timeout, unit);
+//		} catch (CancellationException | TimeoutException ignored) {
+//		} catch (ExecutionException e) {
+//			LOGGER.warn("Schedule pool method uncaught exception", e);
+//		} catch (InterruptedException e) {
+//			Thread.currentThread().interrupt();
+//		}
+//
+//		this.scheduledExecutor.shutdown();
+//		try {
+//			if (!this.scheduledExecutor.awaitTermination(timeout, unit))
+//				this.scheduledExecutor.shutdownNow();
+//		} catch (InterruptedException e) {
+//			Thread.currentThread().interrupt();
+//		}
 
 		this.poolExecutor.shutdown();
 		try {
@@ -95,6 +95,34 @@ public class AudioDecodePool {
 				this.poolExecutor.shutdownNow();
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
+		}
+	}
+
+	public static class DecodeTask {
+		private final AudioDecoder decoder;
+		private final ExecutorService executor;
+
+		protected DecodeTask(@NotNull AudioDecoder decoder, @NotNull ExecutorService executor) {
+			Objects.requireNonNull(decoder, "decoder is null");
+			Objects.requireNonNull(executor, "executor is null");
+			this.decoder = decoder;
+			this.executor = executor;
+
+			executor.
+		}
+	}
+
+	protected static class DecodeRunnable implements Runnable {
+private final AudioDecoder decoder;
+
+		protected DecodeRunnable(@NotNull AudioDecoder decoder) {
+			Objects.requireNonNull(decoder, "decoder is null");
+			this.decoder = decoder;
+		}
+
+		@Override
+		public void run() {
+
 		}
 	}
 
@@ -115,9 +143,5 @@ public class AudioDecodePool {
 			thread.setName("AudioDecode - " + this.id.getAndIncrement());
 			return thread;
 		}
-	}
-
-	public static class DecodeTask {
-
 	}
 }

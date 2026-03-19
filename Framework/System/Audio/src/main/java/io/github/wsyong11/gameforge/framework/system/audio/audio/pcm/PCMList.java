@@ -39,7 +39,9 @@ public interface PCMList extends PCMArray {
 	 * @throws NullPointerException     如果数组为 {@code null}
 	 * @throws IllegalArgumentException 如果数组长度不能构成完整帧
 	 */
-	int add(float @NotNull [] samples);
+	default int add(float @NotNull [] samples){
+		return this.add(samples, this.getFrames());
+	}
 
 	/**
 	 * 在指定帧位置插入 PCM 数据。
@@ -81,7 +83,9 @@ public interface PCMList extends PCMArray {
 	 * @throws NullPointerException     如果参数为 {@code null}
 	 * @throws IllegalArgumentException 如果通道数不一致
 	 */
-	int add(@NotNull PCMArray array);
+	default int add(@NotNull PCMArray array){
+		return this.add(array, this.getFrames());
+	}
 
 	/**
 	 * 在指定帧位置插入另一个 PCM 数据。
@@ -122,7 +126,9 @@ public interface PCMList extends PCMArray {
 	 * @param frame 帧索引
 	 * @throws IndexOutOfBoundsException 如果帧索引超出范围
 	 */
-	void remove(int frame);
+	default void remove(int frame){
+		this.remove(frame, 1);
+	}
 
 	/**
 	 * 删除指定范围的帧。
