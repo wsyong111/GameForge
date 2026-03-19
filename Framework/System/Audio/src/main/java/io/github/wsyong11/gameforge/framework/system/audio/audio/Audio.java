@@ -25,15 +25,11 @@ public interface Audio extends Closeable {
 	@NotNull
 	AudioMetadata getMetadata();
 
-
 	@NotNull
 	AudioStatus getStatus();
 
 	@NotNull
 	AudioStream newStream();
-
-	@NotNull
-	AudioStream openStreamingStream();
 
 	void registerStatusCallback(@NotNull StatusCallback callback);
 

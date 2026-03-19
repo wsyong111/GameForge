@@ -47,7 +47,7 @@ public interface PCMList extends PCMArray {
 	 * 在指定帧位置插入 PCM 数据。
 	 *
 	 * @param samples 源采样数组
-	 * @param frame   插入位置的帧索引
+	 * @param frame   插入位置的帧索引，可为 {@code frame == getFrames()}
 	 * @return 实际写入的帧数
 	 * @throws NullPointerException      如果数组为 {@code null}
 	 * @throws IndexOutOfBoundsException 如果帧索引超出范围
@@ -68,7 +68,7 @@ public interface PCMList extends PCMArray {
 	 * @param samples 源采样数组
 	 * @param offset  起始读取索引
 	 * @param length  写入的采样总数（非帧数）
-	 * @param frame   插入位置的帧索引
+	 * @param frame   插入位置的帧索引，可为 {@code frame == getFrames()}
 	 * @return 实际写入的帧数
 	 * @throws NullPointerException      如果数组为 {@code null}
 	 * @throws IndexOutOfBoundsException 如果索引或帧位置超出范围
@@ -91,7 +91,7 @@ public interface PCMList extends PCMArray {
 	 * 在指定帧位置插入另一个 PCM 数据。
 	 *
 	 * @param array 源 PCM 数据
-	 * @param frame 插入位置的帧索引
+	 * @param frame 插入位置的帧索引，可为 {@code frame == getFrames()}
 	 * @return 实际写入的帧数
 	 * @throws NullPointerException      如果参数为 {@code null}
 	 * @throws IndexOutOfBoundsException 如果帧索引超出范围
@@ -110,9 +110,9 @@ public interface PCMList extends PCMArray {
 	 * </p>
 	 *
 	 * @param array  源 PCM 数据
-	 * @param offset 起始帧索引
-	 * @param length 写入的帧数
-	 * @param frame  插入位置的帧索引
+	 * @param offset 起始帧索引（帧）
+	 * @param length 写入的帧数（帧）
+	 * @param frame  插入位置的帧索引，可为 {@code frame == getFrames()}
 	 * @return 实际写入的帧数
 	 * @throws NullPointerException      如果参数为 {@code null}
 	 * @throws IndexOutOfBoundsException 如果索引超出范围
@@ -126,8 +126,8 @@ public interface PCMList extends PCMArray {
 	 * @param frame 帧索引
 	 * @throws IndexOutOfBoundsException 如果帧索引超出范围
 	 */
-	default void remove(int frame){
-		this.remove(frame, 1);
+	default int remove(int frame) {
+		return this.remove(frame, 1);
 	}
 
 	/**
@@ -137,7 +137,7 @@ public interface PCMList extends PCMArray {
 	 * @param length 删除的帧数
 	 * @throws IndexOutOfBoundsException 如果范围超出有效区间
 	 */
-	void remove(int frame, int length);
+	int remove(int frame, int length);
 
 	default int getAndRemove(float @NotNull [] dest, int frame) {
 		Objects.requireNonNull(dest, "dest is null");

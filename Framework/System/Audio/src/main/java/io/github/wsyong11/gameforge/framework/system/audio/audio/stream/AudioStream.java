@@ -1,10 +1,10 @@
 package io.github.wsyong11.gameforge.framework.system.audio.audio.stream;
 
 import io.github.wsyong11.gameforge.framework.system.audio.audio.Audio;
+import io.github.wsyong11.gameforge.framework.system.audio.audio.ex.AudioDecodeException;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 
 public interface AudioStream extends Closeable {
@@ -22,7 +22,7 @@ public interface AudioStream extends Closeable {
 
 	void reset();
 
-	int read(@NotNull ByteBuffer buffer, int maxSamples) throws IOException;
+	int read(@NotNull ByteBuffer buffer, int maxSamples) throws AudioDecodeException;
 
 	@Override
 	void close();

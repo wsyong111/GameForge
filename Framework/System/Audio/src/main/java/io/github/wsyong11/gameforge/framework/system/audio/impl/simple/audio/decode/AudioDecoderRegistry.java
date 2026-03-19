@@ -1,4 +1,4 @@
-package io.github.wsyong11.gameforge.framework.system.audio.impl.simple.audio;
+package io.github.wsyong11.gameforge.framework.system.audio.impl.simple.audio.decode;
 
 import io.github.wsyong11.gameforge.framework.mime.MimeType;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.AudioDecodeHint;

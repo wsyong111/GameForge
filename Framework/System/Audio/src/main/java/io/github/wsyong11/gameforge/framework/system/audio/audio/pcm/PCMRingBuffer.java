@@ -2,13 +2,14 @@ package io.github.wsyong11.gameforge.framework.system.audio.audio.pcm;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 
 // TODO: 2026/3/17 Impl
 public class PCMRingBuffer extends AbstractPCMArray implements PCMList {
+	private static final int MAX_DEFAULT_INITIAL_SIZE = 1024 * 16; // 16KiB
+	private static final int DEFAULT_LOCK_PRE_ELEMENT = 8;
+
 	private final int capacity;
 	private final int sampleRate;
 	private final int channels;
@@ -18,6 +19,16 @@ public class PCMRingBuffer extends AbstractPCMArray implements PCMList {
 	private volatile int tail;
 
 	private final ReentrantLock[] locks;
+
+//	public PCMRingBuffer(int capacity, int sampleRate, int channels) {
+//		this(
+//			capacity,
+//			Math.min(capacity / 2, MAX_DEFAULT_INITIAL_SIZE),
+//			capacity / DEFAULT_LOCK_PRE_ELEMENT,
+//			sampleRate,
+//			channels
+//		);
+//	}
 
 	public PCMRingBuffer(int capacity, int initialCapacity, int lockCount, int sampleRate, int channels) {
 		if (capacity <= 0)
@@ -81,8 +92,8 @@ public class PCMRingBuffer extends AbstractPCMArray implements PCMList {
 	}
 
 	@Override
-	public void remove(int frame, int length) {
-
+	public int remove(int frame, int length) {
+		return 0;
 	}
 
 	@Override

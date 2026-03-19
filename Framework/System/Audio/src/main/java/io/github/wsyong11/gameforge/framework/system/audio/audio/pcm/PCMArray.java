@@ -138,7 +138,7 @@ public interface PCMArray {
 	 * </p>
 	 *
 	 * @param array  目标数组
-	 * @param offset  起始写入索引
+	 * @param offset 起始写入索引
 	 * @param length 读取的采样总数（非帧数）
 	 * @param frame  起始帧索引
 	 * @return 实际读取的帧数
@@ -195,7 +195,7 @@ public interface PCMArray {
 	 * </p>
 	 *
 	 * @param array  源数组
-	 * @param offset  起始读取索引
+	 * @param offset 起始读取索引
 	 * @param length 写入的采样总数（非帧数）
 	 * @param frame  起始帧索引
 	 * @return 实际写入的帧数
@@ -337,18 +337,25 @@ public interface PCMArray {
 	/**
 	 * 将 PCM 数据写入指定数组。
 	 * <p>
-	 * 从起始帧 0 开始按帧顺序写入，最多填充数组容量。
+	 * 从起始帧 0 开始按帧顺序写入 PCM 数据，最多写入数组容量。
+	 * 如果数组长度小于 PCM 数据总样本数，将创建一个新数组并返回。
 	 * </p>
 	 *
-	 * @param a 目标数组
-	 * @return 写入后的数组（即参数本身）
-	 * @throws NullPointerException 如果数组为 {@code null}
+	 * @param a 目标数组，不能为 {@code null}
+	 * @return 包含 PCM 数据的数组。如果传入数组长度足够，返回 {@code a}；否则返回新创建的数组
+	 * @throws NullPointerException 如果 {@code a} 为 {@code null}
 	 */
 	default float[] toArray(float[] a) {
 		Objects.requireNonNull(a, "a is null");
 
-		this.getFrame(a, 0, a.length, 0);
-		return a;
+		int samples = this.getSamples();
+
+		float[] array = a.length < samples
+			? new float[samples]
+			: a;
+
+		this.getFrame(array, 0, samples, 0);
+		return array;
 	}
 
 	/**
@@ -360,7 +367,10 @@ public interface PCMArray {
 	 * @return 包含全部 PCM 数据的新数组
 	 */
 	default float[] toArray() {
-		return this.toArray(new float[this.getSamples()]);
+		int samples = this.getSamples();
+		float[] array = new float[samples];
+		this.getFrame(array, 0, samples, 0);
+		return array;
 	}
 
 	/**

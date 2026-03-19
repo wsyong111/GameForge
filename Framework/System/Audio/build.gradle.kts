@@ -12,3 +12,6 @@ dependencies {
 	implementation(project(":Framework:Mime"))
 	implementation(project(":Framework:System:Resource"))
 }
+
+junit()
+
