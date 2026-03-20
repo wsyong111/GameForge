@@ -172,7 +172,7 @@ public class OggAudioDecoder extends AbstractAudioDecoder {
 		this.ensureDecoder();
 
 		int maxSamples = maxFrame * this.channels;
-		if (maxSamples > buffer.capacity())
+		if (maxSamples > buffer.remaining())
 			throw new IndexOutOfBoundsException("Float buffer cannot accommodate " + maxSamples + ", capacity=" + buffer.capacity());
 
 		float[] temp = new float[maxSamples];

@@ -10,6 +10,7 @@ import io.github.wsyong11.gameforge.framework.system.audio.audio.stream.AudioStr
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.util.Objects;
 
 public class DecodeContextAudio implements Audio {
@@ -90,7 +91,26 @@ public class DecodeContextAudio implements Audio {
 		@NotNull
 		@Override
 		public AudioStreamStatus getStatus() {
-			return null;
+			DecodeContext.DecodeState decodeState = this.context.getDecodeState();
+			if (decodeState == DecodeContext.DecodeState.FAILED)
+				return AudioStreamStatus.ERROR;
+
+			if (decodeState == DecodeContext.DecodeState.COMPLETE) {
+				AudioMetadata metadata = this.context.getMetadata();
+				long totalFrames = metadata.getTotalFrames();
+				if (totalFrames != -1 && this.position >= totalFrames)
+					return AudioStreamStatus.FINISHED;
+
+				return AudioStreamStatus.PLAYABLE;
+			}
+
+			if (decodeState == DecodeContext.DecodeState.IDLE)
+				return AudioStreamStatus.PLAYABLE;
+
+			if (decodeState == DecodeContext.DecodeState.DECODING)
+				return AudioStreamStatus.BUFFERING;
+
+			return AudioStreamStatus.READY;
 		}
 
 		@Override
@@ -100,15 +120,19 @@ public class DecodeContextAudio implements Audio {
 
 		@Override
 		public long getAvailable() {
-			return 0;
+			return Math.max(0, this.context.getBufferSize() - this.position);
 		}
 
 		@Override
-		public void seek(long frame) throws UnsupportedOperationException {
-			if (frame > Integer.MAX_VALUE)
-				throw new IllegalArgumentException("Sample index is too big");
+		public void seek(long frame) throws AudioDecodeException {
+			this.context.checkDecodeException();
 
-			this.position = (int) frame;
+			if (frame > Integer.MAX_VALUE)
+				throw new IllegalArgumentException("Frame index is too big");
+
+			int pos = (int) frame;
+			this.context.requireData(pos);
+			this.position = pos;
 		}
 
 		@Override
@@ -122,8 +146,22 @@ public class DecodeContextAudio implements Audio {
 		}
 
 		@Override
-		public int read(@NotNull ByteBuffer buffer, int maxSamples) throws AudioDecodeException {
-			return 0;
+		public int read(@NotNull FloatBuffer buffer, int maxFrames) throws AudioDecodeException {
+			Objects.requireNonNull(buffer, "buffer is null");
+
+			int read;
+			try {
+				read = this.context.readData(this.position, buffer, maxFrames);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				throw new AudioDecodeException("Thread interrupted", e);
+			}
+
+			if (read == -1)
+				return -1;
+
+			this.position += read;
+			return read;
 		}
 
 		@Override

@@ -10,12 +10,15 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @UtilityClass
 public class LogTemplate {
 	private static final TemplateValueProvider NULL_PROVIDER = () -> null;
+
+	private static final String[] TIME_UNITS = {"ns", "µs", "ms", "S"};
 
 	@NotNull
 	public static TemplateValueProvider lazy(@NotNull TemplateValueProvider supplier) {
@@ -57,6 +60,23 @@ public class LogTemplate {
 	@NotNull
 	public static TemplateValueProvider oct(long value) {
 		return () -> "0o" + Long.toOctalString(value);
+	}
+
+	@NotNull
+	public static TemplateValueProvider formatTime(long time, @Nullable TimeUnit unit) {
+		if (unit == null)
+			return () -> time + "<unknown unit>";
+
+		return () -> {
+			float value = unit.toNanos(time);
+			int index = 0;
+			while (value > 1000 || index > TIME_UNITS.length) {
+				value /= 1000.0F;
+				index++;
+			}
+
+			return "%.2f%s".formatted(value, TIME_UNITS[index]);
+		};
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //

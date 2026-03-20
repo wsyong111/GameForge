@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.Closeable;
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 
 public interface AudioStream extends Closeable {
 	@NotNull
@@ -18,7 +19,7 @@ public interface AudioStream extends Closeable {
 
 	long getAvailable();
 
-	default void seek(long frame) {
+	default void seek(long frame) throws AudioDecodeException {
 		throw new UnsupportedOperationException();
 	}
 
@@ -26,7 +27,7 @@ public interface AudioStream extends Closeable {
 		return false;
 	}
 
-	int read(@NotNull ByteBuffer buffer, int maxSamples) throws AudioDecodeException;
+	int read(@NotNull FloatBuffer buffer, int maxFrames) throws AudioDecodeException;
 
 	void reset();
 

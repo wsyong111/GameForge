@@ -3,6 +3,7 @@ package io.github.wsyong11.gameforge.framework.system.audio.audio.pcm;
 import it.unimi.dsi.fastutil.floats.FloatArrays;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.FloatBuffer;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -101,6 +102,44 @@ public class PCMArrayList extends AbstractPCMArray implements PCMList {
 		this.size += usableLength;
 
 		return framesToAdd;
+	}
+
+	@Override
+	public int add(@NotNull FloatBuffer src, int length, int frame) {
+		Objects.requireNonNull(src, "src is null");
+
+		int currentFrames = this.getFrames();
+		if (frame < 0 || frame > currentFrames)
+			throw new IndexOutOfBoundsException("Frame index out of bounds: " + frame);
+
+		if (length <= 0)
+			return 0;
+
+		int remainingFrame = src.remaining() / this.channels;
+		if (remainingFrame == 0)
+			return 0;
+
+		int maxAvailableFrames = this.maxCapacity - currentFrames;
+		int framesToAdd = Math.min(Math.min(remainingFrame, length), maxAvailableFrames);
+		this.ensureCapacity(this.size + framesToAdd);
+
+		int usableLength = framesToAdd * this.channels;
+		int insertIndex = frame * this.channels;
+		int tailLength = this.size - insertIndex;
+
+		// 移动尾部数据
+		if (tailLength > 0)
+			System.arraycopy(
+				this.array, insertIndex,
+				this.array, insertIndex + usableLength,
+				tailLength
+			);
+
+		// 插入新样本
+		src.get(this.array, insertIndex, usableLength);
+		this.size += usableLength;
+
+		return 0;
 	}
 
 	@Override

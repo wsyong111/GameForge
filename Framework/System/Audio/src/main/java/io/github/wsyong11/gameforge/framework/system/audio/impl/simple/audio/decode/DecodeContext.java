@@ -11,7 +11,10 @@ import io.github.wsyong11.gameforge.framework.system.audio.audio.pcm.PCMList;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.util.concurrent.TaskHandler;
+import io.github.wsyong11.gameforge.util.concurrent.signal.Notifier;
+import io.github.wsyong11.gameforge.util.concurrent.signal.ValueNotifier;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -21,12 +24,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.*;
+import java.util.concurrent.locks.LockSupport;
+
+import static io.github.wsyong11.gameforge.framework.system.log.LogTemplate.formatTime;
 
 public class DecodeContext implements Closeable, Comparable<DecodeContext>, Runnable {
 	private static final Logger LOGGER = Log.getLogger();
 
 	private static final int DECODE_CHUNK_SIZE_SEC = 2;
-	private static final long BUFFER_SIZE_WAIT_TIMEOUT = 1000 * 10;
+	private static final long BUFFER_SIZE_WAIT_TIMEOUT = 1000 * 5;
 
 	private final ExecutorService pool;
 	private final TaskHandler taskHandler;
@@ -37,17 +43,17 @@ public class DecodeContext implements Closeable, Comparable<DecodeContext>, Runn
 
 	private final List<Audio.StatusCallback> callbacks;
 
-	private final Object bufferMoreDataSignal;
-	private final Object requireBufferSizeUpdateSignal;
+	private final Notifier bufferMoreDataSignal;
 	private volatile PCMList buffer;
 	private volatile FloatBuffer pcmBuffer;
-	private volatile int requireBufferSizeFrame;
+	private final Object bufferLock;
+	private final ValueNotifier<Integer> requireBufferSizeFrame;
 	private volatile DecodeState decodeState;
 	private volatile AudioMetadata metadata;
 
 	private volatile AudioStatus status;
 
-	private volatile CompletableFuture<?> activeFuture;
+	private volatile Future<?> activeFuture;
 
 	public DecodeContext(
 		@NotNull ExecutorService pool,
@@ -72,11 +78,11 @@ public class DecodeContext implements Closeable, Comparable<DecodeContext>, Runn
 
 		this.callbacks = new ArrayList<>();
 
-		this.bufferMoreDataSignal = new Object();
-		this.requireBufferSizeUpdateSignal = new Object();
+		this.bufferMoreDataSignal = new Notifier();
 		this.buffer = null;
 		this.pcmBuffer = null;
-		this.requireBufferSizeFrame = 0;
+		this.bufferLock = new Object();
+		this.requireBufferSizeFrame = new ValueNotifier<>(0);
 		this.decodeState = DecodeState.IDLE;
 		this.metadata = null;
 
@@ -104,6 +110,34 @@ public class DecodeContext implements Closeable, Comparable<DecodeContext>, Runn
 		return this.status;
 	}
 
+	@NotNull
+	public DecodeState getDecodeState() {
+		return this.decodeState;
+	}
+
+	@Nullable
+	public AudioDecodeException getLastDecodeException() {
+		if (this.activeFuture == null || !this.activeFuture.isDone())
+			return null;
+
+		try {
+			this.activeFuture.get();
+		} catch (ExecutionException e) {
+			Throwable cause = e.getCause();
+			if (cause instanceof AudioDecodeException ex)
+				return ex;
+			return new AudioDecodeException(cause);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
+
+		return null;
+	}
+
+	public int getBufferSize() {
+		return this.buffer.getFrames();
+	}
+
 	// -------------------------------------------------------------------------------------------------------------- //
 
 	@NotNull
@@ -126,10 +160,10 @@ public class DecodeContext implements Closeable, Comparable<DecodeContext>, Runn
 	// -------------------------------------------------------------------------------------------------------------- //
 
 	private synchronized void schedule() {
-		if (this.activeFuture != null && !this.activeFuture.isDone() && !this.activeFuture.isCompletedExceptionally())
+		if (this.decodeState == DecodeState.FAILED || (this.activeFuture != null && !this.activeFuture.isDone()))
 			return;
 
-		this.activeFuture = CompletableFuture.runAsync(this, this.pool);
+		this.activeFuture = this.pool.submit(this);
 	}
 
 	public void preload() {
@@ -155,22 +189,24 @@ public class DecodeContext implements Closeable, Comparable<DecodeContext>, Runn
 			return;
 		}
 
-		int sampleRate = this.metadata.getFrameRate();
+		int frameRate = this.metadata.getFrameRate();
 		int channels = this.metadata.getChannels();
-		this.buffer = new PCMArrayList(sampleRate, channels);
+		this.buffer = new PCMArrayList(frameRate, channels);
 
 		this.updateStatus(AudioStatus.READY);
+		LOGGER.trace("[{}] Success to decode metadata", this.identifier);
 	}
 
-	private void doDecode() {
+	private void doDecode() throws AudioDecodeException {
 		if (this.decodeState != DecodeState.IDLE)
 			return;
 
 		assert this.metadata != null;
 
+		int channels = this.metadata.getChannels();
+
 		FloatBuffer tempBuf;
 		if (this.pcmBuffer == null) {
-			int channels = this.metadata.getChannels();
 			int sampleRate = this.metadata.getSampleRate();
 			int bufSize = sampleRate * channels * DECODE_CHUNK_SIZE_SEC;
 			tempBuf = FloatBuffer.wrap(new float[bufSize]);
@@ -182,47 +218,56 @@ public class DecodeContext implements Closeable, Comparable<DecodeContext>, Runn
 		this.decodeState = DecodeState.DECODING;
 
 		while (!Thread.currentThread().isInterrupted()) {
-			synchronized (this.requireBufferSizeUpdateSignal) {
-				while (this.buffer.getFrames() >= this.requireBufferSizeFrame) {
-					try {
-						if (!this.requireBufferSizeUpdateSignal.wait(BUFFER_SIZE_WAIT_TIMEOUT)) {
-							// 超时后没人需要更多数据，退出循环
-							break;
-						}
-					} catch (InterruptedException e) {
-						Thread.currentThread().interrupt();
-						break;
-					}
+			LOGGER.verbose("[{}] Waiting decode request", this.identifier);
+			try {
+				if (!this.requireBufferSizeFrame.awaitUntil(
+					(size) -> this.buffer.getFrames() < size,
+					BUFFER_SIZE_WAIT_TIMEOUT,
+					TimeUnit.MILLISECONDS
+				)) {
+					this.decodeState = DecodeState.IDLE;
+					break;
 				}
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				this.decodeState = DecodeState.IDLE;
+				break;
 			}
 
+			long startTime = System.nanoTime();
+			LOGGER.verbose("[{}] Begin decode", this.identifier);
 			tempBuf.clear();
 
 			int len;
 			try {
-				len = this.decoder.decode(tempBuf, tempBuf.remaining());
+				len = this.decoder.decode(tempBuf, tempBuf.remaining() / channels);
 			} catch (AudioDecodeException e) {
 				LOGGER.error("Failed to decode pcm data", e);
 				this.decodeState = DecodeState.FAILED;
 				this.status = AudioStatus.FAILED;
-				break;
+				throw e;
 			}
 
 			if (len == -1) {
 				this.decodeState = DecodeState.COMPLETE;
+				this.buffer.trim();
+				this.pcmBuffer = null;
 				break;
 			}
 
 			tempBuf.flip();
-			this.buffer.add(tempBuf);
-
-			synchronized (this.bufferMoreDataSignal) {
-				this.bufferMoreDataSignal.notifyAll();
+			synchronized (this.bufferLock) {
+				this.buffer.add(tempBuf);
 			}
+
+			this.bufferMoreDataSignal.signal();
+
+			long usedTime = System.nanoTime() - startTime;
+			LOGGER.verbose("[{}] Decoded {} frames, took {}", this.identifier, len, formatTime(usedTime, TimeUnit.NANOSECONDS));
 		}
 	}
 
-	private void runDecode() {
+	private void runDecode() throws AudioDecodeException {
 		if (this.status == AudioStatus.FAILED)
 			return;
 
@@ -234,11 +279,71 @@ public class DecodeContext implements Closeable, Comparable<DecodeContext>, Runn
 
 	@Override
 	public void run() {
+		LOGGER.trace("[{}] Start decode task", this.identifier);
 		try {
 			this.runDecode();
 		} catch (Throwable e) {
+			LOGGER.error("Exception in decoding {}", this.identifier, e);
 			this.updateStatus(AudioStatus.FAILED);
-			throw e;
+			throw new CompletionException(e);
+		} finally {
+			LOGGER.trace("[{}] Decode task exited", this.identifier);
+		}
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	public void checkAudioStatus() {
+		if (this.status == AudioStatus.LOADING || this.status == AudioStatus.CLOSED)
+			throw new IllegalStateException("Audio metadata not decoded or audio context closed");
+	}
+
+	public void checkDecodeException() throws AudioDecodeException {
+		if (this.decodeState != DecodeState.FAILED)
+			return;
+
+		AudioDecodeException exception = this.getLastDecodeException();
+		if (exception == null)
+			throw new AudioDecodeException("Unknown exception");
+
+		throw exception;
+	}
+
+	public void requireData(int position) throws AudioDecodeException {
+		this.checkAudioStatus();
+		this.checkDecodeException();
+
+		if (this.decodeState == DecodeState.COMPLETE)
+			return;
+
+		this.schedule();
+		this.requireBufferSizeFrame.update(v -> Math.max(v, position));
+	}
+
+	public int readData(int position, @NotNull FloatBuffer buffer, int maxFrames) throws AudioDecodeException, InterruptedException {
+		Objects.requireNonNull(buffer, "buffer is null");
+
+		this.checkAudioStatus();
+		this.checkDecodeException();
+
+		if (this.decodeState == DecodeState.COMPLETE && position >= this.buffer.getFrames())
+			return -1;
+
+		if (maxFrames <= 0)
+			return 0;
+
+		int bufferRemaining = buffer.remaining() / this.metadata.getChannels();
+		if (bufferRemaining == 0)
+			return 0;
+
+		int requireFrame = position + maxFrames;
+		this.requireData(requireFrame);
+
+		this.bufferMoreDataSignal.await(() ->
+			this.decodeState != DecodeState.COMPLETE && this.buffer.getFrames() >= requireFrame);
+
+		synchronized (this.bufferLock) {
+			return this.buffer.getFrame(buffer, position, maxFrames);
 		}
 	}
 
@@ -296,14 +401,16 @@ public class DecodeContext implements Closeable, Comparable<DecodeContext>, Runn
 			return;
 		this.updateStatus(AudioStatus.CLOSED);
 
-		this.activeFuture.cancel(true);
-		try {
-			this.activeFuture.get(5, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		} catch (ExecutionException | TimeoutException ignored) {
-		} finally {
-			this.activeFuture = null;
+		if (this.activeFuture != null) {
+			this.activeFuture.cancel(true);
+			try {
+				this.activeFuture.get(5, TimeUnit.SECONDS);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+			} catch (ExecutionException | TimeoutException | CancellationException ignored) {
+			} finally {
+				this.activeFuture = null;
+			}
 		}
 
 		try {

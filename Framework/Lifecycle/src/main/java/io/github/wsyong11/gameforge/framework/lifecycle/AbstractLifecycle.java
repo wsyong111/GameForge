@@ -4,7 +4,7 @@ import io.github.wsyong11.gameforge.framework.listener.ListenerList;
 import io.github.wsyong11.gameforge.framework.listener.ex.ListenerExceptionCallback;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
-import io.github.wsyong11.gameforge.util.concurrent.signal.Waiter;
+import io.github.wsyong11.gameforge.util.concurrent.signal.Notifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -14,14 +14,14 @@ public abstract class AbstractLifecycle implements Lifecycle {
 
 	private final ListenerList listeners;
 
-	private final Waiter stateChangeSignal;
+	private final Notifier stateChangeSignal;
 
 	private volatile LifecycleState state;
 
 	public AbstractLifecycle() {
 		this.listeners = ListenerList.sync();
 
-		this.stateChangeSignal = new Waiter();
+		this.stateChangeSignal = new Notifier();
 		this.state = LifecycleState.CREATED;
 	}
 

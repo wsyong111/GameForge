@@ -22,10 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.PriorityBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import static io.github.wsyong11.gameforge.framework.system.log.LogTemplate.className;
 
@@ -53,7 +50,8 @@ public class AudioDecodeManager implements AutoCloseable {
 			4,
 			10,
 			TimeUnit.SECONDS,
-			new LimitedCapacityBlockingQueue<>(new PriorityBlockingQueue<>(), 256)
+			new ArrayBlockingQueue<>(256)
+//			new LimitedCapacityBlockingQueue<>(new PriorityBlockingQueue<>(), 256)
 		);
 
 //		this.contextFutureMap = new IdentityHashMap<>();

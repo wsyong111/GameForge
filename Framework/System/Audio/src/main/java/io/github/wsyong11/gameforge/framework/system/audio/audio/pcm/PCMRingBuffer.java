@@ -2,6 +2,7 @@ package io.github.wsyong11.gameforge.framework.system.audio.audio.pcm;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.FloatBuffer;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -79,6 +80,11 @@ public class PCMRingBuffer extends AbstractPCMArray implements PCMList {
 		Objects.checkFromIndexSize(offset, length, samples.length);
 		this.checkBoundsFrame(frame);
 
+		return 0;
+	}
+
+	@Override
+	public int add(@NotNull FloatBuffer src, int length, int frame) {
 		return 0;
 	}
 
