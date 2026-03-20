@@ -2,6 +2,7 @@ package io.github.wsyong11.gameforge.framework.system.audio.audio.pcm;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.FloatBuffer;
 import java.util.Objects;
 
 /**
@@ -28,23 +29,32 @@ public interface PCMList extends PCMArray {
 		return this.getFrames() <= 0;
 	}
 
+	// -------------------------------------------------------------------------------------------------------------- //
+
 	/**
 	 * 在末尾追加 PCM 数据。
 	 * <p>
 	 * 数据按帧顺序写入，每帧内的采样值按通道顺序排列。
+	 * 如果提供的数据不足完整帧，则忽略末尾不完整部分。
 	 * </p>
 	 *
 	 * @param samples 源采样数组
 	 * @return 实际写入的帧数
 	 * @throws NullPointerException     如果数组为 {@code null}
 	 * @throws IllegalArgumentException 如果数组长度不能构成完整帧
+	 * @see #add(float[], int)
+	 * @see #add(float[], int, int, int)
 	 */
-	default int add(float @NotNull [] samples){
+	default int add(float @NotNull [] samples) {
 		return this.add(samples, this.getFrames());
 	}
 
 	/**
 	 * 在指定帧位置插入 PCM 数据。
+	 * <p>
+	 * 数据按帧顺序写入，每帧内的采样值按通道顺序排列。
+	 * 如果提供的数据不足完整帧，则忽略末尾不完整部分。
+	 * </p>
 	 *
 	 * @param samples 源采样数组
 	 * @param frame   插入位置的帧索引，可为 {@code frame == getFrames()}
@@ -52,6 +62,7 @@ public interface PCMList extends PCMArray {
 	 * @throws NullPointerException      如果数组为 {@code null}
 	 * @throws IndexOutOfBoundsException 如果帧索引超出范围
 	 * @throws IllegalArgumentException  如果数组长度不能构成完整帧
+	 * @see #add(float[])
 	 * @see #add(float[], int, int, int)
 	 */
 	default int add(float @NotNull [] samples, int frame) {
@@ -72,8 +83,71 @@ public interface PCMList extends PCMArray {
 	 * @return 实际写入的帧数
 	 * @throws NullPointerException      如果数组为 {@code null}
 	 * @throws IndexOutOfBoundsException 如果索引或帧位置超出范围
+	 * @see #add(float[])
+	 * @see #add(float[], int)
 	 */
 	int add(float @NotNull [] samples, int offset, int length, int frame);
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	/**
+	 * 在末尾追加 PCM 数据。
+	 * <p>
+	 * 数据按帧顺序写入，每帧内的采样值按通道顺序排列。
+	 * 如果提供的数据不足完整帧，则忽略末尾不完整部分。
+	 * </p>
+	 *
+	 * @param src 源 PCM 数据
+	 * @return 实际写入的帧数
+	 * @throws NullPointerException     如果参数为 {@code null}
+	 * @throws IllegalArgumentException 如果通道数不一致
+	 * @see #add(FloatBuffer, int)
+	 * @see #add(FloatBuffer, int, int)
+	 */
+	default int add(@NotNull FloatBuffer src) {
+		return this.add(src, this.getFrames());
+	}
+
+	/**
+	 * 在指定帧位置插入 PCM 数据。
+	 * <p>
+	 * 数据按帧顺序写入，每帧内的采样值按通道顺序排列。
+	 * 如果提供的数据不足完整帧，则忽略末尾不完整部分。
+	 * </p>
+	 *
+	 * @param src   源 PCM 数据
+	 * @param frame 插入位置的帧索引，可为 {@code frame == getFrames()}
+	 * @return 实际写入的帧数
+	 * @throws NullPointerException      如果参数为 {@code null}
+	 * @throws IndexOutOfBoundsException 如果帧索引超出范围
+	 * @throws IllegalArgumentException  如果通道数不一致
+	 * @see #add(FloatBuffer, int, int)
+	 * @see #add(FloatBuffer)
+	 */
+	default int add(@NotNull FloatBuffer src, int frame) {
+		Objects.requireNonNull(src, "src is null");
+		return this.add(src, src.remaining(), frame);
+	}
+
+	/**
+	 * 在指定帧位置插入 PCM 数据。
+	 * <p>
+	 * 数据按帧顺序写入，每帧内的采样值按通道顺序排列。
+	 * 如果提供的数据不足完整帧，则忽略末尾不完整部分。
+	 * </p>
+	 *
+	 * @param src    源 PCM 数据
+	 * @param length 写入的帧数（帧）
+	 * @param frame  插入位置的帧索引，可为 {@code frame == getFrames()}
+	 * @return 实际写入的帧数
+	 * @throws NullPointerException      如果参数为 {@code null}
+	 * @throws IndexOutOfBoundsException 如果索引超出范围
+	 * @see #add(FloatBuffer, int, int)
+	 * @see #add(FloatBuffer, int)
+	 */
+	int add(@NotNull FloatBuffer src, int length, int frame);
+
+	// -------------------------------------------------------------------------------------------------------------- //
 
 	/**
 	 * 在末尾追加另一个 PCM 数据。
@@ -82,8 +156,10 @@ public interface PCMList extends PCMArray {
 	 * @return 实际写入的帧数
 	 * @throws NullPointerException     如果参数为 {@code null}
 	 * @throws IllegalArgumentException 如果通道数不一致
+	 * @see #add(PCMArray, int, int, int)
+	 * @see #add(PCMArray, int)
 	 */
-	default int add(@NotNull PCMArray array){
+	default int add(@NotNull PCMArray array) {
 		return this.add(array, this.getFrames());
 	}
 
@@ -97,6 +173,7 @@ public interface PCMList extends PCMArray {
 	 * @throws IndexOutOfBoundsException 如果帧索引超出范围
 	 * @throws IllegalArgumentException  如果通道数不一致
 	 * @see #add(PCMArray, int, int, int)
+	 * @see #add(PCMArray)
 	 */
 	default int add(@NotNull PCMArray array, int frame) {
 		Objects.requireNonNull(array, "array is null");
@@ -104,10 +181,7 @@ public interface PCMList extends PCMArray {
 	}
 
 	/**
-	 * 在指定帧位置插入另一个 PCM 数据的子区间。
-	 * <p>
-	 * 数据按帧顺序写入，每帧内的采样值按通道顺序排列。
-	 * </p>
+	 * 在指定帧位置插入另一个 PCM 数据。
 	 *
 	 * @param array  源 PCM 数据
 	 * @param offset 起始帧索引（帧）
@@ -117,8 +191,12 @@ public interface PCMList extends PCMArray {
 	 * @throws NullPointerException      如果参数为 {@code null}
 	 * @throws IndexOutOfBoundsException 如果索引超出范围
 	 * @throws IllegalArgumentException  如果通道数不一致
+	 * @see #add(PCMArray, int)
+	 * @see #add(PCMArray)
 	 */
 	int add(@NotNull PCMArray array, int offset, int length, int frame);
+
+	// -------------------------------------------------------------------------------------------------------------- //
 
 	/**
 	 * 删除指定帧。
@@ -164,9 +242,6 @@ public interface PCMList extends PCMArray {
 
 	/**
 	 * 清空所有 PCM 数据。
-	 * <p>
-	 * 调用后帧数将变为 0。
-	 * </p>
 	 */
 	void clear();
 }

@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -23,6 +24,9 @@ import java.util.concurrent.*;
 
 public class DecodeContext implements Closeable, Comparable<DecodeContext>, Runnable {
 	private static final Logger LOGGER = Log.getLogger();
+
+	private static final int DECODE_CHUNK_SIZE_SEC = 2;
+	private static final long BUFFER_SIZE_WAIT_TIMEOUT = 1000 * 10;
 
 	private final ExecutorService pool;
 	private final TaskHandler taskHandler;
@@ -33,7 +37,12 @@ public class DecodeContext implements Closeable, Comparable<DecodeContext>, Runn
 
 	private final List<Audio.StatusCallback> callbacks;
 
+	private final Object bufferMoreDataSignal;
+	private final Object requireBufferSizeUpdateSignal;
 	private volatile PCMList buffer;
+	private volatile FloatBuffer pcmBuffer;
+	private volatile int requireBufferSizeFrame;
+	private volatile DecodeState decodeState;
 	private volatile AudioMetadata metadata;
 
 	private volatile AudioStatus status;
@@ -63,7 +72,12 @@ public class DecodeContext implements Closeable, Comparable<DecodeContext>, Runn
 
 		this.callbacks = new ArrayList<>();
 
+		this.bufferMoreDataSignal = new Object();
+		this.requireBufferSizeUpdateSignal = new Object();
 		this.buffer = null;
+		this.pcmBuffer = null;
+		this.requireBufferSizeFrame = 0;
+		this.decodeState = DecodeState.IDLE;
 		this.metadata = null;
 
 		this.status = AudioStatus.LOADING;
@@ -141,11 +155,71 @@ public class DecodeContext implements Closeable, Comparable<DecodeContext>, Runn
 			return;
 		}
 
-		int sampleRate = this.metadata.getSampleRate();
+		int sampleRate = this.metadata.getFrameRate();
 		int channels = this.metadata.getChannels();
 		this.buffer = new PCMArrayList(sampleRate, channels);
 
 		this.updateStatus(AudioStatus.READY);
+	}
+
+	private void doDecode() {
+		if (this.decodeState != DecodeState.IDLE)
+			return;
+
+		assert this.metadata != null;
+
+		FloatBuffer tempBuf;
+		if (this.pcmBuffer == null) {
+			int channels = this.metadata.getChannels();
+			int sampleRate = this.metadata.getSampleRate();
+			int bufSize = sampleRate * channels * DECODE_CHUNK_SIZE_SEC;
+			tempBuf = FloatBuffer.wrap(new float[bufSize]);
+			this.pcmBuffer = tempBuf;
+		} else {
+			tempBuf = this.pcmBuffer;
+		}
+
+		this.decodeState = DecodeState.DECODING;
+
+		while (!Thread.currentThread().isInterrupted()) {
+			synchronized (this.requireBufferSizeUpdateSignal) {
+				while (this.buffer.getFrames() >= this.requireBufferSizeFrame) {
+					try {
+						if (!this.requireBufferSizeUpdateSignal.wait(BUFFER_SIZE_WAIT_TIMEOUT)) {
+							// 超时后没人需要更多数据，退出循环
+							break;
+						}
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+						break;
+					}
+				}
+			}
+
+			tempBuf.clear();
+
+			int len;
+			try {
+				len = this.decoder.decode(tempBuf, tempBuf.remaining());
+			} catch (AudioDecodeException e) {
+				LOGGER.error("Failed to decode pcm data", e);
+				this.decodeState = DecodeState.FAILED;
+				this.status = AudioStatus.FAILED;
+				break;
+			}
+
+			if (len == -1) {
+				this.decodeState = DecodeState.COMPLETE;
+				break;
+			}
+
+			tempBuf.flip();
+			this.buffer.add(tempBuf);
+
+			synchronized (this.bufferMoreDataSignal) {
+				this.bufferMoreDataSignal.notifyAll();
+			}
+		}
 	}
 
 	private void runDecode() {
@@ -155,9 +229,7 @@ public class DecodeContext implements Closeable, Comparable<DecodeContext>, Runn
 		if (this.status == AudioStatus.LOADING)
 			this.loadMetadata();
 
-		while (!Thread.currentThread().isInterrupted()) {
-
-		}
+		this.doDecode();
 	}
 
 	@Override
@@ -247,5 +319,12 @@ public class DecodeContext implements Closeable, Comparable<DecodeContext>, Runn
 			this.metadata = null;
 			this.buffer = null;
 		}
+	}
+
+	public enum DecodeState {
+		IDLE,
+		DECODING,
+		COMPLETE,
+		FAILED
 	}
 }

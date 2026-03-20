@@ -2,8 +2,8 @@ package io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.ogg;
 
 import io.github.wsyong11.gameforge.framework.system.audio.audio.AudioMetadata;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.AbstractAudioDecoder;
-import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.SimpleAudioMetadata;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.AudioDecodeHint;
+import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.SimpleAudioMetadata;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.ex.AudioDecodeException;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.ex.AudioDecodeIOException;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.ex.AudioDecoderClosedException;
@@ -34,9 +34,9 @@ public class OggAudioDecoder extends AbstractAudioDecoder {
 	private static final int MAX_DATA_SIZE = (Integer.MAX_VALUE - 8) / 2;  // (MAX_INT - Array overhead) / 2
 	private static final int DATA_CHUNK_SIZE = 1024 * 32; // 32KiB
 
-	private int totalSamples;
+	private int totalFrames;
 	private int channels;
-	private int sampleRate;
+	private int frameRate;
 
 	private ByteBuffer dataBuffer;
 
@@ -48,9 +48,9 @@ public class OggAudioDecoder extends AbstractAudioDecoder {
 	public OggAudioDecoder(@NotNull DecodeInfo info) {
 		super(info);
 
-		this.totalSamples = 0;
+		this.totalFrames = 0;
 		this.channels = 0;
-		this.sampleRate = 0;
+		this.frameRate = 0;
 
 		this.dataBuffer = null;
 
@@ -97,13 +97,14 @@ public class OggAudioDecoder extends AbstractAudioDecoder {
 			if (this.decoderHandler == NULL)
 				throw new AudioDecodeException("Failed to open stb vorbis decoder: " + errorBuf.get());
 
-			this.totalSamples = stb_vorbis_stream_length_in_samples(this.decoderHandler);
-
 			STBVorbisInfo vorbisInfo = STBVorbisInfo.malloc(stack);
 			stb_vorbis_get_info(this.decoderHandler, vorbisInfo);
 
 			this.channels = vorbisInfo.channels();
-			this.sampleRate = vorbisInfo.sample_rate();
+			this.frameRate = vorbisInfo.sample_rate();
+
+			int sampleLength = stb_vorbis_stream_length_in_samples(this.decoderHandler);
+			this.totalFrames = sampleLength / this.channels;
 		}
 	}
 
@@ -143,7 +144,12 @@ public class OggAudioDecoder extends AbstractAudioDecoder {
 				}
 			}
 
-			this.metadata = new SimpleAudioMetadata(this.sampleRate, this.channels, this.totalSamples, comments);
+			this.metadata = new SimpleAudioMetadata(
+				this.frameRate,
+				this.channels,
+				this.totalFrames,
+				comments
+			);
 		}
 	}
 

@@ -94,21 +94,26 @@ public class DecodeContextAudio implements Audio {
 		}
 
 		@Override
-		public long getPositionSamples() {
+		public long getPosition() {
 			return this.position;
 		}
 
 		@Override
-		public long getAvailableSamples() {
+		public long getAvailable() {
 			return 0;
 		}
 
 		@Override
-		public void seek(long sampleIndex) throws UnsupportedOperationException {
-			if (sampleIndex > Integer.MAX_VALUE)
+		public void seek(long frame) throws UnsupportedOperationException {
+			if (frame > Integer.MAX_VALUE)
 				throw new IllegalArgumentException("Sample index is too big");
 
-			this.position = (int) sampleIndex;
+			this.position = (int) frame;
+		}
+
+		@Override
+		public boolean isSeekSupport() {
+			return true;
 		}
 
 		@Override

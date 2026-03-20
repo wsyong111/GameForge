@@ -14,15 +14,21 @@ public interface AudioStream extends Closeable {
 	@NotNull
 	AudioStreamStatus getStatus();
 
-	long getPositionSamples();
+	long getPosition();
 
-	long getAvailableSamples();
+	long getAvailable();
 
-	void seek(long sampleIndex) throws UnsupportedOperationException;
+	default void seek(long frame) {
+		throw new UnsupportedOperationException();
+	}
 
-	void reset();
+	default boolean isSeekSupport() {
+		return false;
+	}
 
 	int read(@NotNull ByteBuffer buffer, int maxSamples) throws AudioDecodeException;
+
+	void reset();
 
 	@Override
 	void close();

@@ -14,32 +14,32 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class SimpleAudioMetadata implements AudioMetadata {
-	private final int sampleRate;
+	private final int frameRate;
 	private final int channels;
-	private final long totalSamples;
+	private final long totalFrames;
 
 	private final Map<String, String> comments;
 	private final Map<Key<?>, Object> parsedCommentCache;
 
 	public SimpleAudioMetadata(
-		int sampleRate,
+		int frameRate,
 		int channels,
-		long totalSamples,
+		long totalFrames,
 		@NotNull Map<String, String> comments
 	) {
 		Objects.requireNonNull(comments, "comments is null");
 
-		this.sampleRate = sampleRate;
+		this.frameRate = frameRate;
 		this.channels = channels;
-		this.totalSamples = totalSamples;
+		this.totalFrames = totalFrames;
 		this.comments = Map.copyOf(comments);
 
 		this.parsedCommentCache = new ConcurrentHashMap<>();
 	}
 
 	@Override
-	public int getSampleRate() {
-		return this.sampleRate;
+	public int getFrameRate() {
+		return this.frameRate;
 	}
 
 	@Override
@@ -49,7 +49,7 @@ public class SimpleAudioMetadata implements AudioMetadata {
 
 	@Override
 	public long getTotalFrames() {
-		return this.totalSamples;
+		return this.totalFrames;
 	}
 
 	@NotNull
@@ -91,9 +91,9 @@ public class SimpleAudioMetadata implements AudioMetadata {
 			.collect(Collectors.joining(", "));
 
 		return "AudioMetadata{"
-			+ "sampleRate=" + (this.sampleRate / 1000) + "K, "
+			+ "frameRate=" + (this.frameRate / 1000) + "K, "
 			+ "channels=" + this.channels + ", "
-			+ "totalSamples=" + this.totalSamples + ", "
+			+ "totalFrames=" + this.totalFrames + ", "
 			+ "comments={" + comments + "}}";
 	}
 }

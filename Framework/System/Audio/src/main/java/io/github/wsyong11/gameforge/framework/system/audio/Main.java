@@ -99,7 +99,7 @@ public class Main {
 //				AudioMetadata metadata = decoder.getMetadata();
 //				System.out.println(metadata);
 //
-//				int sampleRate = metadata.getSampleRate();
+//				int sampleRate = metadata.getFrameRate();
 //				int channels = metadata.getChannels();
 //				long totalSamples = metadata.getTotalFrames();
 //
