@@ -8,20 +8,20 @@ import java.util.Objects;
 public class FloatBufferPCMArray extends AbstractPCMArray {
 	private final FloatBuffer buffer;
 	private final int channels;
-	private final int sampleRate;
+	private final int frameRate;
 
-	public FloatBufferPCMArray(@NotNull FloatBuffer buffer, int channels, int sampleRate) {
+	public FloatBufferPCMArray(@NotNull FloatBuffer buffer, int channels, int frameRate) {
 		Objects.requireNonNull(buffer, "buffer is null");
 
 		if (channels <= 0)
 			throw new IllegalArgumentException("Channel count cannot be zero or negative");
 
-		if (sampleRate <= 0)
+		if (frameRate <= 0)
 			throw new IllegalArgumentException("Sample rate cannot be zero or negative");
 
 		this.buffer = buffer.slice();
 		this.channels = channels;
-		this.sampleRate = sampleRate;
+		this.frameRate = frameRate;
 	}
 
 	@Override
@@ -30,8 +30,8 @@ public class FloatBufferPCMArray extends AbstractPCMArray {
 	}
 
 	@Override
-	public int getSampleRate() {
-		return this.sampleRate;
+	public int getFrameRate() {
+		return this.frameRate;
 	}
 
 	@Override

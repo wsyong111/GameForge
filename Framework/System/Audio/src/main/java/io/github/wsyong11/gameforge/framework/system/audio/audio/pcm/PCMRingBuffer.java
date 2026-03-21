@@ -113,7 +113,7 @@ public class PCMRingBuffer extends AbstractPCMArray implements PCMList {
 	}
 
 	@Override
-	public int getSampleRate() {
+	public int getFrameRate() {
 		return this.sampleRate;
 	}
 

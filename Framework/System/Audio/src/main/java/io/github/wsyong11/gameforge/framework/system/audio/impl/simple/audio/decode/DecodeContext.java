@@ -6,29 +6,25 @@ import io.github.wsyong11.gameforge.framework.system.audio.audio.AudioMetadata;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.AudioStatus;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.AudioDecoder;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.ex.AudioDecodeException;
-import io.github.wsyong11.gameforge.framework.system.audio.audio.pcm.PCMArrayList;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.pcm.PCMList;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
+import io.github.wsyong11.gameforge.util.concurrent.FutureUtils;
 import io.github.wsyong11.gameforge.util.concurrent.TaskHandler;
-import io.github.wsyong11.gameforge.util.concurrent.signal.Notifier;
-import io.github.wsyong11.gameforge.util.concurrent.signal.ValueNotifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.*;
-import java.util.concurrent.locks.LockSupport;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 
-import static io.github.wsyong11.gameforge.framework.system.log.LogTemplate.formatTime;
-
-public class DecodeContext implements Closeable, Comparable<DecodeContext>, Runnable {
+public class DecodeContext implements Closeable, Comparable<DecodeContext> {
 	private static final Logger LOGGER = Log.getLogger();
 
 	private static final int DECODE_CHUNK_SIZE_SEC = 2;
@@ -41,19 +37,13 @@ public class DecodeContext implements Closeable, Comparable<DecodeContext>, Runn
 	private final int priority;
 	private final InputStream stream;
 
-	private final List<Audio.StatusCallback> callbacks;
-
-	private final Notifier bufferMoreDataSignal;
-	private volatile PCMList buffer;
-	private volatile FloatBuffer pcmBuffer;
-	private final Object bufferLock;
-	private final ValueNotifier<Integer> requireBufferSizeFrame;
-	private volatile DecodeState decodeState;
 	private volatile AudioMetadata metadata;
+	private volatile Future<?> decodeMetadataFuture;
+	private volatile DecodeTask decodeTask;
+	private volatile Future<?> lastDecodeFuture;
 
-	private volatile AudioStatus status;
-
-	private volatile Future<?> activeFuture;
+	private final AtomicReference<AudioStatus> status;
+	private final List<Audio.StatusCallback> callbacks;
 
 	public DecodeContext(
 		@NotNull ExecutorService pool,
@@ -76,19 +66,13 @@ public class DecodeContext implements Closeable, Comparable<DecodeContext>, Runn
 		this.priority = priority;
 		this.stream = stream;
 
-		this.callbacks = new ArrayList<>();
-
-		this.bufferMoreDataSignal = new Notifier();
-		this.buffer = null;
-		this.pcmBuffer = null;
-		this.bufferLock = new Object();
-		this.requireBufferSizeFrame = new ValueNotifier<>(0);
-		this.decodeState = DecodeState.IDLE;
 		this.metadata = null;
+		this.decodeMetadataFuture = null;
+		this.decodeTask = null;
+		this.lastDecodeFuture = null;
 
-		this.status = AudioStatus.LOADING;
-
-		this.activeFuture = null;
+		this.callbacks = new ArrayList<>();
+		this.status = new AtomicReference<>(AudioStatus.LOADING);
 	}
 
 	@NotNull
@@ -107,7 +91,7 @@ public class DecodeContext implements Closeable, Comparable<DecodeContext>, Runn
 
 	@NotNull
 	public AudioStatus getStatus() {
-		return this.status;
+		return this.status.get();
 	}
 
 	@NotNull
@@ -117,53 +101,52 @@ public class DecodeContext implements Closeable, Comparable<DecodeContext>, Runn
 
 	@Nullable
 	public AudioDecodeException getLastDecodeException() {
-		if (this.activeFuture == null || !this.activeFuture.isDone())
+		DecodeTask decodeTask = this.decodeTask;
+		if (decodeTask == null)
 			return null;
 
-		try {
-			this.activeFuture.get();
-		} catch (ExecutionException e) {
-			Throwable cause = e.getCause();
-			if (cause instanceof AudioDecodeException ex)
-				return ex;
-			return new AudioDecodeException(cause);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
+		Throwable exception = decodeTask.getLastException();
+		if (exception instanceof AudioDecodeException ex)
+			return ex;
 
-		return null;
+		return new AudioDecodeException(exception);
 	}
 
 	public int getBufferSize() {
-		return this.buffer.getFrames();
+		PCMList buffer = this.buffer;
+		return buffer == null ? 0 : buffer.getFrames();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
 	@NotNull
 	public AudioMetadata getMetadata() {
-		if (this.status != AudioStatus.READY)
-			throw new IllegalStateException("Cannot get audio metadata, current status is " + this.status);
+		if (this.status.get() != AudioStatus.READY)
+			throw new IllegalStateException("Cannot get audio metadata, metadata decode failed or not ready");
 
-		AudioMetadata metadata = this.metadata;
-		assert metadata != null;
-		return metadata;
+		return this.metadata;
 	}
 
 	protected void updateStatus(@NotNull AudioStatus newStatus) {
 		Objects.requireNonNull(newStatus, "newStatus is null");
 
-		this.status = newStatus;
+		if (this.status.getAndSet(newStatus) == newStatus)
+			return;
+
 		this.invokeCallback(newStatus);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
 	private synchronized void schedule() {
-		if (this.decodeState == DecodeState.FAILED || (this.activeFuture != null && !this.activeFuture.isDone()))
-			return;
-
-		this.activeFuture = this.pool.submit(this);
+		AudioStatus status = this.status.get();
+		if (status == AudioStatus.READY) {
+			if (this.decodeTask.getState() == DecodeTask.DecodeState.IDLE)
+				this.lastDecodeFuture = this.pool.submit(this.decodeTask);
+		} else if (status == AudioStatus.LOADING) {
+			if (this.decodeMetadataFuture == null)
+				this.decodeMetadataFuture = this.pool.submit(this::loadMetadata);
+		}
 	}
 
 	public void preload() {
@@ -178,7 +161,7 @@ public class DecodeContext implements Closeable, Comparable<DecodeContext>, Runn
 	}
 
 	private void loadMetadata() {
-		if (this.status != AudioStatus.LOADING)
+		if (this.status.get() != AudioStatus.LOADING)
 			return;
 
 		try {
@@ -189,163 +172,60 @@ public class DecodeContext implements Closeable, Comparable<DecodeContext>, Runn
 			return;
 		}
 
-		int frameRate = this.metadata.getFrameRate();
-		int channels = this.metadata.getChannels();
-		this.buffer = new PCMArrayList(frameRate, channels);
-
 		this.updateStatus(AudioStatus.READY);
 		LOGGER.trace("[{}] Success to decode metadata", this.identifier);
 	}
 
-	private void doDecode() throws AudioDecodeException {
-		if (this.decodeState != DecodeState.IDLE)
-			return;
-
-		assert this.metadata != null;
-
-		int channels = this.metadata.getChannels();
-
-		FloatBuffer tempBuf;
-		if (this.pcmBuffer == null) {
-			int sampleRate = this.metadata.getSampleRate();
-			int bufSize = sampleRate * channels * DECODE_CHUNK_SIZE_SEC;
-			tempBuf = FloatBuffer.wrap(new float[bufSize]);
-			this.pcmBuffer = tempBuf;
-		} else {
-			tempBuf = this.pcmBuffer;
-		}
-
-		this.decodeState = DecodeState.DECODING;
-
-		while (!Thread.currentThread().isInterrupted()) {
-			LOGGER.verbose("[{}] Waiting decode request", this.identifier);
-			try {
-				if (!this.requireBufferSizeFrame.awaitUntil(
-					(size) -> this.buffer.getFrames() < size,
-					BUFFER_SIZE_WAIT_TIMEOUT,
-					TimeUnit.MILLISECONDS
-				)) {
-					this.decodeState = DecodeState.IDLE;
-					break;
-				}
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				this.decodeState = DecodeState.IDLE;
-				break;
-			}
-
-			long startTime = System.nanoTime();
-			LOGGER.verbose("[{}] Begin decode", this.identifier);
-			tempBuf.clear();
-
-			int len;
-			try {
-				len = this.decoder.decode(tempBuf, tempBuf.remaining() / channels);
-			} catch (AudioDecodeException e) {
-				LOGGER.error("Failed to decode pcm data", e);
-				this.decodeState = DecodeState.FAILED;
-				this.status = AudioStatus.FAILED;
-				throw e;
-			}
-
-			if (len == -1) {
-				this.decodeState = DecodeState.COMPLETE;
-				this.buffer.trim();
-				this.pcmBuffer = null;
-				break;
-			}
-
-			tempBuf.flip();
-			synchronized (this.bufferLock) {
-				this.buffer.add(tempBuf);
-			}
-
-			this.bufferMoreDataSignal.signal();
-
-			long usedTime = System.nanoTime() - startTime;
-			LOGGER.verbose("[{}] Decoded {} frames, took {}", this.identifier, len, formatTime(usedTime, TimeUnit.NANOSECONDS));
-		}
-	}
-
-	private void runDecode() throws AudioDecodeException {
-		if (this.status == AudioStatus.FAILED)
-			return;
-
-		if (this.status == AudioStatus.LOADING)
-			this.loadMetadata();
-
-		this.doDecode();
-	}
-
-	@Override
-	public void run() {
-		LOGGER.trace("[{}] Start decode task", this.identifier);
-		try {
-			this.runDecode();
-		} catch (Throwable e) {
-			LOGGER.error("Exception in decoding {}", this.identifier, e);
-			this.updateStatus(AudioStatus.FAILED);
-			throw new CompletionException(e);
-		} finally {
-			LOGGER.trace("[{}] Decode task exited", this.identifier);
-		}
-	}
-
 	// -------------------------------------------------------------------------------------------------------------- //
 
-	public void checkAudioStatus() {
-		if (this.status == AudioStatus.LOADING || this.status == AudioStatus.CLOSED)
-			throw new IllegalStateException("Audio metadata not decoded or audio context closed");
-	}
-
-	public void checkDecodeException() throws AudioDecodeException {
-		if (this.decodeState != DecodeState.FAILED)
-			return;
-
-		AudioDecodeException exception = this.getLastDecodeException();
-		if (exception == null)
-			throw new AudioDecodeException("Unknown exception");
-
-		throw exception;
-	}
-
-	public void requireData(int position) throws AudioDecodeException {
-		this.checkAudioStatus();
-		this.checkDecodeException();
-
-		if (this.decodeState == DecodeState.COMPLETE)
-			return;
-
-		this.schedule();
-		this.requireBufferSizeFrame.update(v -> Math.max(v, position));
-	}
-
-	public int readData(int position, @NotNull FloatBuffer buffer, int maxFrames) throws AudioDecodeException, InterruptedException {
-		Objects.requireNonNull(buffer, "buffer is null");
-
-		this.checkAudioStatus();
-		this.checkDecodeException();
-
-		if (this.decodeState == DecodeState.COMPLETE && position >= this.buffer.getFrames())
-			return -1;
-
-		if (maxFrames <= 0)
-			return 0;
-
-		int bufferRemaining = buffer.remaining() / this.metadata.getChannels();
-		if (bufferRemaining == 0)
-			return 0;
-
-		int requireFrame = position + maxFrames;
-		this.requireData(requireFrame);
-
-		this.bufferMoreDataSignal.await(() ->
-			this.decodeState != DecodeState.COMPLETE && this.buffer.getFrames() >= requireFrame);
-
-		synchronized (this.bufferLock) {
-			return this.buffer.getFrame(buffer, position, maxFrames);
-		}
-	}
+//	public void checkDecodeException() throws AudioDecodeException {
+//		if (this.decodeState != DecodeState.FAILED)
+//			return;
+//
+//		AudioDecodeException exception = this.getLastDecodeException();
+//		if (exception == null)
+//			throw new AudioDecodeException("Unknown exception");
+//
+//		throw exception;
+//	}
+//
+//	public void requireData(int position) throws AudioDecodeException {
+//		this.checkAudioStatus();
+//		this.checkDecodeException();
+//
+//		if (this.decodeState == DecodeState.COMPLETE)
+//			return;
+//
+//		this.schedule();
+//		this.requireBufferSizeFrame.update(v -> Math.max(v, position));
+//	}
+//
+//	public int readData(int position, @NotNull FloatBuffer buffer, int maxFrames) throws AudioDecodeException, InterruptedException {
+//		Objects.requireNonNull(buffer, "buffer is null");
+//
+//		this.checkAudioStatus();
+//		this.checkDecodeException();
+//
+//		if (this.decodeState == DecodeState.COMPLETE && position >= this.buffer.getFrames())
+//			return -1;
+//
+//		if (maxFrames <= 0)
+//			return 0;
+//
+//		int bufferRemaining = buffer.remaining() / this.metadata.getChannels();
+//		if (bufferRemaining == 0)
+//			return 0;
+//
+//		int requireFrame = position + maxFrames;
+//		this.requireData(requireFrame);
+//
+//		this.bufferMoreDataSignal.await(() ->
+//			this.decodeState != DecodeState.COMPLETE && this.buffer.getFrames() >= requireFrame);
+//
+//		synchronized (this.bufferLock) {
+//			return this.buffer.getFrame(buffer, position, maxFrames);
+//		}
+//	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
@@ -376,7 +256,7 @@ public class DecodeContext implements Closeable, Comparable<DecodeContext>, Runn
 			this.callbacks.add(callback);
 		}
 
-		this.invokeCallback(this.status);
+		this.invokeCallback(this.status.get(), callback);
 	}
 
 	public void unregisterStatusCallback(@NotNull Audio.StatusCallback callback) {
@@ -397,20 +277,15 @@ public class DecodeContext implements Closeable, Comparable<DecodeContext>, Runn
 
 	@Override
 	public void close() {
-		if (this.status == AudioStatus.CLOSED)
+		if (this.status.getAndSet(AudioStatus.CLOSED) == AudioStatus.CLOSED)
 			return;
-		this.updateStatus(AudioStatus.CLOSED);
 
-		if (this.activeFuture != null) {
-			this.activeFuture.cancel(true);
-			try {
-				this.activeFuture.get(5, TimeUnit.SECONDS);
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-			} catch (ExecutionException | TimeoutException | CancellationException ignored) {
-			} finally {
-				this.activeFuture = null;
-			}
+		FutureUtils.cancelAwait(this.decodeMetadataFuture, )
+
+		DecodeTask decodeTask = this.decodeTask;
+		if (decodeTask != null) {
+			decodeTask.close();
+			this.decodeTask = null;
 		}
 
 		try {
@@ -424,7 +299,6 @@ public class DecodeContext implements Closeable, Comparable<DecodeContext>, Runn
 				LOGGER.error("Exception when closing audio data stream", e);
 			}
 			this.metadata = null;
-			this.buffer = null;
 		}
 	}
 

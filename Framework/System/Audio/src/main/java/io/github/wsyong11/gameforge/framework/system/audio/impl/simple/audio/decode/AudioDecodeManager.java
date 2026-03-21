@@ -9,7 +9,6 @@ import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.AudioDe
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.resource.Resource;
-import io.github.wsyong11.gameforge.util.concurrent.LimitedCapacityBlockingQueue;
 import io.github.wsyong11.gameforge.util.concurrent.TaskHandler;
 import io.github.wsyong11.gameforge.util.io.SeekableInputStream;
 import org.jetbrains.annotations.NotNull;
@@ -22,7 +21,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static io.github.wsyong11.gameforge.framework.system.log.LogTemplate.className;
 
@@ -64,35 +66,6 @@ public class AudioDecodeManager implements AutoCloseable {
 		if (this.closed)
 			throw new IllegalStateException("Audio decode manager is closed");
 	}
-
-//	public void schedule(@NotNull DecodeContext context) {
-//		Objects.requireNonNull(context, "context is null");
-//
-//		this.ensureState();
-
-//		synchronized (this.contextFutureMap) {
-//			Future<?> future = this.contextFutureMap.get(context);
-//			if (future != null && future.isDone()) {
-//				try {
-//					future.get();
-//				} catch (InterruptedException e) {
-//					Thread.currentThread().interrupt();
-//				} catch (ExecutionException e) {
-//					LOGGER.warn("[{}] Uncaught exception in context future task", lazy(context::getIdentifier), e);
-//				}
-//				this.contextFutureMap.remove(context);
-//				future = null;
-//			}
-//
-//			if (context.i)
-//				return;
-//
-//			if (future == null) {
-//				future = this.pool.submit(context);
-//				this.contextFutureMap.put(context, future);
-//			}
-//		}
-//	}
 
 	@Nullable
 	protected DecodeContext createDecodeContext(
@@ -197,20 +170,8 @@ public class AudioDecodeManager implements AutoCloseable {
 			this.contextList.clear();
 		}
 
-		for (DecodeContext context : contexts) {
+		for (DecodeContext context : contexts)
 			context.close();
-//			if (future.isDone())
-//				continue;
-//
-//			future.cancel(true);
-//
-//			try {
-//				future.get(5, TimeUnit.SECONDS);
-//			} catch (InterruptedException e) {
-//				Thread.currentThread().interrupt();
-//			} catch (CancellationException | ExecutionException | TimeoutException ignored) {
-//			}
-		}
 
 		this.pool.shutdown();
 		try {

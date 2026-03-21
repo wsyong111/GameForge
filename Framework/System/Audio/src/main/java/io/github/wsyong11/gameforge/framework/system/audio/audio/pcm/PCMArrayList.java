@@ -9,19 +9,19 @@ import java.util.Objects;
 
 // TODO: 2026/3/20 性能优化
 public class PCMArrayList extends AbstractPCMArray implements PCMList {
-	private final int sampleRate;
+	private final int frameRate;
 	private final int channels;
 
 	private final int maxCapacity;
 	private int size;
 	private float[] array;
 
-	public PCMArrayList(int sampleRate, int channels) {
-		this(sampleRate, channels, Integer.MAX_VALUE);
+	public PCMArrayList(int frameRate, int channels) {
+		this(frameRate, channels, Integer.MAX_VALUE);
 	}
 
-	public PCMArrayList(int sampleRate, int channels, int maxCapacity) {
-		this.sampleRate = sampleRate;
+	public PCMArrayList(int frameRate, int channels, int maxCapacity) {
+		this.frameRate = frameRate;
 		this.channels = channels;
 		this.maxCapacity = maxCapacity;
 
@@ -45,8 +45,8 @@ public class PCMArrayList extends AbstractPCMArray implements PCMList {
 	}
 
 	@Override
-	public int getSampleRate() {
-		return this.sampleRate;
+	public int getFrameRate() {
+		return this.frameRate;
 	}
 
 	@Override

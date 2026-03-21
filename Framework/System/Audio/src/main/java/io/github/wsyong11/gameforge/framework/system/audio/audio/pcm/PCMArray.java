@@ -21,19 +21,19 @@ import java.util.stream.StreamSupport;
  */
 public interface PCMArray {
 	@NotNull
-	static PCMArray wrap(@NotNull FloatBuffer buffer, int channels, int sampleRate) {
+	static PCMArray wrap(@NotNull FloatBuffer buffer, int channels, int frameRate) {
 		Objects.requireNonNull(buffer, "buffer is null");
-		return new FloatBufferPCMArray(buffer, channels, sampleRate);
+		return new FloatBufferPCMArray(buffer, channels, frameRate);
 	}
 
 	@NotNull
-	static PCMArray wrap(float @NotNull [] array, int channels, int sampleRate) {
+	static PCMArray wrap(float @NotNull [] array, int channels, int frameRate) {
 		Objects.requireNonNull(array, "array is null");
-		return wrap(FloatBuffer.wrap(array), channels, sampleRate);
+		return wrap(FloatBuffer.wrap(array), channels, frameRate);
 	}
 
 	@NotNull
-	static PCMArray stream(@NotNull Stream<DoubleStream> samples, int sampleRate) {
+	static PCMArray stream(@NotNull Stream<DoubleStream> samples, int frameRate) {
 		Objects.requireNonNull(samples, "samples is null");
 
 		PrimitiveIterator.OfDouble[] channelIter = samples
@@ -42,7 +42,7 @@ public interface PCMArray {
 
 		int channel = channelIter.length;
 
-		FloatArrayList buffer = new FloatArrayList(sampleRate * channel);
+		FloatArrayList buffer = new FloatArrayList(frameRate * channel);
 		float[] frameBuffer = new float[channel];
 
 		loop:
@@ -57,7 +57,7 @@ public interface PCMArray {
 			buffer.addElements(buffer.size(), frameBuffer);
 		}
 
-		return wrap(buffer.toFloatArray(), channel, sampleRate);
+		return wrap(buffer.toFloatArray(), channel, frameRate);
 	}
 
 	/**
@@ -97,7 +97,7 @@ public interface PCMArray {
 	 *
 	 * @return 每秒采样率（Hz）
 	 */
-	int getSampleRate();
+	int getFrameRate();
 
 	/**
 	 * 获取总帧数。

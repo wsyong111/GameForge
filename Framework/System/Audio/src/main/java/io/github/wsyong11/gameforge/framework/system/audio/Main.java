@@ -14,7 +14,6 @@ import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.manage.DefaultResourceManager;
 import io.github.wsyong11.gameforge.framework.system.resource.manage.ResourceManager;
 import io.github.wsyong11.gameforge.framework.system.resource.pack.AssetsResourcePack;
-import io.github.wsyong11.gameforge.util.concurrent.signal.Notifier;
 import io.github.wsyong11.gameforge.util.concurrent.signal.ThreadSignal;
 import org.jetbrains.annotations.NotNull;
 
@@ -83,7 +82,7 @@ public class Main {
 //			long seekOffS = sampleRate * seekOff;
 
 			AudioFormat format = new AudioFormat(
-				metadata.getSampleRate(),
+				metadata.getSamplesPerSecond(),
 				16,            // 转成 16bit
 				channels,
 				true,          // signed
