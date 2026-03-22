@@ -10,6 +10,7 @@ import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.util.concurrent.signal.Notifier;
 import io.github.wsyong11.gameforge.util.concurrent.signal.ValueNotifier;
+import io.github.wsyong11.gameforge.util.exception.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,6 +33,7 @@ public class DecodeTask implements Runnable, Closeable {
 	private final ValueNotifier<Integer> targetDecodeSize;
 	private final Notifier newDataNotifier;
 
+	private final Object pcmDataLock;
 	private final PCMList pcmData;
 	private volatile FloatBuffer tempBuffer;
 	private volatile AudioDecoder decoder;
@@ -61,6 +63,7 @@ public class DecodeTask implements Runnable, Closeable {
 		this.targetDecodeSize = new ValueNotifier<>(0);
 		this.newDataNotifier = new Notifier();
 
+		this.pcmDataLock = new Object();
 		this.pcmData = new PCMArrayList(metadata.getFrameRate(), metadata.getChannels());
 
 		int tempBufferSize = metadata.getSamplesPerSecond() * bufferDurationSec;
@@ -126,15 +129,19 @@ public class DecodeTask implements Runnable, Closeable {
 			}
 
 			this.tempBuffer.flip();
-			this.pcmData.add(this.tempBuffer);
+
+			synchronized (this.pcmDataLock) {
+				this.pcmData.add(this.tempBuffer);
+			}
+
 			this.newDataNotifier.signal();
 
 			long usedTime = System.nanoTime() - startTime;
-			LOGGER.verbose("[{}] Decoded {} frames, took {}",
+			LOGGER.verbose("[{}] Decoded {} frames (total {}), took {}",
 				this.id,
 				len,
+				this.pcmData.getFrames(),
 				formatTime(usedTime, TimeUnit.NANOSECONDS));
-
 		}
 	}
 
@@ -158,6 +165,63 @@ public class DecodeTask implements Runnable, Closeable {
 				LOGGER.warn("[{}] State switched from DECODING to IDLE in finally", this.id);
 
 			LOGGER.trace("[{}] Decode task exited", this.id);
+		}
+	}
+
+	public int getBufferSize() {
+		return this.pcmData.getFrames();
+	}
+
+	public void ensureData(int position) {
+		if (position < 0)
+			throw new IllegalArgumentException("Position cannot be negative");
+
+		DecodeState state = this.state.get();
+		if (state == DecodeState.FAILED || state == DecodeState.CLOSED)
+			return;
+
+		long totalFramesLong = this.metadata.getTotalFrames();
+		int totalFrames = (int) Math.min(totalFramesLong, Integer.MAX_VALUE);
+		this.targetDecodeSize.update(v -> Math.max(v, Math.min(position, totalFrames)));
+	}
+
+	public int readData(int position, @NotNull FloatBuffer buffer, int maxFrames) throws AudioDecodeException, InterruptedException {
+		Objects.requireNonNull(buffer, "buffer is null");
+
+		if (this.state.get() == DecodeTask.DecodeState.COMPLETE && position >= this.pcmData.getFrames())
+			return -1;
+
+		if (maxFrames <= 0)
+			return 0;
+
+		AudioMetadata metadata = this.metadata;
+		int bufferRemaining = buffer.remaining() / metadata.getChannels();
+		if (bufferRemaining == 0)
+			return 0;
+
+		long requireFrameLong = Math.min(position + maxFrames, metadata.getTotalFrames());
+		int requireFrame = (int) Math.min(requireFrameLong, Integer.MAX_VALUE);
+		this.ensureData(requireFrame);
+
+		while (true) {
+			boolean success = this.newDataNotifier.await(() -> {
+				DecodeState state = this.state.get();
+				if (state == DecodeState.COMPLETE || state == DecodeState.FAILED)
+					return true;
+
+				return this.pcmData.getFrames() >= requireFrame;
+			}, 1, TimeUnit.SECONDS);
+
+			if (success)
+				break;
+
+			Throwable lastException = this.lastException;
+			if (lastException != null)
+				throw ExceptionUtils.wrap(lastException, AudioDecodeException.class, AudioDecodeException::new);
+		}
+
+		synchronized (this.pcmDataLock) {
+			return this.pcmData.getFrame(buffer, position, maxFrames);
 		}
 	}
 

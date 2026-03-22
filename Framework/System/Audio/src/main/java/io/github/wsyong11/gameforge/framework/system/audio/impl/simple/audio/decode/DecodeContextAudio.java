@@ -9,7 +9,6 @@ import io.github.wsyong11.gameforge.framework.system.audio.audio.stream.AudioStr
 import io.github.wsyong11.gameforge.framework.system.audio.audio.stream.AudioStreamStatus;
 import org.jetbrains.annotations.NotNull;
 
-import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.Objects;
 
@@ -25,7 +24,7 @@ public class DecodeContextAudio implements Audio {
 	@NotNull
 	@Override
 	public Identifier getLocation() {
-		return this.context.getIdentifier();
+		return this.context.getId();
 	}
 
 	@NotNull
@@ -91,11 +90,11 @@ public class DecodeContextAudio implements Audio {
 		@NotNull
 		@Override
 		public AudioStreamStatus getStatus() {
-			DecodeContext.DecodeState decodeState = this.context.getDecodeState();
-			if (decodeState == DecodeContext.DecodeState.FAILED)
+			DecodeTask.DecodeState decodeState = this.context.getDecodeState();
+			if (decodeState == DecodeTask.DecodeState.FAILED)
 				return AudioStreamStatus.ERROR;
 
-			if (decodeState == DecodeContext.DecodeState.COMPLETE) {
+			if (decodeState == DecodeTask.DecodeState.COMPLETE) {
 				AudioMetadata metadata = this.context.getMetadata();
 				long totalFrames = metadata.getTotalFrames();
 				if (totalFrames != -1 && this.position >= totalFrames)
@@ -104,10 +103,10 @@ public class DecodeContextAudio implements Audio {
 				return AudioStreamStatus.PLAYABLE;
 			}
 
-			if (decodeState == DecodeContext.DecodeState.IDLE)
+			if (decodeState == DecodeTask.DecodeState.IDLE)
 				return AudioStreamStatus.PLAYABLE;
 
-			if (decodeState == DecodeContext.DecodeState.DECODING)
+			if (decodeState == DecodeTask.DecodeState.DECODING)
 				return AudioStreamStatus.BUFFERING;
 
 			return AudioStreamStatus.READY;
@@ -130,9 +129,7 @@ public class DecodeContextAudio implements Audio {
 			if (frame > Integer.MAX_VALUE)
 				throw new IllegalArgumentException("Frame index is too big");
 
-			int pos = (int) frame;
-			this.context.requireData(pos);
-			this.position = pos;
+			this.position = (int) frame;
 		}
 
 		@Override
@@ -149,6 +146,7 @@ public class DecodeContextAudio implements Audio {
 		public int read(@NotNull FloatBuffer buffer, int maxFrames) throws AudioDecodeException {
 			Objects.requireNonNull(buffer, "buffer is null");
 
+//			return -1;
 			int read;
 			try {
 				read = this.context.readData(this.position, buffer, maxFrames);

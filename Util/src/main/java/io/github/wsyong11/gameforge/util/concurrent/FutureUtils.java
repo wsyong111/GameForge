@@ -4,6 +4,7 @@ import lombok.experimental.UtilityClass;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.concurrent.*;
 
 @UtilityClass
@@ -25,5 +26,24 @@ public class FutureUtils {
 		}
 
 		return true;
+	}
+
+	@Nullable
+	public static Throwable getException(@NotNull Future<?> future) {
+		Objects.requireNonNull(future, "future is null");
+
+		if (!future.isDone())
+			return null;
+
+		try {
+			future.get();
+		} catch (ExecutionException e) {
+			return e.getCause();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		} catch (CancellationException ignored) {
+		}
+
+		return null;
 	}
 }

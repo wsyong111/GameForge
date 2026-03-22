@@ -6,22 +6,24 @@ import io.github.wsyong11.gameforge.framework.system.audio.audio.AudioMetadata;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.AudioStatus;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.AudioDecoder;
 import io.github.wsyong11.gameforge.framework.system.audio.audio.ex.AudioDecodeException;
-import io.github.wsyong11.gameforge.framework.system.audio.audio.pcm.PCMList;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.util.concurrent.FutureUtils;
 import io.github.wsyong11.gameforge.util.concurrent.TaskHandler;
+import io.github.wsyong11.gameforge.util.exception.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class DecodeContext implements Closeable, Comparable<DecodeContext> {
@@ -32,7 +34,7 @@ public class DecodeContext implements Closeable, Comparable<DecodeContext> {
 
 	private final ExecutorService pool;
 	private final TaskHandler taskHandler;
-	private final Identifier identifier;
+	private final Identifier id;
 	private final AudioDecoder decoder;
 	private final int priority;
 	private final InputStream stream;
@@ -48,20 +50,20 @@ public class DecodeContext implements Closeable, Comparable<DecodeContext> {
 	public DecodeContext(
 		@NotNull ExecutorService pool,
 		@NotNull TaskHandler taskHandler,
-		@NotNull Identifier identifier,
+		@NotNull Identifier id,
 		@NotNull AudioDecoder decoder,
 		int priority,
 		@NotNull InputStream stream
 	) {
 		Objects.requireNonNull(pool, "pool is null");
 		Objects.requireNonNull(taskHandler, "taskHandler is null");
-		Objects.requireNonNull(identifier, "identifier is null");
+		Objects.requireNonNull(id, "id is null");
 		Objects.requireNonNull(decoder, "decoder is null");
 		Objects.requireNonNull(stream, "stream is null");
 
 		this.pool = pool;
 		this.taskHandler = taskHandler;
-		this.identifier = identifier;
+		this.id = id;
 		this.decoder = decoder;
 		this.priority = priority;
 		this.stream = stream;
@@ -76,8 +78,8 @@ public class DecodeContext implements Closeable, Comparable<DecodeContext> {
 	}
 
 	@NotNull
-	public Identifier getIdentifier() {
-		return this.identifier;
+	public Identifier getId() {
+		return this.id;
 	}
 
 	public int getPriority() {
@@ -94,27 +96,35 @@ public class DecodeContext implements Closeable, Comparable<DecodeContext> {
 		return this.status.get();
 	}
 
-	@NotNull
-	public DecodeState getDecodeState() {
-		return this.decodeState;
+	@Nullable
+	public DecodeTask.DecodeState getDecodeState() {
+		DecodeTask decodeTask = this.decodeTask;
+		return decodeTask == null ? null : decodeTask.getState();
 	}
 
 	@Nullable
 	public AudioDecodeException getLastDecodeException() {
 		DecodeTask decodeTask = this.decodeTask;
-		if (decodeTask == null)
-			return null;
+		Future<?> decodeMetadataFuture = this.decodeMetadataFuture;
 
-		Throwable exception = decodeTask.getLastException();
-		if (exception instanceof AudioDecodeException ex)
-			return ex;
+		if (decodeMetadataFuture != null) {
+			Throwable exception = FutureUtils.getException(decodeMetadataFuture);
+			if (exception != null)
+				return ExceptionUtils.wrap(exception, AudioDecodeException.class, AudioDecodeException::new);
+		}
 
-		return new AudioDecodeException(exception);
+		if (decodeTask != null) {
+			Throwable exception = decodeTask.getLastException();
+			if (exception != null)
+				return ExceptionUtils.wrap(exception, AudioDecodeException.class, AudioDecodeException::new);
+		}
+
+		return null;
 	}
 
 	public int getBufferSize() {
-		PCMList buffer = this.buffer;
-		return buffer == null ? 0 : buffer.getFrames();
+		DecodeTask decodeTask = this.decodeTask;
+		return decodeTask == null ? 0 : decodeTask.getBufferSize();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
@@ -168,15 +178,44 @@ public class DecodeContext implements Closeable, Comparable<DecodeContext> {
 			this.metadata = this.parseMetadata();
 		} catch (Throwable e) {
 			this.updateStatus(AudioStatus.FAILED);
-			LOGGER.error("Failed to parse metadata from audio {}", this.identifier, e);
+			LOGGER.error("Failed to parse metadata from audio {}", this.id, e);
 			return;
 		}
 
+		LOGGER.trace("[{}] Success to decode metadata", this.id);
+
+		this.decodeTask = new DecodeTask(
+			this.id,
+			this.metadata,
+			this.decoder,
+			2,
+			10,
+			TimeUnit.SECONDS
+		);
 		this.updateStatus(AudioStatus.READY);
-		LOGGER.trace("[{}] Success to decode metadata", this.identifier);
+
+		this.schedule();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
+
+	public void checkDecodeException() throws AudioDecodeException {
+		AudioDecodeException exception = this.getLastDecodeException();
+		if (exception != null)
+			throw exception;
+	}
+
+	public int readData(int position, @NotNull FloatBuffer buffer, int maxFrames) throws AudioDecodeException, InterruptedException {
+		Objects.requireNonNull(buffer, "buffer is null");
+
+		this.checkDecodeException();
+
+		DecodeTask decodeTask = this.decodeTask;
+		if (decodeTask == null)
+			throw new IllegalStateException("Decoder doesn't ready");
+
+		return decodeTask.readData(position, buffer, maxFrames);
+	}
 
 //	public void checkDecodeException() throws AudioDecodeException {
 //		if (this.decodeState != DecodeState.FAILED)
@@ -280,7 +319,11 @@ public class DecodeContext implements Closeable, Comparable<DecodeContext> {
 		if (this.status.getAndSet(AudioStatus.CLOSED) == AudioStatus.CLOSED)
 			return;
 
-		FutureUtils.cancelAwait(this.decodeMetadataFuture, )
+		FutureUtils.cancelAwait(this.decodeMetadataFuture, 5, TimeUnit.SECONDS);
+		this.decodeMetadataFuture = null;
+
+		FutureUtils.cancelAwait(this.lastDecodeFuture, 5, TimeUnit.SECONDS);
+		this.lastDecodeFuture = null;
 
 		DecodeTask decodeTask = this.decodeTask;
 		if (decodeTask != null) {
@@ -292,20 +335,14 @@ public class DecodeContext implements Closeable, Comparable<DecodeContext> {
 			this.decoder.close();
 		} catch (IOException e) {
 			LOGGER.error("Exception when closing decoder", e);
-		} finally {
-			try {
-				this.stream.close();
-			} catch (IOException e) {
-				LOGGER.error("Exception when closing audio data stream", e);
-			}
-			this.metadata = null;
 		}
-	}
 
-	public enum DecodeState {
-		IDLE,
-		DECODING,
-		COMPLETE,
-		FAILED
+		try {
+			this.stream.close();
+		} catch (IOException e) {
+			LOGGER.error("Exception when closing audio data stream", e);
+		}
+
+		this.metadata = null;
 	}
 }
