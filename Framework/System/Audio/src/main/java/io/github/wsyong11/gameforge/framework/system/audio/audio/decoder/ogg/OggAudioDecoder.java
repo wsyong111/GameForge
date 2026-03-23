@@ -104,7 +104,7 @@ public class OggAudioDecoder extends AbstractAudioDecoder {
 			this.frameRate = vorbisInfo.sample_rate();
 
 			int sampleLength = stb_vorbis_stream_length_in_samples(this.decoderHandler);
-			this.totalFrames = sampleLength / this.channels;
+			this.totalFrames = sampleLength;
 		}
 	}
 

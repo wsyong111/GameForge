@@ -11,13 +11,15 @@ public abstract class AbstractPCMArray implements PCMArray {
 	}
 
 	protected void checkBoundsChannel(int channel) {
-		if (channel < 0 || channel >= this.getChannels())
-			throw new IndexOutOfBoundsException("Channel out of range: " + channel);
+		int channels = this.getChannels();
+		if (channel < 0 || channel >= channels)
+			throw new IndexOutOfBoundsException("Channel out of range: " + channel + ", size=" + channels);
 	}
 
 	protected void checkBoundsFrame(int frame) {
-		if (frame < 0 || frame >= this.getFrames())
-			throw new IndexOutOfBoundsException("Frame out of range: " + frame);
+		int frames = this.getFrames();
+		if (frame < 0 || frame >= frames)
+			throw new IndexOutOfBoundsException("Frame out of range: " + frame + ", size=" + frames);
 	}
 
 	@Override
@@ -27,16 +29,19 @@ public abstract class AbstractPCMArray implements PCMArray {
 		this.checkBoundsFrame(frame);
 
 		int channels = this.getChannels();
-		int available = length / channels;
+		int totalFrames = this.getFrames();
 
-		for (int i = 0; i < available; i++) {
+		int available = length / channels;
+		int toRead = Math.min(available, totalFrames - frame);
+
+		for (int i = 0; i < toRead; i++) {
 			int frameSamples = i * channels;
 
 			for (int c = 0; c < channels; c++)
 				array[offset + frameSamples + c] = this.getSample(c, frame + i);
 		}
 
-		return available;
+		return toRead;
 	}
 
 	@Override
@@ -45,13 +50,16 @@ public abstract class AbstractPCMArray implements PCMArray {
 		this.checkBoundsFrame(frame);
 
 		int channels = this.getChannels();
-		int available = dst.remaining() / channels;
+		int totalFrames = this.getFrames();
 
-		for (int i = 0; i < available; i++)
+		int available = Math.min(dst.remaining() / channels, frameCount);
+		int toRead = Math.min(available, totalFrames - frame);
+
+		for (int i = 0; i < toRead; i++)
 			for (int c = 0; c < channels; c++)
 				dst.put(this.getSample(c, frame + i));
 
-		return available;
+		return toRead;
 	}
 
 	@Override
@@ -61,16 +69,19 @@ public abstract class AbstractPCMArray implements PCMArray {
 		this.checkBoundsFrame(frame);
 
 		int channels = this.getChannels();
-		int available = length / channels;
+		int totalFrames = this.getFrames();
 
-		for (int i = 0; i < available; i++) {
+		int available = length / channels;
+		int toWrite = Math.min(available, totalFrames - frame);
+
+		for (int i = 0; i < toWrite; i++) {
 			int frameSamples = i * channels;
 
 			for (int c = 0; c < channels; c++)
 				this.setSample(c, frame + i, array[offset + frameSamples + c]);
 		}
 
-		return available;
+		return toWrite;
 	}
 
 	@Override
@@ -79,12 +90,15 @@ public abstract class AbstractPCMArray implements PCMArray {
 		this.checkBoundsFrame(frame);
 
 		int channels = this.getChannels();
-		int available = src.remaining() / channels;
+		int totalFrames = this.getFrames();
 
-		for (int i = 0; i < available; i++)
+		int available = Math.min(src.remaining() / channels, frameCount);
+		int toWrite = Math.min(available, totalFrames - frame);
+
+		for (int i = 0; i < toWrite; i++)
 			for (int c = 0; c < channels; c++)
 				this.setSample(c, frame + i, src.get());
 
-		return available;
+		return toWrite;
 	}
 }

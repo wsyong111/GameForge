@@ -82,7 +82,7 @@ public class Main {
 //			long seekOffS = sampleRate * seekOff;
 
 			AudioFormat format = new AudioFormat(
-				metadata.getFrameRate() * 4,
+				metadata.getFrameRate(),
 				16,            // 转成 16bit
 				channels,
 				true,          // signed

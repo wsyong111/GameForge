@@ -139,7 +139,7 @@ public class PCMArrayList extends AbstractPCMArray implements PCMList {
 		src.get(this.array, insertIndex, usableLength);
 		this.size += usableLength;
 
-		return 0;
+		return framesToAdd;
 	}
 
 	@Override

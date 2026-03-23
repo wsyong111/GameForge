@@ -96,7 +96,7 @@ public class DecodeTask implements Runnable, Closeable {
 			LOGGER.verbose("[{}] Waiting decode request", this.id);
 			try {
 				if (!this.targetDecodeSize.awaitUntil(
-					(size) -> this.pcmData.getFrames() < size,
+					(size) -> this.pcmData.getFrames() <= size,
 					this.idleTimeout,
 					this.idleTimeoutUnit
 				)) {
@@ -122,6 +122,7 @@ public class DecodeTask implements Runnable, Closeable {
 			}
 
 			if (len == -1) {
+				LOGGER.verbose("[{}] Decode complete", this.id);
 				this.state.set(DecodeState.COMPLETE);
 				this.pcmData.trim();
 				this.tempBuffer = null;
@@ -131,7 +132,8 @@ public class DecodeTask implements Runnable, Closeable {
 			this.tempBuffer.flip();
 
 			synchronized (this.pcmDataLock) {
-				this.pcmData.add(this.tempBuffer);
+				int added = this.pcmData.add(this.tempBuffer, len, this.pcmData.getFrames());
+				assert added == len;
 			}
 
 			this.newDataNotifier.signal();
@@ -199,8 +201,9 @@ public class DecodeTask implements Runnable, Closeable {
 		if (bufferRemaining == 0)
 			return 0;
 
-		long requireFrameLong = Math.min(position + maxFrames, metadata.getTotalFrames());
+		long requireFrameLong = Math.min(((long) position) + maxFrames, metadata.getTotalFrames());
 		int requireFrame = (int) Math.min(requireFrameLong, Integer.MAX_VALUE);
+
 		this.ensureData(requireFrame);
 
 		while (true) {
@@ -209,15 +212,20 @@ public class DecodeTask implements Runnable, Closeable {
 				if (state == DecodeState.COMPLETE || state == DecodeState.FAILED)
 					return true;
 
-				return this.pcmData.getFrames() >= requireFrame;
-			}, 1, TimeUnit.SECONDS);
+				int frames;
+				synchronized (this.pcmDataLock) {
+					frames = this.pcmData.getFrames();
+				}
 
-			if (success)
-				break;
+				return frames >= requireFrame;
+			}, 1, TimeUnit.SECONDS);
 
 			Throwable lastException = this.lastException;
 			if (lastException != null)
 				throw ExceptionUtils.wrap(lastException, AudioDecodeException.class, AudioDecodeException::new);
+
+			if (success)
+				break;
 		}
 
 		synchronized (this.pcmDataLock) {
@@ -236,7 +244,9 @@ public class DecodeTask implements Runnable, Closeable {
 		this.pcmData.clear();
 		this.pcmData.trim();
 
-		this.tempBuffer.clear();
+		FloatBuffer tempBuffer = this.tempBuffer;
+		if (tempBuffer != null)
+			tempBuffer.clear();
 		this.tempBuffer = null;
 	}
 
