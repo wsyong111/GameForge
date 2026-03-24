@@ -99,7 +99,6 @@ public final class RenderSystem {
 
 	private final boolean debug;
 	private final Vector2i logicSize;
-	private final ThreadMark thread;
 
 	private final List<Renderer> renderers;
 
@@ -130,14 +129,13 @@ public final class RenderSystem {
 
 		this.logicSize = new Vector2i(logicSize);
 		this.debug = debug;
-		this.thread = thread;
 
 		this.renderers = new ArrayList<>();
 
 		this.listenerList = ListenerList.sync();
 
 		this.taskExecutor = new TaskQueueExecutor();
-		this.taskHandler = new TaskHandler(this.taskExecutor);
+		this.taskHandler = new TaskHandler(this.taskExecutor, thread);
 
 		this.fpsCounter = new StandardFPSCounter();
 
@@ -220,10 +218,7 @@ public final class RenderSystem {
 	public void runOnUIThread(@NotNull Runnable action) {
 		Objects.requireNonNull(action, "action is null");
 
-		if (this.thread.check())
-			action.run();
-		else
-			this.taskHandler.run(action);
+		this.taskHandler.run(action);
 	}
 
 	public boolean isRunning() {

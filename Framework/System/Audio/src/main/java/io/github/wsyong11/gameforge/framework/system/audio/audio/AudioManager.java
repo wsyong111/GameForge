@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+// TODO: 2026/3/24 完整实现，流式解码
 public interface AudioManager {
 	@Nullable
 	Audio getAudio(@NotNull Identifier location);

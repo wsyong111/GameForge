@@ -9,6 +9,7 @@ import io.github.wsyong11.gameforge.framework.system.audio.audio.decoder.AudioDe
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.resource.Resource;
+import io.github.wsyong11.gameforge.util.concurrent.SimpleThreadFactory;
 import io.github.wsyong11.gameforge.util.concurrent.TaskHandler;
 import io.github.wsyong11.gameforge.util.io.SeekableInputStream;
 import org.jetbrains.annotations.NotNull;
@@ -52,7 +53,12 @@ public class AudioDecodeManager implements AutoCloseable {
 			4,
 			10,
 			TimeUnit.SECONDS,
-			new ArrayBlockingQueue<>(256)
+			new ArrayBlockingQueue<>(256),
+			SimpleThreadFactory
+				.builder()
+				.name("AudioDecoder")
+				.priority(Thread.MAX_PRIORITY)
+				.build()
 //			new LimitedCapacityBlockingQueue<>(new PriorityBlockingQueue<>(), 256)
 		);
 

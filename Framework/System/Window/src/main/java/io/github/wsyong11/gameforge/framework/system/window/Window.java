@@ -10,6 +10,7 @@ import org.joml.Vector2ic;
 /**
  * 窗口对象，包含各种属性和函数可控制窗口状态，窗口应由{@link WindowManager 窗口管理器}管理，在管理器释放后窗口将失效
  */
+// TODO: 2026/3/24 现代化API，vector复用
 public interface Window extends AutoCloseable {
 	void setTitle(@NotNull String title);
 

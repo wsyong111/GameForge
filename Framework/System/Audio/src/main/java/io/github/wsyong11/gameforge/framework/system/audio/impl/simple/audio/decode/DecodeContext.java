@@ -29,9 +29,6 @@ import java.util.concurrent.atomic.AtomicReference;
 public class DecodeContext implements Closeable, Comparable<DecodeContext> {
 	private static final Logger LOGGER = Log.getLogger();
 
-	private static final int DECODE_CHUNK_SIZE_SEC = 2;
-	private static final long BUFFER_SIZE_WAIT_TIMEOUT = 1000 * 5;
-
 	private final ExecutorService pool;
 	private final TaskHandler taskHandler;
 	private final Identifier id;
@@ -216,55 +213,6 @@ public class DecodeContext implements Closeable, Comparable<DecodeContext> {
 
 		return decodeTask.readData(position, buffer, maxFrames);
 	}
-
-//	public void checkDecodeException() throws AudioDecodeException {
-//		if (this.decodeState != DecodeState.FAILED)
-//			return;
-//
-//		AudioDecodeException exception = this.getLastDecodeException();
-//		if (exception == null)
-//			throw new AudioDecodeException("Unknown exception");
-//
-//		throw exception;
-//	}
-//
-//	public void requireData(int position) throws AudioDecodeException {
-//		this.checkAudioStatus();
-//		this.checkDecodeException();
-//
-//		if (this.decodeState == DecodeState.COMPLETE)
-//			return;
-//
-//		this.schedule();
-//		this.requireBufferSizeFrame.update(v -> Math.max(v, position));
-//	}
-//
-//	public int readData(int position, @NotNull FloatBuffer buffer, int maxFrames) throws AudioDecodeException, InterruptedException {
-//		Objects.requireNonNull(buffer, "buffer is null");
-//
-//		this.checkAudioStatus();
-//		this.checkDecodeException();
-//
-//		if (this.decodeState == DecodeState.COMPLETE && position >= this.buffer.getFrames())
-//			return -1;
-//
-//		if (maxFrames <= 0)
-//			return 0;
-//
-//		int bufferRemaining = buffer.remaining() / this.metadata.getChannels();
-//		if (bufferRemaining == 0)
-//			return 0;
-//
-//		int requireFrame = position + maxFrames;
-//		this.requireData(requireFrame);
-//
-//		this.bufferMoreDataSignal.await(() ->
-//			this.decodeState != DecodeState.COMPLETE && this.buffer.getFrames() >= requireFrame);
-//
-//		synchronized (this.bufferLock) {
-//			return this.buffer.getFrame(buffer, position, maxFrames);
-//		}
-//	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
 

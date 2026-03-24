@@ -54,7 +54,7 @@ public class Main {
 				});
 
 				n.await();
-				play(audio);
+				playJvav(audio);
 			}
 
 
@@ -70,7 +70,7 @@ public class Main {
 		}
 	}
 
-	private static void play(@NotNull Audio audio) throws LineUnavailableException, AudioDecodeException {
+	private static void playJvav(@NotNull Audio audio) throws LineUnavailableException, AudioDecodeException {
 		try (AudioStream stream = audio.newStream()) {
 			AudioMetadata metadata = audio.getMetadata();
 
