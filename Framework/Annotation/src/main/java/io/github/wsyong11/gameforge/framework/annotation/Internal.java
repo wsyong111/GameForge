@@ -9,7 +9,7 @@ import java.lang.annotation.*;
  */
 @ApiStatus.Internal
 @Documented
-@Target({ElementType.PACKAGE, ElementType.TYPE})
+@Target({ElementType.METHOD, ElementType.FIELD, ElementType.PACKAGE, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Internal {
 }
