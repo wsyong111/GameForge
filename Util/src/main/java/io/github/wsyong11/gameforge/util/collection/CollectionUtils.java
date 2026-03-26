@@ -27,6 +27,20 @@ public class CollectionUtils {
 		return (List<T>) list;
 	}
 
+	@SuppressWarnings("unchecked")
+	@Contract("null -> null; !null -> !null")
+	@Nullable
+	public static <T> Set<T> forceCast(@Nullable Set<?> set) {
+		return (Set<T>) set;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Contract("null -> null; !null -> !null")
+	@Nullable
+	public static <K, V> Map<K, V> forceCast(@Nullable Map<?, ?> map) {
+		return (Map<K, V>) map;
+	}
+
 	public static <I, T> void sort(@NotNull List<I> items, @NotNull List<T> list, @NotNull BiPredicate<I, T> equalsFunction) {
 		Objects.requireNonNull(items, "items is null");
 		Objects.requireNonNull(list, "list is null");

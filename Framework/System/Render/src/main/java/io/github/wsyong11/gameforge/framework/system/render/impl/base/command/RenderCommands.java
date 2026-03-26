@@ -5,22 +5,24 @@ import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import lombok.experimental.UtilityClass;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.lang.invoke.*;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Modifier;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 import static io.github.wsyong11.gameforge.framework.system.log.LogTemplate.className;
+import static io.github.wsyong11.gameforge.util.collection.CollectionUtils.forceCast;
 
 @UtilityClass
 public class RenderCommands {
 	private static final Logger LOGGER = Log.getLogger();
 
-	private static final Map<Class<?>, Integer> COMMAND_ID_MAP = new ConcurrentHashMap<>();
+	private static final Map<Class<?>, Integer> COMMAND_ID_MAP = Collections.synchronizedMap(new WeakHashMap<>());
 
 	private static final AtomicInteger ID_COUNTER = new AtomicInteger(0);
 
@@ -91,5 +93,11 @@ public class RenderCommands {
 	public static <T extends RenderCommand> Supplier<T> getFactory(@NotNull Class<T> type) {
 		Objects.requireNonNull(type, "type is null");
 		return (Supplier<T>) FACTORY.get(type);
+	}
+
+	@NotNull
+	@Unmodifiable
+	public static Set<Class<? extends RenderCommand>> getCommandTypes() {
+		return forceCast(Set.copyOf(COMMAND_ID_MAP.keySet()));
 	}
 }
