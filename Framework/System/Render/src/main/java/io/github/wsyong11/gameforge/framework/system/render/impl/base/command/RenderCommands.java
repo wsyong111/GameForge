@@ -3,15 +3,14 @@ package io.github.wsyong11.gameforge.framework.system.render.impl.base.command;
 import io.github.wsyong11.gameforge.framework.ex.RuntimeReflectException;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
+import io.github.wsyong11.gameforge.framework.system.render.impl.base.command.command.RenderCommand;
 import lombok.experimental.UtilityClass;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.lang.invoke.*;
-import java.lang.ref.WeakReference;
 import java.lang.reflect.Modifier;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 

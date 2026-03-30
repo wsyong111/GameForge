@@ -3,7 +3,9 @@ package io.github.wsyong11.gameforge.util.pool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.LinkedList;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -13,13 +15,26 @@ public interface ObjectPool<T> {
 		Objects.requireNonNull(objectConstructor, "objectConstructor is null");
 		Objects.requireNonNull(resetMethod, "resetMethod is null");
 
-		return new SimpleObjectPool<>(maxSize, objectConstructor, resetMethod);
+		return new SimpleObjectPool<>(maxSize, objectConstructor, resetMethod, new LinkedList<>());
+	}
+
+	@NotNull
+	static <V> ObjectPool<V> createConcurrent(int maxSize, @NotNull Supplier<V> objectConstructor, @NotNull Consumer<V> resetMethod) {
+		Objects.requireNonNull(objectConstructor, "objectConstructor is null");
+		Objects.requireNonNull(resetMethod, "resetMethod is null");
+
+		return new SimpleObjectPool<>(maxSize, objectConstructor, resetMethod, new ConcurrentLinkedQueue<>());
 	}
 
 	@NotNull
 	T acquire();
 
+	@Nullable
+	T tryAcquire();
+
 	void release(@Nullable T obj);
+
+	boolean tryRelease(@Nullable T obj);
 
 	int size();
 

@@ -1,11 +1,16 @@
 package io.github.wsyong11.gameforge.framework.system.render;
 
+import io.github.wsyong11.gameforge.framework.Identifier;
 import io.github.wsyong11.gameforge.framework.key.KeyAction;
 import io.github.wsyong11.gameforge.framework.key.KeyCode;
 import io.github.wsyong11.gameforge.framework.system.log.core.LogLevel;
 import io.github.wsyong11.gameforge.framework.system.log.core.LogManager;
+import io.github.wsyong11.gameforge.framework.system.render.context.RenderContext;
 import io.github.wsyong11.gameforge.framework.system.render.ex.RenderSystemInitiationException;
 import io.github.wsyong11.gameforge.framework.system.render.impl.opengl.OpenGL330RenderEngine;
+import io.github.wsyong11.gameforge.framework.system.render.mesh.Mesh;
+import io.github.wsyong11.gameforge.framework.system.render.renderer.Renderer;
+import io.github.wsyong11.gameforge.framework.system.render.renderer.RendererContext;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.manage.DefaultResourceManager;
 import io.github.wsyong11.gameforge.framework.system.resource.manage.ResourceManager;
@@ -16,6 +21,8 @@ import io.github.wsyong11.gameforge.framework.system.window.listener.WindowInput
 import io.github.wsyong11.gameforge.framework.system.window.listener.WindowListener;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2i;
+
+import java.util.Objects;
 
 public class Main {
 	public static void main(String[] args) throws Throwable {
@@ -63,9 +70,39 @@ public class Main {
 			});
 			window.setWindowSize(logicSize);
 
+			renderSystem.registerRenderer(new TestRenderer());
+
 			RenderSystem.loop();
 		} finally {
 			RenderSystem.shutdown();
+		}
+	}
+
+	private static class TestRenderer implements Renderer {
+		private static final Identifier TEST_SHADER = Identifier.withDefaultNamespace("test");
+
+		private Mesh TEAPOT;
+
+		@Override
+		public void init(@NotNull RendererContext context) {
+			Objects.requireNonNull(context, "context is null");
+
+			TEAPOT = context
+				.mesh()
+				.build();
+
+			context.preloadShader(TEST_SHADER);
+
+
+		}
+
+		@Override
+		public void render(@NotNull RendererContext rendererContext, @NotNull RenderContext context) {
+			context.push()
+			       .shader(TEST_SHADER)
+			       .mesh(TEAPOT)
+			       .draw()
+			       .pop();
 		}
 	}
 }

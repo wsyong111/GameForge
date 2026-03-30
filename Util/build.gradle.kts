@@ -5,6 +5,7 @@ import io.github.wsyong11.gameforge.project.artifactId
 
 plugins {
 	kotlin("jvm")
+	id("me.champeau.jmh")
 }
 
 group = "io.github.wsyong11.gameforge.util"
