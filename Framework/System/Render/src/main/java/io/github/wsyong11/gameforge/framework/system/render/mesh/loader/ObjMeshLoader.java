@@ -70,6 +70,8 @@ public class ObjMeshLoader implements MeshLoader {
 
 				lineIndex++;
 			}
+
+			return null;
 		}
 	}
 }

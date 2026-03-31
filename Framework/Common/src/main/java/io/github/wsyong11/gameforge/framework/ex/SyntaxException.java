@@ -1,6 +1,7 @@
 package io.github.wsyong11.gameforge.framework.ex;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -12,6 +13,35 @@ import java.util.Objects;
  * </p>
  */
 public class SyntaxException extends RuntimeException {
+	@Nullable
+	private final String fileName;
+	private final int line;
+	private final int startColumn;
+	private final int endColumn;
+
+	@Nullable
+	private final String sourceLine;
+
+	/*
+SyntaxError: ';' expected
+ --> com/example/test:1:1
+  |
+1 | io.print("Hello world")
+  |                        ^
+	 */
+
+	public SyntaxException(@Nullable String fileName, int line, int startColumn, int endColumn, @Nullable String sourceLine) {
+		if (line < 0)
+			throw new IllegalArgumentException("Line cannot be negative");
+
+
+		this.fileName = fileName;
+		this.line = line;
+		this.startColumn = startColumn;
+		this.endColumn = endColumn;
+		this.sourceLine = sourceLine;
+	}
+
 	/**
 	 * 使用指定的错误信息构造一个语法异常。
 	 *
