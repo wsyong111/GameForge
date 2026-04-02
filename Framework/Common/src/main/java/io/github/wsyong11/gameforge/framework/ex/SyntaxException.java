@@ -1,5 +1,6 @@
 package io.github.wsyong11.gameforge.framework.ex;
 
+import io.github.wsyong11.gameforge.util.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,6 +14,58 @@ import java.util.Objects;
  * </p>
  */
 public class SyntaxException extends RuntimeException {
+	@NotNull
+	public static Builder builder(@NotNull String message) {
+		Objects.requireNonNull(message, "message is null");
+		return new Builder(message);
+	}
+
+	@NotNull
+	public static SyntaxException of(@NotNull String message, int line, int startCol, int endCol, @Nullable String fileName, @Nullable String sourceLine) {
+		Objects.requireNonNull(message, "message is null");
+		return new SyntaxException(message, line, startCol, endCol, fileName, sourceLine);
+	}
+
+	@NotNull
+	public static SyntaxException of(@NotNull String message) {
+		Objects.requireNonNull(message, "message is null");
+		return new SyntaxException(message, -1, -1, -1, null, null);
+	}
+
+	@NotNull
+	public static SyntaxException of(@NotNull String message, @NotNull Throwable cause) {
+		Objects.requireNonNull(message, "message is null");
+		Objects.requireNonNull(cause, "cause is null");
+		return new SyntaxException(message, -1, -1, -1, null, null)
+			.initCause(cause);
+	}
+
+	@NotNull
+	public static SyntaxException atIndex(@NotNull String message, int index) {
+		Objects.requireNonNull(message, "message is null");
+		return atRange(message, index, 1);
+	}
+
+	@NotNull
+	public static SyntaxException atIndex(@NotNull String message, int index, @NotNull String sourceLine) {
+		Objects.requireNonNull(message, "message is null");
+		Objects.requireNonNull(sourceLine, "sourceLine is null");
+		return atRange(message, index, 1, sourceLine);
+	}
+
+	@NotNull
+	public static SyntaxException atRange(@NotNull String message, int index, int length) {
+		Objects.requireNonNull(message, "message is null");
+		return of(message, -1, index, index + length, null, null);
+	}
+
+	@NotNull
+	public static SyntaxException atRange(@NotNull String message, int index, int length, @NotNull String sourceLine) {
+		Objects.requireNonNull(message, "message is null");
+		Objects.requireNonNull(sourceLine, "sourceLine is null");
+		return of(message, -1, index, index + length, null, sourceLine);
+	}
+
 	@Nullable
 	private final String fileName;
 	private final int line;
@@ -22,132 +75,166 @@ public class SyntaxException extends RuntimeException {
 	@Nullable
 	private final String sourceLine;
 
-	/*
+	public SyntaxException(@NotNull String message, int line, int startColumn, int endColumn, @Nullable String fileName, @Nullable String sourceLine) {
+		super(Objects.requireNonNull(message, "message is null"));
+
+		this.fileName = fileName;
+		this.line = Math.max(-1, line);
+		this.startColumn = Math.max(-1, startColumn);
+		this.endColumn = this.startColumn == -1 ? -1 : endColumn;
+		this.sourceLine = sourceLine;
+	}
+
+	@Override
+	public String getMessage() {
+		return super.getMessage()
+			+ " at "
+			+ (this.fileName == null ? "<unknown>" : this.fileName)
+			+ ":" + (this.line == -1 ? "?" : this.line + 1)
+			+ ":" + (this.startColumn == -1 ? "?" : this.startColumn + 1);
+	}
+
+	@Override
+	public SyntaxException initCause(@Nullable Throwable cause) {
+		return (SyntaxException) super.initCause(cause);
+	}
+
+	@Nullable
+	public String getFileName() {
+		return this.fileName;
+	}
+
+	public int getLine() {
+		return this.line;
+	}
+
+	public int getStartColumn() {
+		return this.startColumn;
+	}
+
+	public int getEndColumn() {
+		return this.endColumn;
+	}
+
+	@Nullable
+	public String getSourceLine() {
+		return this.sourceLine;
+	}
+
+	@NotNull
+	public String getErrorMessage() {
+		return super.getMessage();
+	}
+
+	public String getFormattedMessage() {
+		/*
 SyntaxError: ';' expected
  --> com/example/test:1:1
   |
 1 | io.print("Hello world")
   |                        ^
-	 */
+		 */
 
-	public SyntaxException(@Nullable String fileName, int line, int startColumn, int endColumn, @Nullable String sourceLine) {
-		if (line < 0)
-			throw new IllegalArgumentException("Line cannot be negative");
+		StringBuilder sb = new StringBuilder();
+		sb.append(this.getClass().getSimpleName());
+		sb.append(": ");
+		sb.append(super.getMessage());
+		sb.append("\n --> ");
+		sb.append(this.fileName == null ? "<unknown>" : this.fileName);
+		sb.append(':');
+		sb.append(this.line == -1 ? "?" : this.line + 1);
+		sb.append(':');
+		sb.append(this.startColumn == -1 ? "?" : this.startColumn + 1);
+		sb.append('\n');
 
+		if (this.sourceLine != null && this.line != -1) {
+			int lineNumLength = NumberUtils.digitLength(this.line + 1);
+			sb.append(" ".repeat(lineNumLength));
+			sb.append(" |\n");
+			sb.append(this.line + 1);
+			sb.append(" | ");
+			sb.append(this.sourceLine);
+			sb.append('\n');
+			sb.append(" ".repeat(lineNumLength));
+			sb.append(" | ");
 
-		this.fileName = fileName;
-		this.line = line;
-		this.startColumn = startColumn;
-		this.endColumn = endColumn;
-		this.sourceLine = sourceLine;
+			if (this.startColumn != -1 && this.endColumn != -1) {
+				sb.append(" ".repeat(this.startColumn));
+				sb.append("^".repeat(this.endColumn - this.startColumn));
+			}
+		}
+
+		return sb.toString();
 	}
 
-	/**
-	 * 使用指定的错误信息构造一个语法异常。
-	 *
-	 * @param message 错误信息，不可为 null
-	 */
-	public SyntaxException(@NotNull String message) {
-		super(message);
-	}
+	public static class Builder {
+		private final String message;
 
-	/**
-	 * 使用指定的错误信息和原因构造一个语法异常。
-	 *
-	 * @param message 错误信息，不可为 null
-	 * @param e       导致该异常的原始异常，不可为 null
-	 */
-	public SyntaxException(@NotNull String message, @NotNull Throwable e) {
-		super(message, e);
-	}
+		@Nullable
+		private Throwable cause = null;
 
-	/**
-	 * 使用错误信息和错误位置索引构造一个语法异常。
-	 * <p>
-	 * 会自动在错误信息前添加位置标识。
-	 * </p>
-	 *
-	 * @param message 错误信息，不可为 null
-	 * @param index   错误发生的位置索引（从 0 开始）
-	 */
-	public SyntaxException(@NotNull String message, int index) {
-		this("SyntaxException: #" + index + ": " + message);
-	}
+		@Nullable
+		private String fileName = null;
+		private int line = -1;
+		private int startColumn = -1;
+		private int endColumn = -1;
 
-	/**
-	 * 使用错误信息、错误位置索引和原始文本构造一个语法异常。
-	 * <p>
-	 * 会生成包含错误位置指示符（^）的可视化文本。
-	 * </p>
-	 *
-	 * @param message 错误信息，不可为 null
-	 * @param index   错误发生的位置索引（从 0 开始）
-	 * @param text    原始输入文本，不可为 null
-	 */
-	public SyntaxException(@NotNull String message, int index, @NotNull String text) {
-		this(message + generationLocation(index, text), index);
-	}
+		@Nullable
+		private String sourceLine = null;
 
-	/**
-	 * 使用错误信息、错误位置索引、错误长度和原始文本构造一个语法异常。
-	 * <p>
-	 * 会生成包含多个 ^ 的可视化错误范围指示。
-	 * </p>
-	 *
-	 * @param message 错误信息，不可为 null
-	 * @param index   错误起始位置索引（从 0 开始）
-	 * @param length  错误长度
-	 * @param text    原始输入文本，不可为 null
-	 */
-	public SyntaxException(@NotNull String message, int index, int length, @NotNull String text) {
-		this(message + generationLocation(index, length, text), index);
-	}
+		public Builder(@NotNull String message) {
+			Objects.requireNonNull(message, "message is null");
+			this.message = message;
+		}
 
-	/**
-	 * 根据指定索引生成单字符错误位置的可视化指示信息。
-	 * <p>
-	 * 示例输出：
-	 * <pre>
-	 * | abcdef
-	 * | ~~^~~~
-	 * </pre>
-	 * </p>
-	 *
-	 * @param index 错误位置索引
-	 * @param text  原始文本，不可为 null
-	 * @return 包含可视化定位信息的字符串
-	 */
-	@NotNull
-	private static String generationLocation(int index, @NotNull String text) {
-		Objects.requireNonNull(text, "text is null");
+		@NotNull
+		public Builder ofCause(@Nullable Throwable cause) {
+			this.cause = cause;
+			return this;
+		}
 
-		int safeIndex = Math.max(0, index);
-		return "\n| " + text
-			+ "\n| " + ("~".repeat(safeIndex)) + "^" + ("~".repeat(Math.max(0, text.length() - safeIndex - 1)));
-	}
+		@NotNull
+		public Builder ofFile(@Nullable String fileName) {
+			this.fileName = fileName;
+			return this;
+		}
 
-	/**
-	 * 根据指定索引和长度生成错误范围的可视化指示信息。
-	 * <p>
-	 * 示例输出：
-	 * <pre>
-	 * | abcdef
-	 * | ~~^^^~
-	 * </pre>
-	 * </p>
-	 *
-	 * @param index  错误起始位置索引
-	 * @param length 错误长度
-	 * @param text   原始文本，不可为 null
-	 * @return 包含可视化定位信息的字符串
-	 */
-	@NotNull
-	private static String generationLocation(int index, int length, @NotNull String text) {
-		Objects.requireNonNull(text, "text is null");
+		@NotNull
+		public Builder ofLine(int line) {
+			this.line = line;
+			return this;
+		}
 
-		int safeIndex = Math.max(0, index);
-		int safeLength = Math.max(0, length);
-		return "\n| " + text
-			+ "\n| " + ("~".repeat(safeIndex)) + ("^".repeat(safeLength)) + ("~".repeat(Math.max(0, text.length() - safeIndex - safeLength)));
+		@NotNull
+		public Builder ofColumnRange(int start, int end) {
+			this.startColumn = start;
+			this.endColumn = end;
+			return this;
+		}
+
+		@NotNull
+		public Builder ofColumn(int index) {
+			return this.ofColumnRange(index, index + 1);
+		}
+
+		@NotNull
+		public Builder ofColumn(int index, int length) {
+			return this.ofColumnRange(index, index + length);
+		}
+
+		@NotNull
+		public Builder ofSource(@Nullable String source) {
+			this.sourceLine = source;
+			return this;
+		}
+
+		@NotNull
+		public SyntaxException build() {
+			SyntaxException exception = new SyntaxException(this.message, this.line, this.startColumn, this.endColumn, this.fileName, this.sourceLine);
+			if (this.cause != null)
+				exception.initCause(this.cause);
+
+			return exception;
+		}
 	}
 }

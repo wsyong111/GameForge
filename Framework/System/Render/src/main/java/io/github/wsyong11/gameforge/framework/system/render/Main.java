@@ -1,10 +1,12 @@
 package io.github.wsyong11.gameforge.framework.system.render;
 
 import io.github.wsyong11.gameforge.framework.Identifier;
+import io.github.wsyong11.gameforge.framework.ex.SyntaxException;
 import io.github.wsyong11.gameforge.framework.system.log.core.LogLevel;
 import io.github.wsyong11.gameforge.framework.system.log.core.LogManager;
 import io.github.wsyong11.gameforge.framework.system.render.context.RenderContext;
 import io.github.wsyong11.gameforge.framework.system.render.mesh.Mesh;
+import io.github.wsyong11.gameforge.framework.system.render.mesh.ex.MeshLoadException;
 import io.github.wsyong11.gameforge.framework.system.render.mesh.loader.ObjMeshLoader;
 import io.github.wsyong11.gameforge.framework.system.render.renderer.Renderer;
 import io.github.wsyong11.gameforge.framework.system.render.renderer.RendererContext;
@@ -37,6 +39,10 @@ public class Main {
 
 			try (InputStream stream = resourceManager.getResource(Identifier.withDefaultNamespace("model/teapot.obj")).openStream()) {
 				new ObjMeshLoader().load(stream);
+			} catch (MeshLoadException e) {
+				Throwable cause = e.getCause();
+				if (cause instanceof SyntaxException ex)
+					System.err.println(ex.getFormattedMessage());
 			}
 
 //			System.out.println("=".repeat(32));

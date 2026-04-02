@@ -19,7 +19,7 @@ public class MimeType implements Comparable<MimeType> {
 
 		int typeSplitIndex = mime.indexOf('/');
 		if (typeSplitIndex == -1)
-			throw new SyntaxException("Missing subtype", mime.length(), mime);
+			throw SyntaxException.atIndex("Missing subtype", mime.length(), mime);
 
 		int parameterStartIndex = mime.indexOf(';', typeSplitIndex);
 		if (parameterStartIndex == -1) {
@@ -27,10 +27,10 @@ public class MimeType implements Comparable<MimeType> {
 			String subtype = mime.substring(typeSplitIndex + 1).trim();
 
 			if (!isWildcard(type) && !isValidToken(type))
-				throw new SyntaxException("Type is not a valid token", 0, typeSplitIndex, mime);
+				throw SyntaxException.atRange("Type is not a valid token", 0, typeSplitIndex, mime);
 
 			if (!isWildcard(subtype) && !isValidToken(subtype))
-				throw new SyntaxException("Subtype is not a valid token", typeSplitIndex + 1, mime);
+				throw SyntaxException.atIndex("Subtype is not a valid token", typeSplitIndex + 1, mime);
 
 			return of(type.trim(), subtype.trim());
 		}
@@ -62,12 +62,12 @@ public class MimeType implements Comparable<MimeType> {
 
 			int splitIndex = mime.indexOf('=', index);
 			if (splitIndex == -1)
-				throw new SyntaxException("Parameter incomplete", length, mime);
+				throw SyntaxException.atIndex("Parameter incomplete", length, mime);
 			String rawKey = mime.substring(index, splitIndex);
 			String key = rawKey.trim();
 
 			if (key.isEmpty())
-				throw new SyntaxException("Parameter key is empty", index - 1, mime);
+				throw SyntaxException.atIndex("Parameter key is empty", index - 1, mime);
 
 			index += rawKey.length();
 			index += 1; // '='
@@ -81,7 +81,7 @@ public class MimeType implements Comparable<MimeType> {
 			}
 
 			if (index >= length)
-				throw new SyntaxException("Parameter incomplete", index, mime);
+				throw SyntaxException.atIndex("Parameter incomplete", index, mime);
 
 			boolean quotesMode = mime.codePointAt(index) == '"';
 			if (quotesMode)
@@ -104,7 +104,7 @@ public class MimeType implements Comparable<MimeType> {
 				index += Character.charCount(c);
 
 				if (quotesMode && index >= length)
-					throw new SyntaxException("Quotes are not closed", index, mime);
+					throw SyntaxException.atIndex("Quotes are not closed", index, mime);
 			}
 			String rawValue = mime.substring(valueStartIndex, index);
 
@@ -119,7 +119,7 @@ public class MimeType implements Comparable<MimeType> {
 			} else {
 				String trimValue = rawValue.trim();
 				if (!isValidToken(trimValue))
-					throw new SyntaxException("Parameter value is not a valid token", valueStartIndex, index - valueStartIndex, mime);
+					throw SyntaxException.atRange("Parameter value is not a valid token", valueStartIndex, index - valueStartIndex, mime);
 
 				value = trimValue;
 			}
