@@ -1,24 +1,45 @@
 package io.github.wsyong11.gameforge.framework.system.render.mesh;
 
-import org.jetbrains.annotations.Contract;
+import io.github.wsyong11.gameforge.framework.Identifier;
+import io.github.wsyong11.gameforge.framework.annotation.nio.DirectBuffer;
 import org.jetbrains.annotations.NotNull;
-import org.joml.Vector3f;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnmodifiableView;
+
+import java.nio.IntBuffer;
+import java.util.Objects;
+import java.util.Set;
 
 public interface Mesh extends AutoCloseable {
-	@Contract("_, _, -> param2")
-	@NotNull
-	Vector3f getVertex(int index, @NotNull Vector3f dest);
+	String ATTR_POSITION = "pos";
+	String ATTR_NORMAL = "normal";
+	String ATTR_UV = "uv";
 
 	@NotNull
-	default Vector3f getVertex(int index) {
-		return this.getVertex(index, new Vector3f());
+	Identifier getId();
+
+	@Nullable
+	VertexAttribute getAttribute(@NotNull String name);
+
+	default boolean hasAttribute(@NotNull String name) {
+		Objects.requireNonNull(name, "name is null");
+		return this.getAttributes().contains(name);
 	}
+
+	@NotNull
+	@UnmodifiableView
+	Set<String> getAttributes();
+
+	@NotNull
+	@DirectBuffer
+	@UnmodifiableView
+	IntBuffer getIndexBuffer();
+
+	int getIndexCount();
 
 	int getVertexCount();
 
-//
-//	@NotNull
-//	FaceAttribute getVertex(int index);
+	Backed
 
 	@Override
 	void close();
