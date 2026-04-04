@@ -1,4 +1,4 @@
-package io.github.wsyong11.gameforge.framework.system.render.mesh;
+package io.github.wsyong11.gameforge.framework.system.render.mesh.vertex;
 
 import org.jetbrains.annotations.NotNull;
 

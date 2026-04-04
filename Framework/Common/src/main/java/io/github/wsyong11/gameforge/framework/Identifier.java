@@ -64,6 +64,11 @@ public class Identifier implements Comparable<Identifier> {
 		return of(namespace, path);
 	}
 
+	@NotNull
+	public static Identifier parseTolerance(@NotNull String identifier) {
+		return parse(identifier, DEFAULT_NAMESPACE);
+	}
+
 	// -------------------------------------------------------------------------------------------------------------- //
 
 	public static boolean isPathChar(char c) {

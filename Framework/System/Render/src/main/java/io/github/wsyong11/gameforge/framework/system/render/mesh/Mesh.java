@@ -2,6 +2,7 @@ package io.github.wsyong11.gameforge.framework.system.render.mesh;
 
 import io.github.wsyong11.gameforge.framework.Identifier;
 import io.github.wsyong11.gameforge.framework.annotation.nio.DirectBuffer;
+import io.github.wsyong11.gameforge.framework.system.render.mesh.vertex.VertexAttribute;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
@@ -38,8 +39,6 @@ public interface Mesh extends AutoCloseable {
 	int getIndexCount();
 
 	int getVertexCount();
-
-	Backed
 
 	@Override
 	void close();

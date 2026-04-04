@@ -1,6 +1,7 @@
-package io.github.wsyong11.gameforge.framework.system.render.mesh;
+package io.github.wsyong11.gameforge.framework.system.render.mesh.vertex;
 
 import io.github.wsyong11.gameforge.framework.Color;
+import io.github.wsyong11.gameforge.framework.system.render.mesh.MeshBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2fc;
 import org.joml.Vector3fc;

@@ -6,38 +6,51 @@
 	"attribute": [
 		{
 			"name": "a_position",
-			"type": "vec3"
+          "type": "vec3",
+          "semantic": "POSITION"
 		},
 		{
 			"name": "a_color",
 			"type": "vec4",
+          "semantic": "COLOR",
 			"default": [0.0, 0.0, 0.0, 1.0]
 		}
 	],
 	"uniform": {
 		"u_model": {
 			"system": true,
-			"type": "mat4x4"
+          "type": "mat4x4",
+          "semantic": "model"
 		},
 		"u_view": {
 			"system": true,
-			"type": "mat4x4"
+          "type": "mat4x4",
+          "semantic": "camera/view"
 		},
 		"u_projection": {
 			"system": true,
-			"type": "mat4x4"
+          "type": "mat4x4",
+          "semantic": "projection"
 		},
 		"u_time": {
 			"system": true,
-			"type": "float"
+          "type": "float",
+          "semantic": "misc/time"
 		},
 		"u_color": {
 			"type": "vec4",
-			"default": [0.0, 0.0, 0.0, 1.0]
+          "default": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "semantic": "material/color"
 		},
 		"u_screenSize": {
 			"system": true,
-			"type": "vec2"
+          "type": "vec2",
+          "semantic": "screenSize"
 		}
 	}
 }

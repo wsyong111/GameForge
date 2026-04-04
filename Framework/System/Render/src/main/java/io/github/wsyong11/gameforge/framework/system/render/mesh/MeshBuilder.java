@@ -1,5 +1,6 @@
 package io.github.wsyong11.gameforge.framework.system.render.mesh;
 
+import io.github.wsyong11.gameforge.framework.system.render.mesh.vertex.VertexBuilder;
 import org.jetbrains.annotations.NotNull;
 
 public interface MeshBuilder {
