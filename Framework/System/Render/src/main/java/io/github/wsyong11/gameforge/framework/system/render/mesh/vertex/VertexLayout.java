@@ -33,16 +33,19 @@ public class VertexLayout {
 
 		this.items = List.copyOf(items);
 
-		this.itemMap = new HashMap<>();
-		this.itemKeyMap = new HashMap<>();
+		Map<Identifier, Item> itemMap = new HashMap<>();
+		HashMap<String, Item> itemKeyMap = new HashMap<>();
 		for (Item item : items) {
 			Identifier semantic = item.getSemantic();
-			if (this.itemMap.containsKey(semantic))
+			if (itemMap.containsKey(semantic))
 				throw new IllegalArgumentException("Duplicate semantic found in items: " + semantic);
 
-			this.itemMap.put(semantic, item);
-			this.itemKeyMap.put(item.getKey(), item);
+			itemMap.put(semantic, item);
+			itemKeyMap.put(item.getKey(), item);
 		}
+
+		this.itemMap = Collections.unmodifiableMap(itemMap);
+		this.itemKeyMap = Collections.unmodifiableMap(itemKeyMap);
 	}
 
 	@NotNull
@@ -65,6 +68,27 @@ public class VertexLayout {
 	public boolean hasKey(@NotNull String key) {
 		Objects.requireNonNull(key, "key is null");
 		return this.itemKeyMap.containsKey(key);
+	}
+
+	public int getStride() {
+		int size = 0;
+		for (Item item : this.items)
+			size = item.getDataType().getByteSize();
+		return size;
+	}
+
+	public int getOffset(@NotNull Identifier semantic) {
+		Objects.requireNonNull(semantic, "semantic is null");
+
+		int offset = 0;
+		for (Item item : this.items) {
+			if (semantic.equals(item.getSemantic()))
+				return offset;
+
+			offset += item.getDataType().getByteSize();
+		}
+
+		throw new IllegalArgumentException("Semantic is not in layout");
 	}
 
 	@NotNull
@@ -101,6 +125,21 @@ public class VertexLayout {
 		@NotNull
 		public Identifier getSemantic() {
 			return this.semantic;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			Item item = (Item) o;
+			return Objects.equals(this.key, item.key)
+				&& Objects.equals(this.dataType, item.dataType)
+				&& Objects.equals(this.semantic, item.semantic);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(this.key, this.dataType, this.semantic);
 		}
 
 		@Override
