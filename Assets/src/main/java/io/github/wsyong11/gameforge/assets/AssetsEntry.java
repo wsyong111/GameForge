@@ -8,11 +8,12 @@ import java.util.Objects;
 
 public class AssetsEntry {
 	private final String name;
-
-	private final ClassLoader classLoader;
 	private final long size;
 
+	private final ClassLoader classLoader;
+
 	AssetsEntry(@NotNull ClassLoader classLoader, @NotNull String name, long size) {
+		Objects.requireNonNull(classLoader, "classLoader is null");
 		Objects.requireNonNull(name, "name is null");
 
 		this.name = name;
@@ -29,6 +30,11 @@ public class AssetsEntry {
 	@Nullable
 	public InputStream openStream() {
 		return this.classLoader.getResourceAsStream(this.name);
+	}
+
+	@NotNull
+	public ClassLoader getClassLoader() {
+		return this.classLoader;
 	}
 
 	public long getSize() {

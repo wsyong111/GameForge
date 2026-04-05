@@ -1,4 +1,4 @@
-package io.github.wsyong11.gameforge.framework.system.resource.ex;
+package io.github.wsyong11.gameforge.framework.ex.io;
 
 import org.jetbrains.annotations.Nullable;
 

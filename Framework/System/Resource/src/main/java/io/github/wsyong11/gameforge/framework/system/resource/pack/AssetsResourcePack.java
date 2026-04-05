@@ -31,6 +31,12 @@ public class AssetsResourcePack implements ResourcePack {
 	private static final Map<ResourcePath, AssetsResource> ENTRY_MAP;
 
 	static {
+		try {
+			Assets.ensure();
+		} catch (IOException e) {
+			throw new ExceptionInInitializerError(e);
+		}
+
 		ENTRY_MAP = Assets
 			.getEntries()
 			.stream()

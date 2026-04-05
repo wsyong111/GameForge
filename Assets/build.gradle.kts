@@ -31,15 +31,6 @@ val generateAssetListTask = tasks.register("generateAssetList") {
 			dataStream.writeUTF(path)
 			dataStream.writeLong(fileSize)
 		}
-//			.map { file ->
-//				val filePath = file
-//					.relativeTo(inputDir)
-//					.toString()
-//					.replace('\\', '/')
-//				val fileSize = file.length()
-//				filePath + "\t" + fileSize
-//			}
-//			.joinToString("\n")
 
 		outputFile.asFile.parentFile.mkdirs()
 		outputFile.asFile.writeBytes(stream.toByteArray())

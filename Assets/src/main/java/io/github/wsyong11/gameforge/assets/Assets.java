@@ -9,46 +9,26 @@ import java.util.List;
 import java.util.Objects;
 
 public final class Assets {
-	//	private static final String RESOURCE_LIST_LOCATION = "resource_list.txt";
 	private static final String RESOURCE_LIST_LOCATION = "resource_list";
 
-	private static final List<AssetsEntry> entries;
+	private static volatile List<AssetsEntry> entries = null;
 
-	static {
-		ClassLoader classLoader = Assets.class.getClassLoader();
-//		try (InputStream stream = classLoader.getResourceAsStream(RESOURCE_LIST_LOCATION)) {
-//			if (stream == null)
-//				throw new ExceptionInInitializerError("Cannot read " + RESOURCE_LIST_LOCATION);
-//
-//			BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
-//			entries = reader
-//				.lines()
-//				.filter(entry -> !entry.isEmpty())
-//				.map(entry -> entry.split("\t"))
-//				.filter(entry -> entry.length == 2)
-//				.map(entry -> {
-//					long size;
-//					try {
-//						size = Long.parseLong(entry[1]);
-//					} catch (NumberFormatException e) {
-//						return null;
-//					}
-//
-//					return new AssetsEntry(classLoader, entry[0], size);
-//				})
-//				.filter(Objects::nonNull)
-//				.toList();
-//		} catch (IOException | UncheckedIOException e) {
-//			throw new ExceptionInInitializerError(e);
-//		}
+	public static void ensure() throws IOException {
+		if (entries != null)
+			return;
 
-		try (InputStream stream = classLoader.getResourceAsStream(RESOURCE_LIST_LOCATION)) {
-			if (stream == null)
-				throw new ExceptionInInitializerError("Cannot read " + RESOURCE_LIST_LOCATION);
+		synchronized (Assets.class) {
+			if (entries != null)
+				return;
 
-			entries = List.copyOf(parseByteData(classLoader, new BufferedInputStream(stream)));
-		} catch (IOException | UncheckedIOException e) {
-			throw new ExceptionInInitializerError(e);
+			ClassLoader classLoader = Assets.class.getClassLoader();
+
+			try (InputStream stream = classLoader.getResourceAsStream(RESOURCE_LIST_LOCATION)) {
+				if (stream == null)
+					throw new FileNotFoundException("Cannot read " + RESOURCE_LIST_LOCATION);
+
+				entries = List.copyOf(parseByteData(classLoader, new BufferedInputStream(stream)));
+			}
 		}
 	}
 
@@ -79,6 +59,9 @@ public final class Assets {
 	@Unmodifiable
 	@NotNull
 	public static List<AssetsEntry> getEntries() {
+		if (entries == null)
+			throw new IllegalStateException("Assets list is not load");
+
 		return entries;
 	}
 

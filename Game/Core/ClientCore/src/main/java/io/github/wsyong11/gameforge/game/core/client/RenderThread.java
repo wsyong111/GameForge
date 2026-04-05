@@ -6,7 +6,6 @@ import io.github.wsyong11.gameforge.framework.lifecycle.LifecycleProvider;
 import io.github.wsyong11.gameforge.framework.lifecycle.LifecycleState;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
-import io.github.wsyong11.gameforge.framework.system.render.RenderSystem;
 import io.github.wsyong11.gameforge.framework.system.render.ex.RenderSystemInitiationException;
 import io.github.wsyong11.gameforge.framework.system.render.impl.opengl.OpenGL330RenderEngine;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourceProvider;
