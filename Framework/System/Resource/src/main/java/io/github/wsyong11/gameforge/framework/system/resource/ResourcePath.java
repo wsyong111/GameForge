@@ -8,8 +8,8 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class ResourcePath {
-	public static final String separator = "/";
-	public static final char separatorChar = '/';
+	public static final String SEPARATOR = "/";
+	public static final char SEPARATOR_CHAR = '/';
 
 	@NotNull
 	public static ResourcePath of(@NotNull String path) {
@@ -20,7 +20,7 @@ public class ResourcePath {
 	@NotNull
 	public static ResourcePath of(String... paths) {
 		Objects.requireNonNull(paths, "paths is null");
-		return new ResourcePath(String.join(separator, paths));
+		return new ResourcePath(String.join(SEPARATOR, paths));
 	}
 
 	@NotNull
@@ -30,14 +30,14 @@ public class ResourcePath {
 		if (path.isEmpty())
 			return ArrayUtils.EMPTY_STRING_ARRAY;
 
-		return Arrays.stream(path.replace('\\', separatorChar).split(separator))
+		return Arrays.stream(path.replace('\\', SEPARATOR_CHAR).split(SEPARATOR))
 			.filter(s -> !s.isEmpty())
 			.toArray(String[]::new);
 	}
 
 	private static boolean isDirectory(@NotNull String path) {
 		Objects.requireNonNull(path, "path is null");
-		return path.endsWith(separator);
+		return path.endsWith(SEPARATOR);
 	}
 
 	private final String[] path;
@@ -202,7 +202,20 @@ public class ResourcePath {
 	public ResourcePath resolve(@NotNull String... path) {
 		Objects.requireNonNull(path, "path is null");
 		// FIX: resolve("path/to", "the", "path")
-		return this.resolve(String.join(separator, path));
+		return this.resolve(String.join(SEPARATOR, path));
+	}
+
+	@NotNull
+	public String getExtension() {
+		if (this.directory)
+			return "";
+
+		String name = this.getName();
+		int extensionIndex = name.lastIndexOf('.');
+		if (extensionIndex == -1)
+			return "";
+
+		return name.substring(extensionIndex);
 	}
 
 	@NotNull
@@ -230,22 +243,9 @@ public class ResourcePath {
 	@Override
 	public String toString() {
 		if (this.fullPath == null)
-			this.fullPath = String.join(separator, this.path)
-				+ (this.directory ? separator : "");
+			this.fullPath = String.join(SEPARATOR, this.path)
+				+ (this.directory ? SEPARATOR : "");
 
 		return this.fullPath;
-	}
-
-	@NotNull
-	public String getExtension() {
-		if (this.directory)
-			return "";
-
-		String name = this.getName();
-		int extensionIndex = name.lastIndexOf('.');
-		if (extensionIndex == -1)
-			return "";
-
-		return name.substring(extensionIndex);
 	}
 }

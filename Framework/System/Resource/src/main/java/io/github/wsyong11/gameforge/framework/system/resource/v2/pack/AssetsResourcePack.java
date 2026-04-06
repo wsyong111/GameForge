@@ -5,7 +5,6 @@ import io.github.wsyong11.gameforge.assets.AssetsEntry;
 import io.github.wsyong11.gameforge.framework.ex.io.FileClosedException;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
-import io.github.wsyong11.gameforge.framework.system.resource.v2.ex.ResourceException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -28,10 +27,12 @@ public class AssetsResourcePack implements ResourcePack {
 	private boolean closed;
 
 	public AssetsResourcePack() {
-		this.closed = false;
+		this.resourceMap = null;
+		this.loaded = false;
+
 		this.childCache = new ConcurrentHashMap<>();
 
-		this.resourceMap = null;
+		this.closed = false;
 	}
 
 	private void ensureAssets() throws IOException {
@@ -78,37 +79,66 @@ public class AssetsResourcePack implements ResourcePack {
 		if (!this.isDirectory(path))
 			return List.of();
 
+		ResourcePath directory = path.toDirectory();
 		return this.childCache.computeIfAbsent(path, k -> this.resourceMap
 			.keySet()
 			.stream()
-			.filter(r -> path.equals(r.parent()))
+			.filter(r -> directory.equals(r.parent()))
 			.toList());
 	}
 
 	@NotNull
 	@Override
 	public List<ResourcePath> list(@NotNull ResourcePath path) throws IOException {
+		Objects.requireNonNull(path, "path is null");
+
 		this.ensureAssets();
-		this.childCache.computeIfAbsent(path, k -> this.assetsEntries
-			.stream()
-			.filter(r -> r.getPath().startsWith(path))
-			.toList())
+		return this.getChildItems(path);
 	}
 
 	@NotNull
 	@Override
-	public Resource get(@NotNull ResourcePath path) throws ResourceException {
-		return null;
+	public Resource get(@NotNull ResourcePath path) throws IOException {
+		Objects.requireNonNull(path, "path is null");
+
+		this.ensureAssets();
+		AssetsResource resource = this.resourceMap.get(path);
+		if (resource == null)
+			throw new FileNotFoundException(path.toString());
+
+		return resource;
 	}
 
 	@Override
-	public long getSize(@NotNull ResourcePath path) {
-		return 0;
+	public long getSize(@NotNull ResourcePath path) throws IOException {
+		Objects.requireNonNull(path, "path is null");
+		return this.get(path).getSize();
 	}
 
 	@Override
 	public boolean exist(@NotNull ResourcePath path) {
-		return false;
+		Objects.requireNonNull(path, "path is null");
+
+		if (path.isEmpty())
+			return true; // 根目录一定存在
+
+		try {
+			this.ensureAssets();
+		} catch (IOException e) {
+			return false;
+		}
+
+		if (this.resourceMap.containsKey(path.toFile()))
+			return true;
+
+		ResourcePath directory = path.toDirectory();
+		if (this.childCache.containsKey(directory))
+			return true;
+
+		return this.resourceMap
+			.keySet()
+			.stream()
+			.anyMatch(r -> directory.equals(r.parent()) || r.startsWith(directory));
 	}
 
 	@Override
@@ -121,17 +151,24 @@ public class AssetsResourcePack implements ResourcePack {
 	@Override
 	public boolean isFile(@NotNull ResourcePath path) {
 		Objects.requireNonNull(path, "path is null");
-		return false;
+		return this.resourceMap.containsKey(path.toFile());
 	}
 
 	@Override
-	public void walk(@NotNull PackWalkVisitor visitor) throws IOException {
+	public void walk(@NotNull ResourcePath path, int maxDepths, @NotNull ResourceWalkVisitor visitor) throws IOException {
+		Objects.requireNonNull(path, "path is null");
+		Objects.requireNonNull(visitor, "visitor is null");
+
 
 	}
 
 	@Override
 	public void close() throws IOException {
+		if (this.closed)
+			return;
 		this.closed = true;
+
+
 	}
 
 	private static class AssetsResource implements Resource {
