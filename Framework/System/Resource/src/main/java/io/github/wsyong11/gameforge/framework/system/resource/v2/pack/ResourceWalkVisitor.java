@@ -13,16 +13,16 @@ public interface ResourceWalkVisitor {
 	}
 
 	@NotNull
-	VisitResult visitFile(@NotNull ResourcePath path) throws IOException;
-
-	@NotNull
 	default VisitResult postVisitDirectory(@NotNull ResourcePath path, @Nullable IOException exception) throws IOException {
 		return VisitResult.CONTINUE;
 	}
 
 	@NotNull
-	default VisitResult visitFailed(@NotNull ResourcePath path, @NotNull IOException exception) {
-		return VisitResult.TERMINATE;
+	VisitResult visitFile(@NotNull ResourcePath path) throws IOException;
+
+	@NotNull
+	default VisitResult visitFileFailed(@NotNull ResourcePath path, @NotNull IOException exception) throws IOException {
+		throw exception;
 	}
 
 	enum VisitResult {

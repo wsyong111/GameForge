@@ -164,7 +164,7 @@ public class ZipResourcePack implements ResourcePack, Closeable {
 
 		@Override
 		public String toString() {
-			return "ZipResource[\"" + this.filePath + "!" + ResourcePath.separator + this.path + "\"]";
+			return "ZipResource[\"" + this.filePath + "!" + ResourcePath.SEPARATOR + this.path + "\"]";
 		}
 	}
 }

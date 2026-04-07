@@ -1,38 +1,57 @@
 package io.github.wsyong11.gameforge.framework.system.resource;
 
+import io.github.wsyong11.gameforge.util.collection.ArrayIterators;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Locale;
 import java.util.Objects;
 
-public class ResourcePath {
+public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> {
 	public static final String SEPARATOR = "/";
 	public static final char SEPARATOR_CHAR = '/';
+
+	public static final ResourcePath ROOT = new ResourcePath(ArrayUtils.EMPTY_STRING_ARRAY, true);
 
 	@NotNull
 	public static ResourcePath of(@NotNull String path) {
 		Objects.requireNonNull(path, "path is null");
-		return new ResourcePath(path);
+
+		if (isRoot(path))
+			return ROOT;
+
+		return new ResourcePath(splitPath(path), isDirectory(path));
+	}
+
+	private static boolean isRoot(@NotNull String path) {
+		Objects.requireNonNull(path, "path is null");
+
+		if (path.length() != 1)
+			return false;
+
+		char c = path.charAt(0);
+		return c == SEPARATOR_CHAR || c == '\\';
 	}
 
 	@NotNull
 	public static ResourcePath of(String... paths) {
 		Objects.requireNonNull(paths, "paths is null");
-		return new ResourcePath(String.join(SEPARATOR, paths));
+		return of(String.join(SEPARATOR, paths));
 	}
 
 	@NotNull
 	private static String[] splitPath(@NotNull String path) {
 		Objects.requireNonNull(path, "path is null");
 
-		if (path.isEmpty())
+		if (path.isEmpty() || isRoot(path))
 			return ArrayUtils.EMPTY_STRING_ARRAY;
 
 		return Arrays.stream(path.replace('\\', SEPARATOR_CHAR).split(SEPARATOR))
-			.filter(s -> !s.isEmpty())
-			.toArray(String[]::new);
+		             .filter(s -> !s.isEmpty())
+		             .toArray(String[]::new);
 	}
 
 	private static boolean isDirectory(@NotNull String path) {
@@ -56,10 +75,6 @@ public class ResourcePath {
 
 		this.fullPath = null;
 		this.hash = Integer.MAX_VALUE;
-	}
-
-	protected ResourcePath(@NotNull String path) {
-		this(splitPath(path), isDirectory(path));
 	}
 
 	public boolean isDirectory() {
@@ -94,10 +109,14 @@ public class ResourcePath {
 
 	@NotNull
 	public ResourcePath parent() {
-		if (this.path.length == 0)
+		if (this.isEmpty())
 			return this.toDirectory();
 
 		return new ResourcePath(Arrays.copyOf(this.path, this.path.length - 1), true);
+	}
+
+	public boolean isRoot() {
+		return this.isEmpty() && this.directory;
 	}
 
 	@NotNull
@@ -206,6 +225,30 @@ public class ResourcePath {
 	}
 
 	@NotNull
+	public ResourcePath lower() {
+		String[] path = new String[this.path.length];
+		for (int i = 0; i < this.path.length; i++)
+			path[i] = this.path[i].toLowerCase(Locale.ROOT);
+
+		return new ResourcePath(path, this.directory);
+	}
+
+	@NotNull
+	public ResourcePath upper() {
+		String[] path = new String[this.path.length];
+		for (int i = 0; i < this.path.length; i++)
+			path[i] = this.path[i].toUpperCase(Locale.ROOT);
+
+		return new ResourcePath(path, this.directory);
+	}
+
+	@NotNull
+	public String indexOf(int index) {
+		Objects.checkIndex(index, this.path.length);
+		return this.path[index];
+	}
+
+	@NotNull
 	public String getExtension() {
 		if (this.directory)
 			return "";
@@ -221,6 +264,39 @@ public class ResourcePath {
 	@NotNull
 	public String[] toArray() {
 		return Arrays.copyOf(this.path, this.path.length);
+	}
+
+	@NotNull
+	@Override
+	public Iterator<String> iterator() {
+		return ArrayIterators.iterator(this.path);
+	}
+
+	@Override
+	public int compareTo(@NotNull ResourcePath o) {
+		Objects.requireNonNull(o, "o is null");
+
+		if (this.isDirectory() && !o.isDirectory())
+			return -1;
+
+		if (!this.isDirectory() && o.isDirectory())
+			return 1;
+
+		int nameCompare = this.getName().compareTo(o.getName());
+		if (nameCompare != 0)
+			return nameCompare;
+
+		int length = this.length();
+		int otherLength = o.length();
+
+		int len = Math.min(length, otherLength);
+		for (int i = 0; i < len; i++) {
+			int cmp = this.indexOf(i).compareTo(o.indexOf(i));
+			if (cmp != 0)
+				return cmp;
+		}
+
+		return Integer.compare(length, otherLength);
 	}
 
 	@Override
