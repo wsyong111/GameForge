@@ -1,23 +1,22 @@
 package io.github.wsyong11.gameforge.framework.system.resource.v2.pack;
 
-import io.github.wsyong11.gameforge.framework.ex.io.FileClosedException;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
-import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.Unmodifiable;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Path;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Objects;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-public class ZipResourcePack implements ResourcePack, Closeable {
+public class ZipResourcePack extends FlatResourcePack<ZipResourcePack.ZipResource> implements Closeable {
 	private static final Logger LOGGER = Log.getLogger();
 
 	private final Path path;
@@ -34,11 +33,6 @@ public class ZipResourcePack implements ResourcePack, Closeable {
 		this.loadFile();
 	}
 
-	private void ensureOpen() throws IOException {
-		if (this.closed)
-			throw new FileClosedException();
-	}
-
 	private synchronized void loadFile() throws IOException {
 		if (this.file != null)
 			this.closeFile();
@@ -51,8 +45,9 @@ public class ZipResourcePack implements ResourcePack, Closeable {
 			this.file.close();
 		} catch (IOException e) {
 			LOGGER.warn("Failed to close the zip file", e);
+		} finally {
+			this.file = null;
 		}
-		this.file = null;
 	}
 
 	@Nullable
@@ -61,48 +56,68 @@ public class ZipResourcePack implements ResourcePack, Closeable {
 		return this.path.toUri();
 	}
 
+	@NotNull
+	@Override
+	protected Iterator<ZipResource> getResourceList() throws IOException {
+		try {
+			return this.file
+				.stream()
+				.map(entry -> new ZipResource(this.file, entry))
+				.iterator();
+		} catch (IllegalStateException e) {
+			throw new IOException(e);
+		}
+	}
+
 	@Override
 	public void refresh() throws IOException {
-		this.ensureOpen();
 		this.loadFile();
-	}
-
-	@NotNull
-	@Unmodifiable
-	@Override
-	public List<ResourcePath> list(@NotNull ResourcePath path) throws IOException {
-		this.ensureOpen();
-
-		return List.of();
-	}
-
-	@Override
-	public @NotNull Resource get(@NotNull ResourcePath path) throws IOException {
-		this.ensureOpen();
-		return null;
-	}
-
-	@Override
-	public boolean exist(@NotNull ResourcePath path) {
-		return false;
-	}
-
-	@Override
-	public boolean isDirectory(@NotNull ResourcePath path) {
-		return false;
-	}
-
-	@Override
-	public boolean isFile(@NotNull ResourcePath path) {
-		return false;
+		super.refresh();
 	}
 
 	@Override
 	public void close() throws IOException {
-		if (this.closed)
-			return;
-		this.closed = true;
+		try {
+			super.close();
+		} finally {
+			this.closeFile();
+		}
+	}
 
-		this.closeFile();
+	protected class ZipResource extends AbstractResource {
+		private final ZipFile file;
+		private final ZipEntry entry;
+		private final ResourcePath path;
+
+		public ZipResource(@NotNull ZipFile file, @NotNull ZipEntry entry) {
+			Objects.requireNonNull(file, "file is null");
+			Objects.requireNonNull(entry, "entry is null");
+
+			this.file = file;
+			this.entry = entry;
+
+			this.path = ResourcePath.of(this.entry.getName());
+		}
+
+		@NotNull
+		@Override
+		public InputStream openStream() throws IOException {
+			this.ensurePackOpen();
+			return this.file.getInputStream(this.entry);
+		}
+
+		@NotNull
+		@Override
+		public ResourcePath getPath() {
+			return this.path;
+		}
+
+		@Override
+		public long getSize() {
+			if (this.isPackClosed())
+				return -1L;
+
+			return this.entry.getSize();
+		}
 	}
 }
