@@ -23,14 +23,10 @@ public class AssetsResourcePack extends AbstractResourcePack {
 	private volatile Map<ResourcePath, List<ResourcePath>> fileTree;
 	private volatile boolean loaded;
 
-	private boolean closed;
-
 	public AssetsResourcePack() {
 		this.resourceMap = null;
 		this.fileTree = null;
 		this.loaded = false;
-
-		this.closed = false;
 	}
 
 	@Nullable
@@ -142,7 +138,7 @@ public class AssetsResourcePack extends AbstractResourcePack {
 	public boolean exist(@NotNull ResourcePath path) {
 		Objects.requireNonNull(path, "path is null");
 
-		if (this.closed)
+		if (this.isClosed())
 			return false;
 
 		if (path.isRoot())
@@ -162,7 +158,7 @@ public class AssetsResourcePack extends AbstractResourcePack {
 	public boolean isDirectory(@NotNull ResourcePath path) {
 		Objects.requireNonNull(path, "path is null");
 
-		if (this.closed)
+		if (this.isClosed())
 			return false;
 
 		try {
@@ -178,7 +174,7 @@ public class AssetsResourcePack extends AbstractResourcePack {
 	public boolean isFile(@NotNull ResourcePath path) {
 		Objects.requireNonNull(path, "path is null");
 
-		if (this.closed)
+		if (this.isClosed())
 			return false;
 
 		try {
@@ -192,12 +188,12 @@ public class AssetsResourcePack extends AbstractResourcePack {
 
 	@Override
 	public void close() throws IOException {
-		if (this.closed)
-			return;
-		this.closed = true;
+		super.close();
 
-		for (AssetsResource resource : this.resourceMap.values())
-			resource.close();
+		Map<ResourcePath, AssetsResource> resourceMap = this.resourceMap;
+		if (resourceMap != null)
+			for (AssetsResource resource : this.resourceMap.values())
+				resource.close();
 
 		this.fileTree = null;
 		this.resourceMap = null;
