@@ -5,6 +5,7 @@ import io.github.wsyong11.gameforge.assets.AssetsEntry;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,7 +18,7 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.Objects;
 
-public class AssetsResourcePack extends FlatResourcePack<AssetsResourcePack.AssetsResource> {
+public class AssetsResourcePack extends FlatResourcePack {
 	private static final Logger LOGGER = Log.getLogger();
 
 	@Nullable
@@ -37,12 +38,12 @@ public class AssetsResourcePack extends FlatResourcePack<AssetsResourcePack.Asse
 
 	@NotNull
 	@Override
-	protected Iterator<AssetsResource> getResourceList() throws IOException {
+	protected Iterator<Resource> getResourceList() throws IOException {
 		Assets.ensure();
 		return Assets
 			.getEntries()
 			.stream()
-			.map(AssetsResource::new)
+			.<Resource>map(AssetsResource::new)
 			.iterator();
 	}
 

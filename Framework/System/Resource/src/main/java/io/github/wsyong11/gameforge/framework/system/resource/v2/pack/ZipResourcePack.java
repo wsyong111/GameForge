@@ -3,6 +3,7 @@ package io.github.wsyong11.gameforge.framework.system.resource.v2.pack;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,21 +17,18 @@ import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-public class ZipResourcePack extends FlatResourcePack<ZipResourcePack.ZipResource> implements Closeable {
+public class ZipResourcePack extends FlatResourcePack implements Closeable {
 	private static final Logger LOGGER = Log.getLogger();
 
 	private final Path path;
 	private volatile ZipFile file;
 
-	private volatile boolean closed;
-
-	public ZipResourcePack(@NotNull Path path) throws IOException {
+	public ZipResourcePack(@NotNull Path path) {
 		Objects.requireNonNull(path, "path is null");
 
 		this.path = path;
 
 		this.file = null;
-		this.loadFile();
 	}
 
 	private synchronized void loadFile() throws IOException {
@@ -58,11 +56,11 @@ public class ZipResourcePack extends FlatResourcePack<ZipResourcePack.ZipResourc
 
 	@NotNull
 	@Override
-	protected Iterator<ZipResource> getResourceList() throws IOException {
+	protected Iterator<Resource> getResourceList() throws IOException {
 		try {
 			return this.file
 				.stream()
-				.map(entry -> new ZipResource(this.file, entry))
+				.<Resource>map(entry -> new ZipResource(this.file, entry))
 				.iterator();
 		} catch (IllegalStateException e) {
 			throw new IOException(e);

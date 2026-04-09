@@ -17,6 +17,7 @@ public class SeekableInputStream extends InputStream {
 	private final boolean root;
 
 	private long position;
+	private long markPosition;
 
 	public SeekableInputStream(@NotNull InputStream in, int maxCapacity) {
 		Objects.requireNonNull(in, "InputStream is null");
@@ -25,7 +26,9 @@ public class SeekableInputStream extends InputStream {
 		this.state.increaseRef();
 
 		this.root = true;
-		this.position = 0;
+		this.position = 0L;
+
+		this.markPosition = 0L;
 	}
 
 	public SeekableInputStream(@NotNull InputStream in) {
@@ -114,6 +117,21 @@ public class SeekableInputStream extends InputStream {
 	public SeekableInputStream duplicate() {
 		this.ensureOpen();
 		return new SeekableInputStream(this.state, this.position);
+	}
+
+	@Override
+	public synchronized void mark(int readLimit) {
+		this.markPosition = this.position;
+	}
+
+	@Override
+	public synchronized void reset() throws IOException {
+		this.seek(this.markPosition);
+	}
+
+	@Override
+	public boolean markSupported() {
+		return true;
 	}
 
 	@Override

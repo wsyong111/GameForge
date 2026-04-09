@@ -1,8 +1,6 @@
 package io.github.wsyong11.gameforge.framework.system.resource.v2.pack;
 
 import com.google.common.collect.Streams;
-import io.github.wsyong11.gameforge.framework.system.log.Log;
-import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
 import org.jetbrains.annotations.NotNull;
@@ -13,10 +11,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public abstract class FlatResourcePack<R extends AbstractResourcePack.AbstractResource> extends AbstractResourcePack {
-	private static final Logger LOGGER = Log.getLogger();
-
-	private volatile Map<ResourcePath, R> resourceMap;
+public abstract class FlatResourcePack extends AbstractResourcePack {
+	private volatile Map<ResourcePath, Resource> resourceMap;
 	private volatile Map<ResourcePath, List<ResourcePath>> fileTree;
 	private volatile boolean loaded;
 
@@ -27,69 +23,49 @@ public abstract class FlatResourcePack<R extends AbstractResourcePack.AbstractRe
 	}
 
 	@NotNull
-	protected abstract Iterator<R> getResourceList() throws IOException;
+	protected abstract Iterator<Resource> getResourceList() throws IOException;
 
-	private void ensureResource() throws IOException {
-		this.ensureOpen();
-
-		if (this.loaded)
-			return;
-
-		synchronized (this) {
-			if (this.loaded)
-				return;
-
-			Map<ResourcePath, R> resourceMap = Streams
-				.stream(this.getResourceList())
-				.collect(Collectors.toUnmodifiableMap(
-					Resource::getPath,
-					Function.identity()
-				));
-
-			Map<ResourcePath, Set<ResourcePath>> tree = new HashMap<>();
-			for (ResourcePath file : resourceMap.keySet()) {
-				ResourcePath current = file;
-
-				while (!current.isEmpty()) {
-					ResourcePath parent = current.parent();
-					tree.computeIfAbsent(parent, k -> new HashSet<>())
-					    .add(current);
-
-					current = parent;
-				}
-			}
-
-			tree.computeIfAbsent(ResourcePath.ROOT, k -> new HashSet<>());
-
-			this.fileTree = tree
-				.entrySet()
-				.stream()
-				.collect(Collectors.toUnmodifiableMap(
-					Map.Entry::getKey,
-					e -> List.copyOf(e.getValue())
-				));
-			this.resourceMap = resourceMap;
-			this.loaded = true;
-		}
-	}
-
-	private boolean ensureResourceSafe() {
-		try {
-			this.ensureResource();
-		} catch (IOException e) {
-			LOGGER.warn("Failed load resource", e);
-			return false;
-		}
-
-		return true;
+	private void ensureLoaded() throws IOException {
+		if (!this.loaded)
+			throw new IOException("Resource pack is not load");
 	}
 
 	@Override
-	public void refresh() throws IOException {
+	public synchronized void refresh() throws IOException {
 		this.ensureOpen();
 
-		this.loaded = false;
-		this.ensureResource();
+		Map<ResourcePath, Resource> resourceMap = Streams
+			.stream(this.getResourceList())
+			.collect(Collectors.toUnmodifiableMap(
+				Resource::getPath,
+				Function.identity()
+			));
+
+		Map<ResourcePath, Set<ResourcePath>> tree = new HashMap<>();
+		for (ResourcePath file : resourceMap.keySet()) {
+			ResourcePath current = file;
+
+			while (!current.isEmpty()) {
+				ResourcePath parent = current.parent();
+				tree.computeIfAbsent(parent, k -> new HashSet<>())
+				    .add(current);
+
+				current = parent;
+			}
+		}
+
+		tree.computeIfAbsent(ResourcePath.ROOT, k -> new HashSet<>());
+
+		this.fileTree = tree
+			.entrySet()
+			.stream()
+			.collect(Collectors.toUnmodifiableMap(
+				Map.Entry::getKey,
+				e -> List.copyOf(e.getValue())
+			));
+		this.resourceMap = resourceMap;
+
+		this.loaded = true;
 	}
 
 	@NotNull
@@ -98,7 +74,7 @@ public abstract class FlatResourcePack<R extends AbstractResourcePack.AbstractRe
 		Objects.requireNonNull(path, "path is null");
 
 		this.ensureOpen();
-		this.ensureResource();
+		this.ensureLoaded();
 
 		List<ResourcePath> children = this.fileTree.get(path.toDirectory());
 		if (children == null)
@@ -109,13 +85,13 @@ public abstract class FlatResourcePack<R extends AbstractResourcePack.AbstractRe
 
 	@NotNull
 	@Override
-	public R get(@NotNull ResourcePath path) throws IOException {
+	public Resource get(@NotNull ResourcePath path) throws IOException {
 		Objects.requireNonNull(path, "path is null");
 
 		this.ensureOpen();
-		this.ensureResource();
+		this.ensureLoaded();
 
-		R resource = this.resourceMap.get(path);
+		Resource resource = this.resourceMap.get(path);
 		if (resource == null)
 			throw new FileNotFoundException(path.toString());
 
@@ -129,11 +105,11 @@ public abstract class FlatResourcePack<R extends AbstractResourcePack.AbstractRe
 		if (this.isClosed())
 			return false;
 
+		if (this.loaded)
+			return false;
+
 		if (path.isRoot())
 			return true; // 根目录一定存在
-
-		if (!this.ensureResourceSafe())
-			return false;
 
 		return this.resourceMap.containsKey(path.toFile())
 			|| this.fileTree.containsKey(path.toDirectory());
@@ -146,7 +122,7 @@ public abstract class FlatResourcePack<R extends AbstractResourcePack.AbstractRe
 		if (this.isClosed())
 			return false;
 
-		if (!this.ensureResourceSafe())
+		if (!this.loaded)
 			return false;
 
 		return this.fileTree.containsKey(path.toDirectory());
@@ -159,7 +135,7 @@ public abstract class FlatResourcePack<R extends AbstractResourcePack.AbstractRe
 		if (this.isClosed())
 			return false;
 
-		if (!this.ensureResourceSafe())
+		if (!this.loaded)
 			return false;
 
 		return this.resourceMap.containsKey(path.toFile());
@@ -172,6 +148,7 @@ public abstract class FlatResourcePack<R extends AbstractResourcePack.AbstractRe
 		} finally {
 			this.fileTree = null;
 			this.resourceMap = null;
+			this.loaded = false;
 		}
 	}
 }

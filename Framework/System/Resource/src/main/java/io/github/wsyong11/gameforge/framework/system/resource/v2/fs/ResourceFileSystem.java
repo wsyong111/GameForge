@@ -2,8 +2,6 @@ package io.github.wsyong11.gameforge.framework.system.resource.v2.fs;
 
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
-import io.github.wsyong11.gameforge.framework.system.resource.v2.pack.ResourceFileWalker;
-import io.github.wsyong11.gameforge.framework.system.resource.v2.pack.ResourceWalkVisitor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 

@@ -1,7 +1,7 @@
 package io.github.wsyong11.gameforge.framework.system.resource;
 
+import io.github.wsyong11.gameforge.framework.system.resource.v2.fs.ResourceWalkVisitor;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.pack.ResourcePack;
-import io.github.wsyong11.gameforge.framework.system.resource.v2.pack.ResourceWalkVisitor;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.pack.ZipResourcePack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

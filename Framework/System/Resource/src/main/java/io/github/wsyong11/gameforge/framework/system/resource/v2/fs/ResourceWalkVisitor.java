@@ -1,4 +1,4 @@
-package io.github.wsyong11.gameforge.framework.system.resource.v2.pack;
+package io.github.wsyong11.gameforge.framework.system.resource.v2.fs;
 
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import org.jetbrains.annotations.NotNull;
