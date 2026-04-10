@@ -89,6 +89,7 @@ public abstract class FlatResourcePack extends AbstractResourcePack {
 	@NotNull
 	protected ResourceElement getElement(@NotNull ResourcePath path) throws IOException {
 		this.ensureOpen();
+		this.ensureLoaded();
 
 		ResourceElement element = this.resourceMap.get(path);
 		if (element == null)
