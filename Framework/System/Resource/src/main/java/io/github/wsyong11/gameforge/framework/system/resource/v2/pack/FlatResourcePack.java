@@ -2,17 +2,20 @@ package io.github.wsyong11.gameforge.framework.system.resource.v2.pack;
 
 import com.google.common.collect.Streams;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
-import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
+import io.github.wsyong11.gameforge.util.exception.ExceptionSupplier;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.LongSupplier;
 import java.util.stream.Collectors;
 
 public abstract class FlatResourcePack extends AbstractResourcePack {
-	private volatile Map<ResourcePath, Resource> resourceMap;
+	private volatile Map<ResourcePath, ResourceElement> resourceMap;
 	private volatile Map<ResourcePath, List<ResourcePath>> fileTree;
 	private volatile boolean loaded;
 
@@ -23,7 +26,7 @@ public abstract class FlatResourcePack extends AbstractResourcePack {
 	}
 
 	@NotNull
-	protected abstract Iterator<Resource> getResourceList() throws IOException;
+	protected abstract Iterator<ResourceElement> getResourceList() throws IOException;
 
 	private void ensureLoaded() throws IOException {
 		if (!this.loaded)
@@ -31,13 +34,13 @@ public abstract class FlatResourcePack extends AbstractResourcePack {
 	}
 
 	@Override
-	public synchronized void refresh() throws IOException {
+	public synchronized void load(@Nullable RefreshStatus status) throws IOException {
 		this.ensureOpen();
 
-		Map<ResourcePath, Resource> resourceMap = Streams
+		Map<ResourcePath, ResourceElement> resourceMap = Streams
 			.stream(this.getResourceList())
 			.collect(Collectors.toUnmodifiableMap(
-				Resource::getPath,
+				ResourceElement::getPath,
 				Function.identity()
 			));
 
@@ -84,18 +87,31 @@ public abstract class FlatResourcePack extends AbstractResourcePack {
 	}
 
 	@NotNull
-	@Override
-	public Resource get(@NotNull ResourcePath path) throws IOException {
-		Objects.requireNonNull(path, "path is null");
-
+	protected ResourceElement getElement(@NotNull ResourcePath path) throws IOException {
 		this.ensureOpen();
-		this.ensureLoaded();
 
-		Resource resource = this.resourceMap.get(path);
-		if (resource == null)
+		ResourceElement element = this.resourceMap.get(path);
+		if (element == null)
 			throw new FileNotFoundException(path.toString());
 
-		return resource;
+		return element;
+	}
+
+	@NotNull
+	@Override
+	public InputStream openStream(@NotNull ResourcePath path) throws IOException {
+		Objects.requireNonNull(path, "path is null");
+
+		ResourceElement element = this.getElement(path);
+		return element.createStream();
+	}
+
+	@Override
+	public long getSize(@NotNull ResourcePath path) throws IOException {
+		Objects.requireNonNull(path, "path is null");
+
+		ResourceElement element = this.getElement(path);
+		return element.getSize();
 	}
 
 	@Override
@@ -149,6 +165,77 @@ public abstract class FlatResourcePack extends AbstractResourcePack {
 			this.fileTree = null;
 			this.resourceMap = null;
 			this.loaded = false;
+		}
+	}
+
+	protected interface ResourceElement {
+		@NotNull
+		static ResourceElement simple(
+			@NotNull ResourcePath path,
+			@NotNull ExceptionSupplier<InputStream, IOException> streamFactory,
+			long size
+		) {
+			Objects.requireNonNull(path, "path is null");
+			Objects.requireNonNull(streamFactory, "streamFactory is null");
+
+			return new SimpleResourceElement(path, streamFactory, () -> size);
+		}
+
+		@NotNull
+		static ResourceElement simple(
+			@NotNull ResourcePath path,
+			@NotNull ExceptionSupplier<InputStream, IOException> streamFactory,
+			@NotNull LongSupplier sizeGetter
+		) {
+			Objects.requireNonNull(path, "path is null");
+			Objects.requireNonNull(streamFactory, "streamFactory is null");
+			Objects.requireNonNull(sizeGetter, "sizeGetter is null");
+
+			return new SimpleResourceElement(path, streamFactory, sizeGetter);
+		}
+
+		@NotNull
+		ResourcePath getPath();
+
+		@NotNull
+		InputStream createStream() throws IOException;
+
+		long getSize() throws IOException;
+	}
+
+	protected static class SimpleResourceElement implements ResourceElement {
+		private final ResourcePath path;
+		private final ExceptionSupplier<InputStream, IOException> streamFactory;
+		private final LongSupplier sizeGetter;
+
+		protected SimpleResourceElement(
+			@NotNull ResourcePath path,
+			@NotNull ExceptionSupplier<InputStream, IOException> streamFactory,
+			@NotNull LongSupplier sizeGetter
+		) {
+			Objects.requireNonNull(path, "path is null");
+			Objects.requireNonNull(streamFactory, "streamFactory is null");
+
+			this.path = path;
+			this.streamFactory = streamFactory;
+			this.sizeGetter = sizeGetter;
+		}
+
+		@NotNull
+		@Override
+		public ResourcePath getPath() {
+			return this.path;
+		}
+
+		@NotNull
+		@Override
+		public InputStream createStream() throws IOException {
+			return this.streamFactory.get();
+		}
+
+		@Override
+		public long getSize() {
+			return this.sizeGetter.getAsLong();
 		}
 	}
 }

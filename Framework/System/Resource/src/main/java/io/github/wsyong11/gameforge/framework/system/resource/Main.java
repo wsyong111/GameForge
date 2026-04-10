@@ -19,7 +19,7 @@ public class Main {
 
 		try (ResourcePack resourcePack = new ZipResourcePack(Path.of("D:/Projects/Java/GameForge/Stay True 1.21.5.zip"))) {
 //				try (TimeIt _t = TimeIt.begin(LOGGER, "Load file")) {
-			resourcePack.refresh();
+			resourcePack.load(null);
 //				}
 
 			System.out.println(resourcePack.getSource());
@@ -45,7 +45,7 @@ public class Main {
 				@NotNull
 				@Override
 				public VisitResult visitFile(@NotNull ResourcePath path) throws IOException {
-					System.out.println("|   ".repeat(this.space) + "|- " + path.getName());
+					System.out.println("|   ".repeat(this.space) + "|- " + path.getName() + "[" + resourcePack.getSize(path) + " B]");
 					return VisitResult.CONTINUE;
 				}
 			});

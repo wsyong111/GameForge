@@ -11,7 +11,7 @@ public interface ResourcePack extends ResourceFileSystem, Closeable {
 	@Nullable
 	URI getSource();
 
-	void refresh(@Nullable RefreshStatus status) throws IOException;
+	void load(@Nullable RefreshStatus status) throws IOException;
 
 	class RefreshStatus {
 

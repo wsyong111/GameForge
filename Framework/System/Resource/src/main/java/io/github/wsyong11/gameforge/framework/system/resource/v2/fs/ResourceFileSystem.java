@@ -1,13 +1,12 @@
 package io.github.wsyong11.gameforge.framework.system.resource.v2.fs;
 
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
-import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
-import java.util.Objects;
 
 public interface ResourceFileSystem {
 	@NotNull
@@ -15,12 +14,9 @@ public interface ResourceFileSystem {
 	List<ResourcePath> list(@NotNull ResourcePath path) throws IOException;
 
 	@NotNull
-	Resource get(@NotNull ResourcePath path) throws IOException;
+	InputStream openStream(@NotNull ResourcePath path) throws IOException;
 
-	default long getSize(@NotNull ResourcePath path) throws IOException {
-		Objects.requireNonNull(path, "path is null");
-		return this.get(path).getSize();
-	}
+	long getSize(@NotNull ResourcePath path) throws IOException;
 
 	boolean exist(@NotNull ResourcePath path);
 
