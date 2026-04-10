@@ -2,7 +2,7 @@ package io.github.wsyong11.gameforge.framework.system.resource.v2.manage;
 
 import io.github.wsyong11.gameforge.framework.Identifier;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
-import io.github.wsyong11.gameforge.framework.system.resource.pack.ResourcePack;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.pack.ResourcePack;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.ResourceProvider;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.fs.ResourceFileSystem;
 import org.jetbrains.annotations.NotNull;
