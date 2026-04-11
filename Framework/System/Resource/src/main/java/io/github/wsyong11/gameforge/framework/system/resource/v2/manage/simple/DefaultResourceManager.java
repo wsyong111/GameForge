@@ -2,28 +2,27 @@ package io.github.wsyong11.gameforge.framework.system.resource.v2.manage.simple;
 
 import io.github.wsyong11.gameforge.framework.Identifier;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
-import io.github.wsyong11.gameforge.framework.system.resource.v2.pack.ResourcePack;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.fs.ResourceFileSystem;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ReloadStatus;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceConflictResolver;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceManager;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceTransformer;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.pack.ResourcePack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class SimpleResourceManager implements ResourceManager {
+public class DefaultResourceManager implements ResourceManager {
 	private final ResourcePackRegistry packRegistry;
 	private volatile boolean closed;
 
-	public SimpleResourceManager() {
+	public DefaultResourceManager() {
 		this.packRegistry = new ResourcePackRegistry();
 
 		this.closed = false;
@@ -34,18 +33,21 @@ public class SimpleResourceManager implements ResourceManager {
 			throw new IllegalStateException("Resource manager closed");
 	}
 
+	@NotNull
 	@Override
-	public @NotNull ResourceFileSystem getFileSystem() {
+	public ResourceFileSystem getFileSystem() {
 		return null;
 	}
 
+	@Nullable
 	@Override
-	public @Nullable Identifier toIdentifier(@NotNull ResourcePath path) {
+	public Identifier toIdentifier(@NotNull ResourcePath path) {
 		return null;
 	}
 
+	@NotNull
 	@Override
-	public @NotNull ResourcePath toPath(@NotNull Identifier id) {
+	public ResourcePath toPath(@NotNull Identifier id) {
 		return null;
 	}
 
@@ -69,8 +71,10 @@ public class SimpleResourceManager implements ResourceManager {
 
 	}
 
+	@NotNull
 	@Override
-	public @NotNull ReloadStatus reload() {
+	public ReloadStatus reload() {
+		this.packRegistry.update();
 		return null;
 	}
 
@@ -114,18 +118,23 @@ public class SimpleResourceManager implements ResourceManager {
 		this.packRegistry.unregister(pack);
 	}
 
+	@Nullable
 	@Override
-	public @Nullable Resource getResource(@NotNull Identifier location) {
+	public Resource getResource(@NotNull Identifier location) {
 		return null;
 	}
 
+	@Nullable
+	@Unmodifiable
 	@Override
-	public @Nullable @Unmodifiable List<Resource> getAllResources(@NotNull Identifier location) {
+	public List<Resource> getAllResources(@NotNull Identifier location) {
 		return List.of();
 	}
 
+	@Nullable
+	@Unmodifiable
 	@Override
-	public @Nullable @Unmodifiable List<String> listResources(@NotNull Identifier location) {
+	public List<String> listResources(@NotNull Identifier location) {
 		return List.of();
 	}
 

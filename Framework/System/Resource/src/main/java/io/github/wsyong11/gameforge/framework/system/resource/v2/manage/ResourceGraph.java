@@ -7,7 +7,6 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
-import java.util.function.Predicate;
 
 public interface ResourceGraph {
 	@Nullable
@@ -16,9 +15,15 @@ public interface ResourceGraph {
 	@Nullable
 	Resource get(@NotNull ResourcePath path);
 
+	boolean remove(@NotNull ResourcePath path);
+
 	boolean exist(@NotNull ResourcePath path);
 
-	@NotNull
+	boolean isDir(@NotNull ResourcePath path);
+
+	boolean isEntry(@NotNull ResourcePath path);
+
+	@Nullable
 	@Unmodifiable
-	List<Resource> list(@NotNull Predicate<ResourcePath> filter);
+	List<ResourcePath> list(@NotNull ResourcePath path);
 }

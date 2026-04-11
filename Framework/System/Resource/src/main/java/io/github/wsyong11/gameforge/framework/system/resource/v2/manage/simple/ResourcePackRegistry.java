@@ -1,19 +1,16 @@
 package io.github.wsyong11.gameforge.framework.system.resource.v2.manage.simple;
 
-import io.github.wsyong11.gameforge.framework.system.log.Log;
-import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.pack.ResourcePack;
+import io.github.wsyong11.gameforge.util.IdentityRef;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Stream;
 
 public class ResourcePackRegistry {
-	private final List<ResourcePack> packs;
-	private final Map<ResourcePack, Integer> packPriority;
+	private final List<IdentityRef<ResourcePack>> packs;
+	private final Map<IdentityRef<ResourcePack>, Integer> packPriority;
 	private final Object packListLock;
 
 	private volatile List<ResourcePack> currentPacks;
@@ -27,8 +24,8 @@ public class ResourcePackRegistry {
 	}
 
 	public void update() {
-		List<ResourcePack> packs;
-		Map<ResourcePack, Integer> packPriority;
+		List<IdentityRef<ResourcePack>> packs;
+		Map<IdentityRef<ResourcePack>, Integer> packPriority;
 
 		synchronized (this.packListLock) {
 			packs = List.copyOf(this.packs);
@@ -39,6 +36,7 @@ public class ResourcePackRegistry {
 			.stream()
 			.sorted(Comparator.comparingInt(
 				pack -> packPriority.getOrDefault(pack, 0)))
+			.map(IdentityRef::get)
 			.toList();
 	}
 
@@ -51,45 +49,66 @@ public class ResourcePackRegistry {
 	@NotNull
 	@Unmodifiable
 	public List<ResourcePack> getPacks() {
-		return List.copyOf(this.packs);
+		List<IdentityRef<ResourcePack>> packs;
+		synchronized (this.packListLock) {
+			packs = List.copyOf(this.packs);
+		}
+
+		return packs
+			.stream()
+			.map(IdentityRef::get)
+			.toList();
 	}
 
 	public void setPriority(@NotNull ResourcePack pack, int priority) {
 		Objects.requireNonNull(pack, "pack is null");
 
+		IdentityRef<ResourcePack> ref = new IdentityRef<>(pack);
+
 		synchronized (this.packListLock) {
-			if (!this.packs.contains(pack))
+			if (!this.packs.contains(ref))
 				throw new IllegalArgumentException("Resource pack not register");
 
-			this.packPriority.put(pack, priority);
+			this.packPriority.put(ref, priority);
 		}
 	}
 
 	public int getPriority(@NotNull ResourcePack pack) {
 		Objects.requireNonNull(pack, "pack is null");
 
+		IdentityRef<ResourcePack> ref = new IdentityRef<>(pack);
+
 		synchronized (this.packListLock) {
-			if (!this.packs.contains(pack))
+			if (!this.packs.contains(ref))
 				throw new IllegalArgumentException("Resource pack not register");
 
-			return this.packPriority.getOrDefault(pack, 0);
+			return this.packPriority.getOrDefault(ref, 0);
 		}
 	}
 
-	public void register(@NotNull ResourcePack pack) {
+	public boolean register(@NotNull ResourcePack pack) {
 		Objects.requireNonNull(pack, "pack is null");
 
+		IdentityRef<ResourcePack> ref = new IdentityRef<>(pack);
 		synchronized (this.packListLock) {
-			this.packs.add(pack);
+			if (this.packs.contains(ref))
+				return false;
+
+			this.packs.add(ref);
+			return true;
 		}
 	}
 
-	public void unregister(@NotNull ResourcePack pack) {
+	public boolean unregister(@NotNull ResourcePack pack) {
 		Objects.requireNonNull(pack, "pack is null");
 
+		IdentityRef<ResourcePack> ref = new IdentityRef<>(pack);
 		synchronized (this.packListLock) {
-			this.packs.remove(pack);
-			this.packPriority.remove(pack);
+			if (!this.packs.remove(ref))
+				return false;
+
+			this.packPriority.remove(ref);
+			return true;
 		}
 	}
 
