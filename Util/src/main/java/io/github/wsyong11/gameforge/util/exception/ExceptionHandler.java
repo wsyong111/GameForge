@@ -41,7 +41,21 @@ public class ExceptionHandler implements Consumer<Throwable>, Iterable<Throwable
 	// -------------------------------------------------------------------------------------------------------------- //
 
 	@NotNull
-	public ExceptionHandler run(@Nullable Runnable runnable) {
+	public ExceptionHandler close(@Nullable AutoCloseable closeable) {
+		if (closeable == null)
+			return this;
+
+		try {
+			closeable.close();
+		} catch (Throwable e) {
+			this.exceptions.add(e);
+		}
+
+		return this;
+	}
+
+	@NotNull
+	public ExceptionHandler run(@Nullable ExceptionRunnable<?> runnable) {
 		if (runnable == null)
 			return this;
 
@@ -211,11 +225,16 @@ public class ExceptionHandler implements Consumer<Throwable>, Iterable<Throwable
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
+	@NotNull
+	public ExceptionHandler acceptSelf(@Nullable Throwable throwable) {
+		if (throwable != null)
+			this.exceptions.add(throwable);
+		return this;
+	}
+
 	@Override
 	public void accept(@Nullable Throwable throwable) {
-		if (throwable == null)
-			return;
-		this.exceptions.add(throwable);
+		this.acceptSelf(throwable);
 	}
 
 	@NotNull

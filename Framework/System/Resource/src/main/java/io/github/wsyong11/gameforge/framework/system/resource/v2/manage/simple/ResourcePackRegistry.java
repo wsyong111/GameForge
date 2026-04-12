@@ -17,7 +17,7 @@ public class ResourcePackRegistry {
 
 	public ResourcePackRegistry() {
 		this.packs = new ArrayList<>();
-		this.packPriority = new IdentityHashMap<>();
+		this.packPriority = new HashMap<>();
 		this.packListLock = new Object();
 
 		this.currentPacks = List.of();
@@ -34,8 +34,8 @@ public class ResourcePackRegistry {
 
 		this.currentPacks = packs
 			.stream()
-			.sorted(Comparator.comparingInt(
-				pack -> packPriority.getOrDefault(pack, 0)))
+			.sorted(Comparator
+				.comparingInt(pack -> packPriority.getOrDefault(pack, 0)))
 			.map(IdentityRef::get)
 			.toList();
 	}
@@ -67,7 +67,7 @@ public class ResourcePackRegistry {
 
 		synchronized (this.packListLock) {
 			if (!this.packs.contains(ref))
-				throw new IllegalArgumentException("Resource pack not register");
+				throw new IllegalArgumentException("Resource pack is not register");
 
 			this.packPriority.put(ref, priority);
 		}

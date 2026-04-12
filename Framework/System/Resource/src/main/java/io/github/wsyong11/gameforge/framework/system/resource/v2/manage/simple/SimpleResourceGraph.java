@@ -3,12 +3,12 @@ package io.github.wsyong11.gameforge.framework.system.resource.v2.manage.simple;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceGraph;
+import io.github.wsyong11.gameforge.util.StreamUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
-import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -24,6 +24,35 @@ public class SimpleResourceGraph implements ResourceGraph {
 		this.treeMap = new HashMap<>();
 
 		this.lock = new ReentrantReadWriteLock();
+	}
+
+	@Override
+	public boolean isFrozen() {
+		return false;
+	}
+
+	@NotNull
+	public ResourceGraph freeze() {
+		Map<ResourcePath, Resource> resourceMap;
+		Map<ResourcePath, List<ResourcePath>> treeMap;
+
+		Lock lock = this.lock.readLock();
+		lock.lock();
+		try {
+			resourceMap = Map.copyOf(this.resourceMap);
+			treeMap = this.treeMap
+				.entrySet()
+				.stream()
+				.map(StreamUtils.entryValueMap(List::copyOf))
+				.collect(StreamUtils.collectUnmodifiableMap());
+		} finally {
+			lock.unlock();
+		}
+
+		return new FrozenResourceGraph(
+			resourceMap,
+			treeMap
+		);
 	}
 
 	@Nullable
@@ -83,7 +112,6 @@ public class SimpleResourceGraph implements ResourceGraph {
 
 		parentChildren.remove(path);
 
-
 		ResourcePath currentPath = path;
 		while (!currentPath.isRoot()) {
 			Set<ResourcePath> children = this.treeMap.get(currentPath);
@@ -96,6 +124,7 @@ public class SimpleResourceGraph implements ResourceGraph {
 			this.treeMap.remove(currentPath);
 			currentPath = currentPath.parent();
 		}
+
 		return true;
 	}
 
@@ -138,7 +167,7 @@ public class SimpleResourceGraph implements ResourceGraph {
 		lock.lock();
 		try {
 			return this.removeEntry(path.toFile())
-				|| this.removeDir(path.toDirectory());
+			       || this.removeDir(path.toDirectory());
 		} finally {
 			lock.unlock();
 		}
@@ -155,7 +184,7 @@ public class SimpleResourceGraph implements ResourceGraph {
 		lock.lock();
 		try {
 			return this.resourceMap.containsKey(path.toFile())
-				|| this.treeMap.containsKey(path.toDirectory());
+			       || this.treeMap.containsKey(path.toDirectory());
 		} finally {
 			lock.unlock();
 		}
@@ -198,7 +227,7 @@ public class SimpleResourceGraph implements ResourceGraph {
 		try {
 			Set<ResourcePath> children = this.treeMap.get(path.toDirectory());
 			if (children == null)
-				return null;
+				return path.isRoot() ? List.of() : null;
 
 			return List.copyOf(children);
 		} finally {

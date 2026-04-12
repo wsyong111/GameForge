@@ -10,11 +10,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 @UtilityClass
 public class StreamUtils {
 	@NotNull
-	public static <T> Predicate<T> distinctByKey(@NotNull Function<? super T, ?> keyExtractor) {
+	public static <T> Predicate<T> distinct(@NotNull Function<? super T, ?> keyExtractor) {
 		Objects.requireNonNull(keyExtractor, "keyExtractor is null");
 
 		Set<Object> seen = ConcurrentHashMap.newKeySet();
@@ -32,6 +34,8 @@ public class StreamUtils {
 		Objects.requireNonNull(type, "type is null");
 		return type::cast;
 	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
 
 	@NotNull
 	public static UnaryOperator<String> wrapStartText(@NotNull String startText) {
@@ -67,10 +71,31 @@ public class StreamUtils {
 		return text -> startText + text + endText;
 	}
 
+	// -------------------------------------------------------------------------------------------------------------- //
+
 	@NotNull
-	public static <T, K, V> Function<T, Map.Entry<K, V>> entryMap(@NotNull Function<T, K> keyMapper, @NotNull Function<T, V> valueMapper) {
+	public static <T, K, V> Function<T, Map.Entry<K, V>> toEntry(@NotNull Function<T, K> keyMapper, @NotNull Function<T, V> valueMapper) {
 		Objects.requireNonNull(keyMapper, "keyMapper is null");
 		Objects.requireNonNull(valueMapper, "valueMapper is null");
 		return value -> Map.entry(keyMapper.apply(value), valueMapper.apply(value));
+	}
+
+	@NotNull
+	public static <K, V, VR> Function<Map.Entry<K, V>, Map.Entry<K, VR>> entryValueMap(@NotNull Function<V, VR> mapper) {
+		Objects.requireNonNull(mapper, "mapper is null");
+		return value -> Map.entry(value.getKey(), mapper.apply(value.getValue()));
+	}
+
+	@NotNull
+	public static <K, V, KR> Function<Map.Entry<K, V>, Map.Entry<KR, V>> entryKeyMap(@NotNull Function<K, KR> mapper) {
+		Objects.requireNonNull(mapper, "mapper is null");
+		return value -> Map.entry(mapper.apply(value.getKey()), value.getValue());
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	@NotNull
+	public static <K, V> Collector<Map.Entry<K, V>, ?, Map<K, V>> collectUnmodifiableMap() {
+		return Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue);
 	}
 }

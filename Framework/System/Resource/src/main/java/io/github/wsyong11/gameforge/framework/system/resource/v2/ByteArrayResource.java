@@ -1,7 +1,9 @@
 package io.github.wsyong11.gameforge.framework.system.resource.v2;
 
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.pack.ResourcePack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -29,6 +31,11 @@ public class ByteArrayResource implements Resource {
 	@Override
 	public ResourcePath getPath() {
 		return this.path;
+	}
+
+	@Override
+	public @Nullable ResourcePack getSource() {
+		return null;
 	}
 
 	@Override

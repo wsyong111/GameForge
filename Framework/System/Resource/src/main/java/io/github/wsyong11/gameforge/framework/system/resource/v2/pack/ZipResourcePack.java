@@ -3,21 +3,29 @@ package io.github.wsyong11.gameforge.framework.system.resource.v2.pack;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
+import io.github.wsyong11.gameforge.util.exception.ExceptionHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Path;
-import java.util.Iterator;
-import java.util.Objects;
+import java.util.*;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-public class ZipResourcePack extends FlatResourcePack implements Closeable {
+import static io.github.wsyong11.gameforge.framework.system.log.LogTemplate.lazy;
+
+// TODO: 2026/4/12 可能会有并发问题，需要观察
+public class ZipResourcePack extends AbstractResourcePack implements Closeable {
 	private static final Logger LOGGER = Log.getLogger();
 
 	private final Path path;
+
+	private volatile Map<ResourcePath, ZipEntry> assets;
 	private volatile ZipFile file;
 
 	public ZipResourcePack(@NotNull Path path) {
@@ -25,24 +33,8 @@ public class ZipResourcePack extends FlatResourcePack implements Closeable {
 
 		this.path = path;
 
+		this.assets = Map.of();
 		this.file = null;
-	}
-
-	private synchronized void loadFile() throws IOException {
-		if (this.file != null)
-			this.closeFile();
-
-		this.file = new ZipFile(this.path.toFile());
-	}
-
-	private void closeFile() {
-		try {
-			this.file.close();
-		} catch (IOException e) {
-			LOGGER.warn("Failed to close the zip file", e);
-		} finally {
-			this.file = null;
-		}
 	}
 
 	@Nullable
@@ -51,35 +43,116 @@ public class ZipResourcePack extends FlatResourcePack implements Closeable {
 		return this.path.toUri();
 	}
 
-	@NotNull
 	@Override
-	protected Iterator<ResourceElement> getResourceList() throws IOException {
+	public void load(@NotNull LoadListener listener) throws IOException {
+		Objects.requireNonNull(listener, "listener is null");
+
+		this.ensureOpen();
+
+		Map<ResourcePath, ZipEntry> assets = new HashMap<>();
+
+		ZipFile file = new ZipFile(this.path.toFile());
 		try {
-			return this.file
-				.stream()
-				.map(entry -> ResourceElement.simple(
-					ResourcePath.of(entry.getName()),
-					() -> this.file.getInputStream(entry),
-					entry::getSize
-				))
-				.iterator();
-		} catch (IllegalStateException e) {
-			throw new IOException(e);
+			listener.onStart(file.size());
+
+			Enumeration<? extends ZipEntry> enumeration = file.entries();
+			while (enumeration.hasMoreElements()) {
+				ZipEntry entry = enumeration.nextElement();
+
+				ResourcePath path = ResourcePath.of(entry.getName());
+				if (path.isDirectory()) {
+					LOGGER.warn("Skipped zip entry {} in zip file {}", lazy(entry::getName), lazy(file));
+					continue;
+				}
+
+				assets.put(path, entry);
+				listener.onSuccess(path);
+			}
+
+			listener.onComplete();
+		} catch (Exception e) {
+			throw ExceptionHandler
+				.create()
+				.acceptSelf(e)
+				.run(file::close)
+				.toException("Cannot list entry", IOException::new);
 		}
+
+		ZipFile oldFile = this.file;
+		if (oldFile != null) {
+			try {
+				oldFile.close();
+			} catch (IOException e) {
+				LOGGER.warn("Failed to close the old zip file", e);
+			}
+		}
+
+		this.file = file;
+		this.assets = Collections.unmodifiableMap(assets);
 	}
 
 	@Override
-	public void load(@Nullable RefreshStatus status) throws IOException {
-		this.loadFile();
-		super.load(status);
+	public boolean exist(@NotNull ResourcePath path) {
+		Objects.requireNonNull(path, "path is null");
+
+		if (this.isClosed())
+			return false;
+
+		return this.assets.containsKey(path.toFile());
+	}
+
+	@Override
+	public long size(@NotNull ResourcePath path) throws IOException {
+		Objects.requireNonNull(path, "path is null");
+
+		this.ensureOpen();
+
+		ZipEntry entry = this.assets.get(path.toFile());
+		if (entry == null)
+			throw new FileNotFoundException(path.toString());
+
+		return entry.getSize();
+	}
+
+	@NotNull
+	@Override
+	public InputStream open(@NotNull ResourcePath path) throws IOException {
+		Objects.requireNonNull(path, "path is null");
+
+		this.ensureOpen();
+
+		Map<ResourcePath, ZipEntry> assets = this.assets;
+		ZipFile file = this.file;
+
+		ZipEntry entry = assets.get(path.toFile());
+		if (entry == null)
+			throw new FileNotFoundException(path.toString());
+
+		return file.getInputStream(entry);
+	}
+
+	@NotNull
+	@Override
+	public List<ResourcePath> list() {
+		if (this.isClosed())
+			return List.of();
+
+		return List.copyOf(this.assets.keySet());
 	}
 
 	@Override
 	public void close() throws IOException {
+		//noinspection TryFinallyCanBeTryWithResources
 		try {
 			super.close();
 		} finally {
-			this.closeFile();
+			ZipFile file = this.file;
+			this.file = null;
+			if (file != null) {
+				file.close();
+			}
+
+			this.assets = Map.of();
 		}
 	}
 }
