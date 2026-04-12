@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
+import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -75,18 +76,58 @@ public class SimpleResourceGraph implements ResourceGraph {
 		if (this.resourceMap.remove(path.toFile()) == null)
 			return false;
 
-		ResourcePath parent = path.parent();
-		if (parent.isRoot())
+		ResourcePath parentPath = path.parent();
+		Set<ResourcePath> parentChildren = this.treeMap.get(parentPath);
+		if (parentChildren == null)
 			return true;
 
-		// TODO: 2026/4/12 Trim Dir
+		parentChildren.remove(path);
+
+
+		ResourcePath currentPath = path;
+		while (!currentPath.isRoot()) {
+			Set<ResourcePath> children = this.treeMap.get(currentPath);
+			if (children == null)
+				break;
+
+			if (!children.isEmpty())
+				break;
+
+			this.treeMap.remove(currentPath);
+			currentPath = currentPath.parent();
+		}
 		return true;
 	}
 
 	private boolean removeDir(@NotNull ResourcePath path) {
 		Objects.requireNonNull(path, "path is null");
 
+		if (!this.treeMap.containsKey(path))
+			return false;
 
+		Deque<ResourcePath> stack = new ArrayDeque<>();
+		stack.push(path);
+
+		while (!stack.isEmpty()) {
+			ResourcePath currentPath = stack.pop();
+			Set<ResourcePath> children = this.treeMap.remove(currentPath);
+
+			for (ResourcePath child : children) {
+				if (child.isDirectory()) {
+					stack.push(child);
+					continue;
+				}
+
+				this.resourceMap.remove(child);
+			}
+		}
+
+		ResourcePath parentPath = path.parent();
+		Set<ResourcePath> parentChildren = this.treeMap.get(parentPath);
+		if (parentChildren != null)
+			parentChildren.remove(path);
+
+		return true;
 	}
 
 	@Override
@@ -96,13 +137,8 @@ public class SimpleResourceGraph implements ResourceGraph {
 		Lock lock = this.lock.writeLock();
 		lock.lock();
 		try {
-			if (this.removeEntry(path))
-				return true;
-
-			if (this.removeDir(path))
-				return true;
-
-			return false;
+			return this.removeEntry(path.toFile())
+				|| this.removeDir(path.toDirectory());
 		} finally {
 			lock.unlock();
 		}

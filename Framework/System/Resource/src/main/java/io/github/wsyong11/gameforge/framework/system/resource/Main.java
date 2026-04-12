@@ -24,7 +24,9 @@ public class Main {
 		graph.put(ResourcePath.of("path/to/info.json"), new ByteArrayResource(ArrayUtils.EMPTY_BYTE_ARRAY, ResourcePath.ROOT));
 		graph.put(ResourcePath.of("a.json"), new ByteArrayResource(ArrayUtils.EMPTY_BYTE_ARRAY, ResourcePath.ROOT));
 
-		graph.remove(ResourcePath.of("path/to/example"));
+		graph.remove(ResourcePath.of("path/to/info.json"));
+		graph.remove(ResourcePath.of("path/to/example/"));
+		graph.remove(ResourcePath.of("/"));
 
 		printTree(graph, 0, ResourcePath.ROOT);
 
