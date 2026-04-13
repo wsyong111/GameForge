@@ -11,4 +11,5 @@ dependencies {
 
 	implementation(project(":Util"))
 	implementation(project(":Framework:Mime"))
+	implementation(project(":Framework:SPI"))
 }

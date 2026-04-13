@@ -1,6 +1,7 @@
 package io.github.wsyong11.gameforge.framework.system.resource.v2.manage;
 
 import io.github.wsyong11.gameforge.framework.Identifier;
+import io.github.wsyong11.gameforge.framework.spi.ExtensionHost;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.ResourceProvider;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.fs.ResourceFileSystem;
@@ -16,7 +17,7 @@ import java.util.List;
 /*
 Source -> ResourcePack -> Transformer -> MergeResource -> ResolveConflict -> Index -> ResourceManager
  */
-public interface ResourceManager extends ResourceProvider, Closeable {
+public interface ResourceManager extends ResourceProvider, ExtensionHost, Closeable {
 	@NotNull
 	ResourceFileSystem getFileSystem();
 
