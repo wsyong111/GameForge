@@ -1,7 +1,9 @@
 package io.github.wsyong11.gameforge.framework.spi;
 
-public interface ExtensionLifecycle {
-	default void attach() { /* no-op */ }
+import org.jetbrains.annotations.NotNull;
 
-	default void detach() { /* no-op */ }
+public interface ExtensionLifecycle {
+	default void attach(@NotNull ExtensionType<?> type) { /* no-op */ }
+
+	default void detach(@NotNull ExtensionType<?> type) { /* no-op */ }
 }
