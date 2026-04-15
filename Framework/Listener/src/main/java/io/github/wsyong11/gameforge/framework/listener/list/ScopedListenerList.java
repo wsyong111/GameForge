@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class ScopedListenerList extends ListenerListWrapper {
+public class ScopedListenerList extends ForwardingListenerList {
 	private final Map<Class<? extends IListener>, List<IListener>> listeners;
 
 	public ScopedListenerList(@NotNull ListenerList delegate) {

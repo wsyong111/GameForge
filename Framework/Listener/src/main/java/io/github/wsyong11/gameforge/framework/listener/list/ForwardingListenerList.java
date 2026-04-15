@@ -10,10 +10,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
-public class ListenerListWrapper extends Wrapper<ListenerList> implements ListenerList {
-	public ListenerListWrapper() { /* no-op */ }
+public abstract class ForwardingListenerList extends Wrapper<ListenerList> implements ListenerList {
+	public ForwardingListenerList() { /* no-op */ }
 
-	public ListenerListWrapper(@Nullable ListenerList delegate) {
+	public ForwardingListenerList(@Nullable ListenerList delegate) {
 		super(delegate);
 	}
 

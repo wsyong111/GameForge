@@ -5,6 +5,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 public class ExtensionType<T> {
+	@NotNull
+	public static <V> ExtensionType<V> of(@NotNull Class<V> type) {
+		Objects.requireNonNull(type, "type is null");
+		return new ExtensionType<>(type);
+	}
+
 	private final Class<T> type;
 
 	public ExtensionType(@NotNull Class<T> type) {

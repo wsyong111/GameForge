@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class NamedListenerList extends ListenerListWrapper implements Nameable {
+public class NamedListenerList extends ForwardingListenerList implements Nameable {
 	private final String name;
 
 	public NamedListenerList(@NotNull ListenerList delegate, @NotNull String name) {

@@ -1,6 +1,7 @@
 package io.github.wsyong11.gameforge.framework.system.resource.v2.manage.simple;
 
 import io.github.wsyong11.gameforge.framework.Identifier;
+import io.github.wsyong11.gameforge.framework.spi.registry.ExtensionRegistry;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.log.TimeIt;
@@ -9,10 +10,8 @@ import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.fs.ResourceFileSystem;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ReloadStatus;
-import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceConflictResolver;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceManager;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.pack.ResourcePack;
-import io.github.wsyong11.gameforge.framework.system.resource.v2.transform.ResourceTransformer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -28,10 +27,12 @@ public class DefaultResourceManager implements ResourceManager {
 	private static final Logger LOGGER = Log.getLogger();
 
 	private final ResourcePackRegistry packRegistry;
+	private final ExtensionRegistry extensions;
 	private volatile boolean closed;
 
 	public DefaultResourceManager() {
 		this.packRegistry = new ResourcePackRegistry();
+		this.extensions = ExtensionRegistry.createRestrict()
 
 		this.closed = false;
 	}
@@ -57,26 +58,6 @@ public class DefaultResourceManager implements ResourceManager {
 	@Override
 	public ResourcePath toPath(@NotNull Identifier id) {
 		return null;
-	}
-
-	@Override
-	public void registerConflictResolver(@NotNull ResourceConflictResolver resolver) {
-
-	}
-
-	@Override
-	public void unregisterConflictResolver(@NotNull ResourceConflictResolver resolver) {
-
-	}
-
-	@Override
-	public void registerResourceTransformer(@NotNull ResourceTransformer transformer) {
-
-	}
-
-	@Override
-	public void unregisterResourceTransformer(@NotNull ResourceTransformer transformer) {
-
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //

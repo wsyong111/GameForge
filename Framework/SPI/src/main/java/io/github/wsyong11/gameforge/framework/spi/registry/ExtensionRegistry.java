@@ -7,8 +7,24 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface ExtensionRegistry {
+	@NotNull
+	static ExtensionRegistry create() {
+		return new SimpleExtensionRegistry();
+	}
+
+	@NotNull
+	static ExtensionRegistry createRestrict(@NotNull Set<ExtensionType<?>> allowTypes) {
+		return restrict(create(), allowTypes);
+	}
+
+	@NotNull
+	static ExtensionRegistry restrict(@NotNull ExtensionRegistry registry, @NotNull Set<ExtensionType<?>> allowTypes) {
+		return new RestrictedExtensionRegistry(registry, allowTypes);
+	}
+
 	<T> void register(@NotNull ExtensionType<T> type, @NotNull T instance);
 
 	<T> void unregister(@NotNull ExtensionType<T> type, @NotNull T instance);
