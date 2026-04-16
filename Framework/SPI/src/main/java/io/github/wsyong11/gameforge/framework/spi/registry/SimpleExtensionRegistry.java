@@ -4,6 +4,8 @@ import com.google.common.collect.Table;
 import com.google.common.collect.Tables;
 import io.github.wsyong11.gameforge.framework.spi.ExtensionLifecycle;
 import io.github.wsyong11.gameforge.framework.spi.ExtensionType;
+import io.github.wsyong11.gameforge.framework.system.log.Log;
+import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.util.IdentityRef;
 import io.github.wsyong11.gameforge.util.collection.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +20,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class SimpleExtensionRegistry implements ExtensionRegistry {
-	private static final io.github.wsyong11.gameforge.framework.system.log.Logger LOGGER = io.github.wsyong11.gameforge.framework.system.log.Log.getLogger();
+	private static final Logger LOGGER = Log.getLogger();
 
 	private final Table<ExtensionType<?>, IdentityRef<?>, ExtensionInfo<?>> table;
 

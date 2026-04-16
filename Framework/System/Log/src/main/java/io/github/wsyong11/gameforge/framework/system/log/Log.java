@@ -20,6 +20,12 @@ public class Log {
 	}
 
 	@NotNull
+	public static Logger getLogger(@NotNull Object obj) {
+		Objects.requireNonNull(obj, "obj is null");
+		return getLogger(obj.getClass());
+	}
+
+	@NotNull
 	public static Logger getLogger(@NotNull Class<?> clazz) {
 		Objects.requireNonNull(clazz, "clazz is null");
 		return getLogger(clazz.getClassLoader(), clazz.getName());

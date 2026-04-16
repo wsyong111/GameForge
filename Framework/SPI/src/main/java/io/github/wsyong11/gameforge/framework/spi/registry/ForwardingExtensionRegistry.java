@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public abstract class ForwardingExtensionRegistry extends Wrapper<ExtensionRegistry> implements ExtensionRegistry {
@@ -67,6 +68,12 @@ public abstract class ForwardingExtensionRegistry extends Wrapper<ExtensionRegis
 	@Override
 	public <T> T getExtension(@NotNull ExtensionType<T> type) {
 		return this.delegate().getExtension(type);
+	}
+
+	@NotNull
+	@Override
+	public <T> Optional<T> getExtensionOptional(@NotNull ExtensionType<T> type) {
+		return this.delegate().getExtensionOptional(type);
 	}
 
 	@NotNull

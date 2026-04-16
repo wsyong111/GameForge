@@ -10,6 +10,8 @@ import java.util.concurrent.*;
 @UtilityClass
 public class FutureUtils {
 	public static boolean cancelAwait(@Nullable Future<?> future, long timeout, @NotNull TimeUnit unit) {
+		Objects.requireNonNull(unit, "unit is null");
+
 		if (future == null)
 			return true;
 

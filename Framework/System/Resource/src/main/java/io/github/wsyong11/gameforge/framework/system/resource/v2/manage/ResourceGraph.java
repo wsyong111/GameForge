@@ -2,7 +2,7 @@ package io.github.wsyong11.gameforge.framework.system.resource.v2.manage;
 
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
-import io.github.wsyong11.gameforge.framework.system.resource.v2.ResourceSelector;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.query.ResourceQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -31,5 +31,5 @@ public interface ResourceGraph {
 	boolean isFrozen();
 
 	@NotNull
-	ResourceSelector select();
+	ResourceQuery select();
 }

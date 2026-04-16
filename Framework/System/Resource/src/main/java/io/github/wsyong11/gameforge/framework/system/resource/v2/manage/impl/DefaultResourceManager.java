@@ -1,8 +1,7 @@
 package io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl;
 
 import io.github.wsyong11.gameforge.framework.Identifier;
-import io.github.wsyong11.gameforge.framework.spi.ExtensionType;
-import io.github.wsyong11.gameforge.framework.spi.registry.ExtensionRegistry;
+import io.github.wsyong11.gameforge.framework.platform.Platform;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.log.TimeIt;
@@ -12,26 +11,36 @@ import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.fs.ResourceFileSystem;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ReloadStatus;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceConflictResolver;
-import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceManager;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.pack.ResourcePack;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.transform.ResourceTransformer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
-import org.jetbrains.annotations.UnmodifiableView;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
+import java.util.concurrent.*;
 
 import static io.github.wsyong11.gameforge.framework.system.log.LogTemplate.lazy;
 
 public class DefaultResourceManager extends AbstractResourceManager {
 	private static final Logger LOGGER = Log.getLogger();
 
+	private final ExecutorService packReloadPool;
+
 	public DefaultResourceManager() {
+		this.packReloadPool = new ThreadPoolExecutor(
+			1,
+			Math.max(2, Math.min(Platform.CPU_COUNT / 2, 4)),
+			10,
+			TimeUnit.SECONDS,
+			new ArrayBlockingQueue<>(32)
+		);
 	}
+
 
 	@NotNull
 	@Override
@@ -54,20 +63,43 @@ public class DefaultResourceManager extends AbstractResourceManager {
 	// -------------------------------------------------------------------------------------------------------------- //
 
 	@NotNull
+	private List<ResourcePath> reloadResourcePack(@NotNull ResourcePack pack) {
+
+	}
+
+	@NotNull
+	private Map<ResourcePath, List<Resource>> reloadAndListResources(@NotNull List<ResourcePack> packs) {
+		Objects.requireNonNull(packs, "packs is null");
+
+		List<Future<List<ResourcePath>>> reloadFutures = packs
+			.stream()
+			.map(pack -> this.packReloadPool.submit(() -> {
+				pack.load();
+			}))
+		this.packReloadPool.submit()
+	}
+
+	@NotNull
+	private List<Resource> processConflict(@NotNull Map<ResourcePath, List<Resource>> resources) {
+		return List.of();
+	}
+
+	@NotNull
 	@Override
-	public ReloadStatus reload() {
+	protected ReloadStatus doReload(
+		@NotNull List<ResourcePack> packs,
+		@NotNull List<ResourceConflictResolver> conflictResolvers,
+		@NotNull List<ResourceTransformer> transformers
+	) {
 		LOGGER.info("Start reload resource");
 		try (TimeIt ignored = TimeIt.begin(LOGGER, LogLevel.INFO, "Reload complete")) {
-			this.packRegistry.update();
-
-			List<ResourcePack> packs = this.packRegistry.getCurrentPacks();
 
 			LOGGER.debug("Pack info list:{}", lazy(() -> {
 				StringBuilder sb = new StringBuilder();
 				for (ResourcePack pack : packs) {
 					sb.append('\n');
 					sb.append("| ");
-					sb.append(this.packRegistry.getPriority(pack));
+					sb.append(this.getPackPriority(pack));
 					sb.append(' ');
 					sb.append(pack.getClass().getName());
 					sb.append(": \"");
@@ -77,8 +109,22 @@ public class DefaultResourceManager extends AbstractResourceManager {
 				return sb.toString();
 			}));
 
+			LOGGER.debug("Listing resources...");
 
-			return null;
+			int totalResourceCount = 0;
+			Map<ResourcePath, List<Resource>> allResources = new LinkedHashMap<>();
+
+			for (ResourcePack pack : packs) {
+				for (ResourcePath path : pack.list()) {
+
+				}
+				totalResourceCount++;
+			}
+
+			LOGGER.debug("Total found {} resources", );
+
+			this.processConflict()
+
 		}
 	}
 
@@ -107,5 +153,23 @@ public class DefaultResourceManager extends AbstractResourceManager {
 	@Override
 	public boolean hasResource(@NotNull Identifier location) {
 		return false;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
+
+	@Override
+	public void close() throws IOException {
+		try {
+			super.close();
+		} finally {
+			this.packReloadPool.shutdown();
+			try {
+				if (this.packReloadPool.awaitTermination(1, TimeUnit.SECONDS))
+					this.packReloadPool.shutdownNow();
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+			}
+		}
 	}
 }
