@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
+import java.util.Set;
 
 public abstract class ForwardingExtensionRegistry extends Wrapper<ExtensionRegistry> implements ExtensionRegistry {
 	public ForwardingExtensionRegistry() { /* no-op */ }
@@ -41,6 +42,11 @@ public abstract class ForwardingExtensionRegistry extends Wrapper<ExtensionRegis
 	}
 
 	@Override
+	public <T> boolean has(@NotNull ExtensionType<T> type, @NotNull T instance) {
+		return this.delegate().has(type, instance);
+	}
+
+	@Override
 	public <T> void setPriority(@NotNull ExtensionType<T> type, @NotNull T instance, int priority) {
 		this.delegate().setPriority(type, instance, priority);
 	}
@@ -61,6 +67,13 @@ public abstract class ForwardingExtensionRegistry extends Wrapper<ExtensionRegis
 	@Override
 	public <T> T getExtension(@NotNull ExtensionType<T> type) {
 		return this.delegate().getExtension(type);
+	}
+
+	@NotNull
+	@Unmodifiable
+	@Override
+	public Set<ExtensionType<?>> getTypes() {
+		return this.delegate().getTypes();
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-package io.github.wsyong11.gameforge.framework.system.resource.v2.manage.simple;
+package io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl;
 
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;

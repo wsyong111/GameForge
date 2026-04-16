@@ -18,6 +18,8 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class SimpleExtensionRegistry implements ExtensionRegistry {
+	private static final io.github.wsyong11.gameforge.framework.system.log.Logger LOGGER = io.github.wsyong11.gameforge.framework.system.log.Log.getLogger();
+
 	private final Table<ExtensionType<?>, IdentityRef<?>, ExtensionInfo<?>> table;
 
 	private final Map<ExtensionType<?>, List<? extends ExtensionInfo<?>>> cache;
@@ -39,16 +41,24 @@ public class SimpleExtensionRegistry implements ExtensionRegistry {
 		Objects.requireNonNull(type, "type is null");
 		Objects.requireNonNull(extension, "extension is null");
 
-		if (extension instanceof ExtensionLifecycle lifecycle)
-			lifecycle.attach(type);
+		try {
+			if (extension instanceof ExtensionLifecycle lifecycle)
+				lifecycle.attach(type);
+		} catch (Throwable e) {
+			LOGGER.error("Uncaught exception when calling attach: {}", extension, e);
+		}
 	}
 
 	private <T> void invokeDetach(@NotNull ExtensionType<T> type, @NotNull T extension) {
 		Objects.requireNonNull(type, "type is null");
 		Objects.requireNonNull(extension, "extension is null");
 
-		if (extension instanceof ExtensionLifecycle lifecycle)
-			lifecycle.detach(type);
+		try {
+			if (extension instanceof ExtensionLifecycle lifecycle)
+				lifecycle.detach(type);
+		} catch (Throwable e) {
+			LOGGER.error("Uncaught exception when calling detach: {}", extension, e);
+		}
 	}
 
 	@NotNull
@@ -105,7 +115,6 @@ public class SimpleExtensionRegistry implements ExtensionRegistry {
 		} finally {
 			lock.unlock();
 		}
-
 	}
 
 	@Override
@@ -188,6 +197,22 @@ public class SimpleExtensionRegistry implements ExtensionRegistry {
 		}
 	}
 
+	@Override
+	public <T> boolean has(@NotNull ExtensionType<T> type, @NotNull T instance) {
+		Objects.requireNonNull(type, "type is null");
+		Objects.requireNonNull(instance, "instance is null");
+
+		IdentityRef<T> ref = IdentityRef.of(instance);
+
+		Lock lock = this.lock.readLock();
+		lock.lock();
+		try {
+			return this.table.contains(type, ref);
+		} finally {
+			lock.unlock();
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	@NotNull
 	private <T> ExtensionInfo<T> getInfo(@NotNull ExtensionType<T> type, @NotNull T instance) {
@@ -250,6 +275,19 @@ public class SimpleExtensionRegistry implements ExtensionRegistry {
 		return list.isEmpty() ? null : list.get(0).getInstance();
 	}
 
+	@NotNull
+	@Unmodifiable
+	@Override
+	public Set<ExtensionType<?>> getTypes() {
+		Lock lock = this.lock.readLock();
+		lock.lock();
+		try {
+			return Set.copyOf(this.table.rowKeySet());
+		} finally {
+			lock.unlock();
+		}
+	}
+
 	@Override
 	public void clear() {
 		this.table.clear();
@@ -258,7 +296,14 @@ public class SimpleExtensionRegistry implements ExtensionRegistry {
 	@Override
 	public void clear(@NotNull ExtensionType<?> type) {
 		Objects.requireNonNull(type, "type is null");
-		this.table.rowKeySet().remove(type);
+
+		Lock lock = this.lock.writeLock();
+		lock.lock();
+		try {
+			this.table.rowKeySet().remove(type);
+		} finally {
+			lock.unlock();
+		}
 	}
 
 	protected static class ExtensionInfo<T> implements Comparable<ExtensionInfo<T>> {

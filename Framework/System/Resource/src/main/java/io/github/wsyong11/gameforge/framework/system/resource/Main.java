@@ -4,12 +4,12 @@ import io.github.wsyong11.gameforge.framework.system.log.core.LogManager;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.fs.ResourceFileSystem;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceGraph;
-import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceList;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceManager;
-import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.simple.DefaultResourceManager;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl.DefaultResourceManager;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.pack.AssetsResourcePack;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.pack.ZipResourcePack;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.transform.ResourceTransformer;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.transform.TransformContext;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.transform.TransformedResource;
 import org.jetbrains.annotations.NotNull;
 
@@ -44,7 +44,7 @@ public class Main {
 
 			manager.setPackPriority(assetsPack, -1);
 
-			manager.registerResourceTransformer(new JsonTransformer());
+			manager.addExtension(ResourceTransformer.TYPE, new Transformer());
 
 			manager.reload();
 
@@ -72,21 +72,21 @@ public class Main {
 	}
 
 	private static class Transformer implements ResourceTransformer {
-		@NotNull
 		@Override
-		public List<Resource> transform(@NotNull ResourceGraph graph, @NotNull ResourceList resources) {
-			return graph
-				.select()
-				.ofPattern("(.*)\\.test")
-				.stream()
-				.<Resource>map(resource -> new TransformedResource(resource) {
-					@NotNull
-					@Override
-					protected InputStream transformStream(@NotNull InputStream stream) {
-						return new SequenceInputStream(stream, new ByteArrayInputStream("EOF".getBytes(StandardCharsets.UTF_8)));
-					}
-				})
-				.toList();
+		public void transform(@NotNull Resource resource, @NotNull TransformContext context) {
+			ResourcePath path = resource.getPath();
+			if (!".test".equals(path.getExtension()))
+				return;
+
+			context.replaceResource(path, res -> new TransformedResource(res) {
+				@NotNull
+				@Override
+				protected InputStream transformStream(@NotNull InputStream stream) {
+					return new SequenceInputStream(stream, new ByteArrayInputStream("EOF".getBytes(StandardCharsets.UTF_8)));
+				}
+			});
+
+			context.addResource(path.transformName(n -> n + ".src"), resource);
 		}
 	}
 }

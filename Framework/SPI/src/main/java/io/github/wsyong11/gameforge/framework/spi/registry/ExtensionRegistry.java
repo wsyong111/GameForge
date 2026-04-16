@@ -35,6 +35,8 @@ public interface ExtensionRegistry {
 
 	<T> boolean has(@NotNull ExtensionType<T> type);
 
+	<T> boolean has(@NotNull ExtensionType<T> type, @NotNull T instance);
+
 	<T> void setPriority(@NotNull ExtensionType<T> type, @NotNull T instance, int priority);
 
 	<T> int getPriority(@NotNull ExtensionType<T> type, @NotNull T instance);
@@ -50,6 +52,10 @@ public interface ExtensionRegistry {
 	default <T> Optional<T> getExtensionOptional(@NotNull ExtensionType<T> type) {
 		return Optional.ofNullable(this.getExtension(type));
 	}
+
+	@NotNull
+	@Unmodifiable
+	Set<ExtensionType<?>> getTypes();
 
 	void clear();
 

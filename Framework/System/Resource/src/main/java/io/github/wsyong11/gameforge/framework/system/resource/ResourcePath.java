@@ -9,21 +9,42 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.function.UnaryOperator;
 
+// TODO 2026/04/15: 实现绝对路径，..和.兼容，改成从root逐层排序，getExtension返回不带点
 public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> {
 	public static final String SEPARATOR = "/";
 	public static final char SEPARATOR_CHAR = '/';
 
 	public static final ResourcePath ROOT = new ResourcePath(ArrayUtils.EMPTY_STRING_ARRAY, true);
+	public static final ResourcePath EMPTY = new ResourcePath(ArrayUtils.EMPTY_STRING_ARRAY, false);
 
 	@NotNull
 	public static ResourcePath of(@NotNull String path) {
 		Objects.requireNonNull(path, "path is null");
 
+		if (path.isEmpty())
+			return EMPTY;
+
 		if (isRoot(path))
 			return ROOT;
 
-		return new ResourcePath(splitPath(path), isDirectory(path));
+		return ofInternal(splitPath(path), isDirectory(path));
+	}
+
+	@NotNull
+	public static ResourcePath of(String... paths) {
+		Objects.requireNonNull(paths, "paths is null");
+		return of(String.join(SEPARATOR, paths));
+	}
+
+	@NotNull
+	private static ResourcePath ofInternal(@NotNull String @NotNull [] paths, boolean directory) {
+		Objects.requireNonNull(paths, "paths is null");
+
+		if (paths.length == 0)
+			return directory ? ROOT : EMPTY;
+		return new ResourcePath(paths, directory);
 	}
 
 	private static boolean isRoot(@NotNull String path) {
@@ -34,12 +55,6 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 
 		char c = path.charAt(0);
 		return c == SEPARATOR_CHAR || c == '\\';
-	}
-
-	@NotNull
-	public static ResourcePath of(String... paths) {
-		Objects.requireNonNull(paths, "paths is null");
-		return of(String.join(SEPARATOR, paths));
 	}
 
 	@NotNull
@@ -83,12 +98,12 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 
 	@NotNull
 	public ResourcePath toDirectory() {
-		return this.directory ? this : new ResourcePath(this.path, true);
+		return this.directory ? this : ofInternal(this.path, true);
 	}
 
 	@NotNull
 	public ResourcePath toFile() {
-		return this.directory ? new ResourcePath(this.path, false) : this;
+		return this.directory ? ofInternal(this.path, false) : this;
 	}
 
 	public boolean isEmpty() {
@@ -112,7 +127,7 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 		if (this.isEmpty())
 			return this.toDirectory();
 
-		return new ResourcePath(Arrays.copyOf(this.path, this.path.length - 1), true);
+		return ofInternal(Arrays.copyOf(this.path, this.path.length - 1), true);
 	}
 
 	public boolean isRoot() {
@@ -132,7 +147,7 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 
 		String[] sub = Arrays.copyOfRange(this.path, begin, end);
 
-		boolean isDir = (end < this.path.length) || this.directory;
+		boolean isDir = this.directory || (end < this.path.length);
 		return new ResourcePath(sub, isDir);
 	}
 
@@ -149,7 +164,7 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 			if (strict)
 				throw new IllegalArgumentException("Base path is not a prefix of this path");
 
-			return this;
+			return EMPTY;
 		}
 
 		String[] remaining = Arrays.copyOfRange(this.path, i, this.path.length);
@@ -226,6 +241,9 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 
 	@NotNull
 	public ResourcePath lower() {
+		if (this.isEmpty())
+			return this.directory ? ROOT : EMPTY;
+
 		String[] path = new String[this.path.length];
 		for (int i = 0; i < this.path.length; i++)
 			path[i] = this.path[i].toLowerCase(Locale.ROOT);
@@ -235,6 +253,9 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 
 	@NotNull
 	public ResourcePath upper() {
+		if (this.isEmpty())
+			return this.directory ? ROOT : EMPTY;
+
 		String[] path = new String[this.path.length];
 		for (int i = 0; i < this.path.length; i++)
 			path[i] = this.path[i].toUpperCase(Locale.ROOT);
@@ -262,8 +283,26 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 	}
 
 	@NotNull
+	public ResourcePath withName(@NotNull String name) {
+		Objects.requireNonNull(name, "name is null");
+
+		if (name.equals(this.getName()))
+			return this;
+
+		String[] newPath = Arrays.copyOf(this.path, this.path.length);
+		newPath[newPath.length - 1] = name;
+		return new ResourcePath(newPath, this.directory);
+	}
+
+	@NotNull
+	public ResourcePath transformName(@NotNull UnaryOperator<String> transformer) {
+		Objects.requireNonNull(transformer, "transformer is null");
+		return this.withName(transformer.apply(this.getName()));
+	}
+
+	@NotNull
 	public String[] toArray() {
-		return Arrays.copyOf(this.path, this.path.length);
+		return this.path.length == 0 ? this.path : Arrays.copyOf(this.path, this.path.length);
 	}
 
 	@NotNull

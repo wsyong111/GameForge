@@ -21,4 +21,10 @@ public interface ExtensionHost {
 	}
 
 	<T> void removeExtension(@NotNull T instance);
+
+	<T>void setExtensionPriority(@NotNull ExtensionType<T> type, @NotNull T instance, int priority);
+
+	<T>int getExtensionPriority(@NotNull ExtensionType<T> type, @NotNull T instance);
+
+	<T> boolean hasExtension(@NotNull ExtensionType<T> type, @NotNull T instance);
 }
