@@ -7,20 +7,16 @@ import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.Resource
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceManager;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.pack.ResourcePack;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.transform.ResourceTransformer;
-import io.github.wsyong11.gameforge.util.IdentityRef;
 import io.github.wsyong11.gameforge.util.concurrent.FutureThread;
-import io.github.wsyong11.gameforge.util.concurrent.FutureUtils;
 import io.github.wsyong11.gameforge.util.exception.ExceptionHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.*;
 
 public abstract class AbstractResourceManager implements ResourceManager {
 	private final ResourcePackRegistry packRegistry;
@@ -66,8 +62,8 @@ public abstract class AbstractResourceManager implements ResourceManager {
 	@NotNull
 	protected abstract List<ReloadStatus.Stage> getReloadStages();
 
-	protected abstract void doReload(
-		@NotNull SimpleReloadStatus reloadStatus,
+	@NotNull
+	protected abstract ResourceReloader createReloader(
 		@NotNull List<ResourcePack> packs,
 		@NotNull List<ResourceConflictResolver> conflictResolvers,
 		@NotNull List<ResourceTransformer> transformers
@@ -78,26 +74,17 @@ public abstract class AbstractResourceManager implements ResourceManager {
 	public synchronized ReloadStatus reload() {
 		this.ensureOpen();
 
-		if (this.reloadThread != null)
-			return this.lastReloadStatus;
+
+		this.packRegistry.update();
 
 		List<ResourceConflictResolver> conflictResolvers = this.extensions.getExtensions(ResourceConflictResolver.TYPE);
 		List<ResourceTransformer> transformers = this.extensions.getExtensions(ResourceTransformer.TYPE);
 
-		this.packRegistry.update();
 		List<ResourcePack> packs = this.packRegistry.getCurrentPacks();
+
 
 		SimpleReloadStatus reloadStatus = new SimpleReloadStatus(this.getReloadStages());
 		this.lastReloadStatus = reloadStatus;
-
-		FutureThread<Object> reloadThread = new FutureThread<>(() -> {
-			this.doReload(reloadStatus, packs, conflictResolvers, transformers);
-			return null;
-		});
-		this.reloadThread = reloadThread;
-		reloadThread.start();
-
-		reloadStatus.bindFuture(this.reloadThread.getFuture());
 		return reloadStatus;
 	}
 
@@ -214,114 +201,114 @@ public abstract class AbstractResourceManager implements ResourceManager {
 		handler.throwException("An error occurred while closing", IOException::new);
 	}
 
-	protected static class SimpleReloadStatus implements ReloadStatus {
-		private final List<Stage> stages;
-		private volatile int stageIndex;
-
-		private volatile Future<?> future;
-
-		private final List<IdentityRef<Listener>> listeners;
-
-		protected SimpleReloadStatus(@NotNull List<Stage> stages) {
-			Objects.requireNonNull(stages, "stages is null");
-
-			this.stages = List.copyOf(stages);
-			this.future = null;
-			this.listeners = new CopyOnWriteArrayList<>();
-		}
-
-		public void bindFuture(@NotNull Future<?> future) {
-			Objects.requireNonNull(future, "future is null");
-
-			if (this.future != null)
-				throw new IllegalStateException("Current status is bound to future");
-
-			this.future = future;
-		}
-
-		public void setStageIndex(int index) {
-			Objects.checkIndex(index, this.stages.size());
-			this.stageIndex = index;
-		}
-
-		public int getStageIndex() {
-			return this.stageIndex;
-		}
-
-		public void nextStage() {
-			this.setStageIndex(this.stageIndex + 1);
-		}
-
-		@NotNull
-		@Unmodifiable
-		public List<Listener> getListeners() {
-			return this.listeners
-				.stream()
-				.map(IdentityRef::get)
-				.toList();
-		}
-
-		@NotNull
-		@UnmodifiableView
-		@Override
-		public List<Stage> getStages() {
-			return this.stages;
-		}
-
-		@NotNull
-		@Override
-		public Stage getCurrentStage() {
-			return this.stages.get(this.stageIndex);
-		}
-
-		@Override
-		public boolean isDone() {
-			return this.future.isDone();
-		}
-
-		@Override
-		public boolean isSuccess() {
-			return this.future.isDone() && FutureUtils.getException(this.future) == null;
-		}
-
-		@Nullable
-		@Override
-		public Throwable getException() {
-			return FutureUtils.getException(this.future);
-		}
-
-		@Override
-		public void await() {
-			try {
-				this.future.get();
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-			} catch (ExecutionException | CancellationException ignored) {
-			}
-		}
-
-		@Override
-		public void await(long timeout, @NotNull TimeUnit unit) {
-			Objects.requireNonNull(unit, "unit is null");
-
-			try {
-				this.future.get(timeout, unit);
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-			} catch (ExecutionException | TimeoutException | CancellationException ignored) {
-			}
-		}
-
-		@Override
-		public void addListener(@NotNull Listener listener) {
-			Objects.requireNonNull(listener, "listener is null");
-			this.listeners.add(IdentityRef.of(listener));
-		}
-
-		@Override
-		public void removeListener(@NotNull Listener listener) {
-			Objects.requireNonNull(listener, "listener is null");
-			this.listeners.remove(IdentityRef.of(listener));
-		}
-	}
+	//	protected static class SimpleReloadStatus implements ReloadStatus {
+//		private final List<Stage> stages;
+//		private volatile int stageIndex;
+//
+//		private volatile Future<?> future;
+//
+//		private final List<IdentityRef<Listener>> listeners;
+//
+//		protected SimpleReloadStatus(@NotNull List<Stage> stages) {
+//			Objects.requireNonNull(stages, "stages is null");
+//
+//			this.stages = List.copyOf(stages);
+//			this.future = null;
+//			this.listeners = new CopyOnWriteArrayList<>();
+//		}
+//
+//		public void bindFuture(@NotNull Future<?> future) {
+//			Objects.requireNonNull(future, "future is null");
+//
+//			if (this.future != null)
+//				throw new IllegalStateException("Current status is bound to future");
+//
+//			this.future = future;
+//		}
+//
+//		public void setStageIndex(int index) {
+//			Objects.checkIndex(index, this.stages.size());
+//			this.stageIndex = index;
+//		}
+//
+//		public int getStageIndex() {
+//			return this.stageIndex;
+//		}
+//
+//		public void nextStage() {
+//			this.setStageIndex(this.stageIndex + 1);
+//		}
+//
+//		@NotNull
+//		@Unmodifiable
+//		public List<Listener> getListeners() {
+//			return this.listeners
+//				.stream()
+//				.map(IdentityRef::get)
+//				.toList();
+//		}
+//
+//		@NotNull
+//		@UnmodifiableView
+//		@Override
+//		public List<Stage> getStages() {
+//			return this.stages;
+//		}
+//
+//		@NotNull
+//		@Override
+//		public Stage getCurrentStage() {
+//			return this.stages.get(this.stageIndex);
+//		}
+//
+//		@Override
+//		public boolean isDone() {
+//			return this.future.isDone();
+//		}
+//
+//		@Override
+//		public boolean isSuccess() {
+//			return this.future.isDone() && FutureUtils.getException(this.future) == null;
+//		}
+//
+//		@Nullable
+//		@Override
+//		public Throwable getException() {
+//			return FutureUtils.getException(this.future);
+//		}
+//
+//		@Override
+//		public void await() {
+//			try {
+//				this.future.get();
+//			} catch (InterruptedException e) {
+//				Thread.currentThread().interrupt();
+//			} catch (ExecutionException | CancellationException ignored) {
+//			}
+//		}
+//
+//		@Override
+//		public void await(long timeout, @NotNull TimeUnit unit) {
+//			Objects.requireNonNull(unit, "unit is null");
+//
+//			try {
+//				this.future.get(timeout, unit);
+//			} catch (InterruptedException e) {
+//				Thread.currentThread().interrupt();
+//			} catch (ExecutionException | TimeoutException | CancellationException ignored) {
+//			}
+//		}
+//
+//		@Override
+//		public void addListener(@NotNull Listener listener) {
+//			Objects.requireNonNull(listener, "listener is null");
+//			this.listeners.add(IdentityRef.of(listener));
+//		}
+//
+//		@Override
+//		public void removeListener(@NotNull Listener listener) {
+//			Objects.requireNonNull(listener, "listener is null");
+//			this.listeners.remove(IdentityRef.of(listener));
+//		}
+//	}
 }

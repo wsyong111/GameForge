@@ -86,6 +86,16 @@ public class DefaultResourceManager extends AbstractResourceManager {
 
 	@NotNull
 	@Override
+	protected ResourceReloader createReloader(
+		@NotNull List<ResourcePack> packs,
+		@NotNull List<ResourceConflictResolver> conflictResolvers,
+		@NotNull List<ResourceTransformer> transformers
+	) {
+		return new ReloaderImpl(packs, conflictResolvers, transformers);
+	}
+
+	@NotNull
+	@Override
 	protected ReloadStatus doReload(
 		@NotNull List<ResourcePack> packs,
 		@NotNull List<ResourceConflictResolver> conflictResolvers,
@@ -170,6 +180,27 @@ public class DefaultResourceManager extends AbstractResourceManager {
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
+		}
+	}
+
+	private class ReloaderImpl extends ResourceReloader {
+		private final List<ResourcePack> packs;
+		private final List<ResourceConflictResolver> conflictResolvers;
+		private final List<ResourceTransformer> transformers;
+
+		public ReloaderImpl(
+			@NotNull List<ResourcePack> packs,
+			@NotNull List<ResourceConflictResolver> conflictResolvers,
+			@NotNull List<ResourceTransformer> transformers
+		) {
+			super();
+			Objects.requireNonNull(packs, "packs is null");
+			Objects.requireNonNull(conflictResolvers, "conflictResolvers is null");
+			Objects.requireNonNull(transformers, "transformers is null");
+
+			this.packs = List.copyOf(packs);
+			this.conflictResolvers = List.copyOf(conflictResolvers);
+			this.transformers = List.copyOf(transformers);
 		}
 	}
 }
