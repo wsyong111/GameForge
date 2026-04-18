@@ -61,7 +61,9 @@ public class ZipResourcePack extends AbstractResourcePack implements Closeable {
 
 				ResourcePath path = ResourcePath.of(entry.getName());
 				if (path.isDirectory()) {
-					LOGGER.warn("Skipped zip entry {} in zip file {}", lazy(entry::getName), lazy(file));
+					LOGGER.trace("Skipped zip entry {} in zip file \"{}\"",
+						lazy(entry::getName),
+						lazy(() -> this.path.toAbsolutePath().normalize()));
 					continue;
 				}
 
@@ -154,5 +156,10 @@ public class ZipResourcePack extends AbstractResourcePack implements Closeable {
 
 			this.assets = Map.of();
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "ZipResourcePack[\"" + this.path.toAbsolutePath().normalize() + "\"]";
 	}
 }

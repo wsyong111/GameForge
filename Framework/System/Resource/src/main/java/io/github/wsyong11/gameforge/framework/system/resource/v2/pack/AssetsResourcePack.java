@@ -99,4 +99,9 @@ public class AssetsResourcePack extends AbstractResourcePack {
 	public List<ResourcePath> list() {
 		return List.copyOf(this.assets.keySet());
 	}
+
+	@Override
+	public String toString() {
+		return "AssetsResourcePack[\"" + this.getSource() + "\"]";
+	}
 }

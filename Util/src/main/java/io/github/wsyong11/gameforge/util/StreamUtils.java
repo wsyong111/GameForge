@@ -12,6 +12,7 @@ import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @UtilityClass
 public class StreamUtils {
@@ -97,5 +98,11 @@ public class StreamUtils {
 	@NotNull
 	public static <K, V> Collector<Map.Entry<K, V>, ?, Map<K, V>> collectUnmodifiableMap() {
 		return Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue);
+	}
+
+	@NotNull
+	public static <T> Iterable<T> toIterable(@NotNull Stream<T> stream) {
+		Objects.requireNonNull(stream, "stream is null");
+		return stream::iterator;
 	}
 }

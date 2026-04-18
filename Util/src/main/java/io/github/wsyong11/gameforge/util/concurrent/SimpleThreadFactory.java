@@ -64,10 +64,10 @@ public class SimpleThreadFactory implements ThreadFactory {
 	}
 
 	public static class Builder {
-		private boolean daemon;
-		private int priority;
+		private boolean daemon = false;
+		private int priority = Thread.NORM_PRIORITY;
 		private String name = "Pool";
-		private Thread.UncaughtExceptionHandler uncaughtExceptionHandler;
+		private Thread.UncaughtExceptionHandler uncaughtExceptionHandler = null;
 
 		@NotNull
 		public Builder daemon() {

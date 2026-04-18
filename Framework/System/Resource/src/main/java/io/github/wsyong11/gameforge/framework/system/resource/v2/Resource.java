@@ -20,6 +20,7 @@ public interface Resource {
 	@Nullable
 	ResourcePack getSource();
 
+	// 如果失败则返回 -1L
 	long getSize();
 
 	@NotNull

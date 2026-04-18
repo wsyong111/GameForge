@@ -33,8 +33,9 @@ public class ByteArrayResource implements Resource {
 		return this.path;
 	}
 
+	@Nullable
 	@Override
-	public @Nullable ResourcePack getSource() {
+	public ResourcePack getSource() {
 		return null;
 	}
 

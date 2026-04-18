@@ -1,14 +1,18 @@
 package io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import io.github.wsyong11.gameforge.framework.spi.ExtensionType;
 import io.github.wsyong11.gameforge.framework.spi.registry.ExtensionRegistry;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ReloadStatus;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceConflictResolver;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceGraph;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceManager;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl.loader.ResourceLoader;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.pack.ResourcePack;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.transform.ResourceTransformer;
-import io.github.wsyong11.gameforge.util.concurrent.FutureThread;
+import io.github.wsyong11.gameforge.util.concurrent.FutureUtils;
 import io.github.wsyong11.gameforge.util.exception.ExceptionHandler;
+import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
@@ -17,16 +21,23 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class AbstractResourceManager implements ResourceManager {
 	private final ResourcePackRegistry packRegistry;
 	private final ExtensionRegistry extensions;
 
 	@Nullable
-	private volatile FutureThread<?> reloadThread;
-	private volatile ReloadStatus lastReloadStatus;
+	private volatile ResourceLoader loader;
 
-	private volatile boolean closed;
+	private final AtomicReference<ResourceGraph> graph;
+
+	private final AtomicBoolean closed;
 
 	public AbstractResourceManager() {
 		this.packRegistry = new ResourcePackRegistry();
@@ -36,10 +47,11 @@ public abstract class AbstractResourceManager implements ResourceManager {
 			ResourceTransformer.TYPE
 		));
 
-		this.reloadThread = null;
-		this.lastReloadStatus = null;
+		this.loader = null;
 
-		this.closed = false;
+		this.graph = new AtomicReference<>(null);
+
+		this.closed = new AtomicBoolean(false);
 	}
 
 	@NotNull
@@ -53,27 +65,59 @@ public abstract class AbstractResourceManager implements ResourceManager {
 	}
 
 	protected void ensureOpen() {
-		if (this.closed)
+		if (this.closed.get())
 			throw new IllegalStateException("Resource manager closed");
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
 	@NotNull
-	protected abstract List<ReloadStatus.Stage> getReloadStages();
-
-	@NotNull
-	protected abstract ResourceReloader createReloader(
+	protected abstract ResourceLoader createLoader(
 		@NotNull List<ResourcePack> packs,
 		@NotNull List<ResourceConflictResolver> conflictResolvers,
 		@NotNull List<ResourceTransformer> transformers
 	);
+
+	protected void onLoadComplete(@NotNull ResourceGraph graph) {
+		Objects.requireNonNull(graph, "graph is null");
+		this.graph.set(graph);  // TODO: 2026/4/18 Frozen graph
+	}
+
+	protected void onLoadFailed(@NotNull Throwable exception) {
+	}
+
+	private void processLoadComplete(@NotNull Future<ResourceGraph> future) {
+		Objects.requireNonNull(future, "future is null");
+
+		ResourceGraph graph;
+		try {
+			graph = future.get();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			return;
+		} catch (ExecutionException e) {
+			this.onLoadFailed(e.getCause());
+			return;
+		} catch (CancellationException ignored) {
+			return;
+		} finally {
+			synchronized (this) {
+				this.loader = null;
+			}
+		}
+
+		this.onLoadComplete(graph);
+	}
+
 
 	@NotNull
 	@Override
 	public synchronized ReloadStatus reload() {
 		this.ensureOpen();
 
+		ResourceLoader loader = this.loader;
+		if (loader != null)
+			throw new NotImplementedException(); // TODO: 2026/4/18 Cancel and restart reload
 
 		this.packRegistry.update();
 
@@ -82,10 +126,14 @@ public abstract class AbstractResourceManager implements ResourceManager {
 
 		List<ResourcePack> packs = this.packRegistry.getCurrentPacks();
 
+		ResourceLoader newLoader = this.createLoader(packs, conflictResolvers, transformers);
+		ListenableFuture<ResourceGraph> future = newLoader.getFuture();
+		future.addListener(() -> this.processLoadComplete(future), Runnable::run);
 
-		SimpleReloadStatus reloadStatus = new SimpleReloadStatus(this.getReloadStages());
-		this.lastReloadStatus = reloadStatus;
-		return reloadStatus;
+		this.loader = newLoader;
+		newLoader.load();
+
+		return newLoader.getStatus();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
@@ -189,7 +237,13 @@ public abstract class AbstractResourceManager implements ResourceManager {
 
 	@Override
 	public void close() throws IOException {
-		this.closed = true;
+		if (!this.closed.compareAndSet(false, true))
+			return;
+
+		ResourceLoader loader = this.loader;
+		if (loader != null)
+			FutureUtils.cancelAwait(loader.getFuture(), 10, TimeUnit.SECONDS);
+		this.graph.set(null);
 
 		ExceptionHandler handler = new ExceptionHandler();
 		for (ResourcePack pack : this.packRegistry.getPacks())
@@ -200,115 +254,4 @@ public abstract class AbstractResourceManager implements ResourceManager {
 
 		handler.throwException("An error occurred while closing", IOException::new);
 	}
-
-	//	protected static class SimpleReloadStatus implements ReloadStatus {
-//		private final List<Stage> stages;
-//		private volatile int stageIndex;
-//
-//		private volatile Future<?> future;
-//
-//		private final List<IdentityRef<Listener>> listeners;
-//
-//		protected SimpleReloadStatus(@NotNull List<Stage> stages) {
-//			Objects.requireNonNull(stages, "stages is null");
-//
-//			this.stages = List.copyOf(stages);
-//			this.future = null;
-//			this.listeners = new CopyOnWriteArrayList<>();
-//		}
-//
-//		public void bindFuture(@NotNull Future<?> future) {
-//			Objects.requireNonNull(future, "future is null");
-//
-//			if (this.future != null)
-//				throw new IllegalStateException("Current status is bound to future");
-//
-//			this.future = future;
-//		}
-//
-//		public void setStageIndex(int index) {
-//			Objects.checkIndex(index, this.stages.size());
-//			this.stageIndex = index;
-//		}
-//
-//		public int getStageIndex() {
-//			return this.stageIndex;
-//		}
-//
-//		public void nextStage() {
-//			this.setStageIndex(this.stageIndex + 1);
-//		}
-//
-//		@NotNull
-//		@Unmodifiable
-//		public List<Listener> getListeners() {
-//			return this.listeners
-//				.stream()
-//				.map(IdentityRef::get)
-//				.toList();
-//		}
-//
-//		@NotNull
-//		@UnmodifiableView
-//		@Override
-//		public List<Stage> getStages() {
-//			return this.stages;
-//		}
-//
-//		@NotNull
-//		@Override
-//		public Stage getCurrentStage() {
-//			return this.stages.get(this.stageIndex);
-//		}
-//
-//		@Override
-//		public boolean isDone() {
-//			return this.future.isDone();
-//		}
-//
-//		@Override
-//		public boolean isSuccess() {
-//			return this.future.isDone() && FutureUtils.getException(this.future) == null;
-//		}
-//
-//		@Nullable
-//		@Override
-//		public Throwable getException() {
-//			return FutureUtils.getException(this.future);
-//		}
-//
-//		@Override
-//		public void await() {
-//			try {
-//				this.future.get();
-//			} catch (InterruptedException e) {
-//				Thread.currentThread().interrupt();
-//			} catch (ExecutionException | CancellationException ignored) {
-//			}
-//		}
-//
-//		@Override
-//		public void await(long timeout, @NotNull TimeUnit unit) {
-//			Objects.requireNonNull(unit, "unit is null");
-//
-//			try {
-//				this.future.get(timeout, unit);
-//			} catch (InterruptedException e) {
-//				Thread.currentThread().interrupt();
-//			} catch (ExecutionException | TimeoutException | CancellationException ignored) {
-//			}
-//		}
-//
-//		@Override
-//		public void addListener(@NotNull Listener listener) {
-//			Objects.requireNonNull(listener, "listener is null");
-//			this.listeners.add(IdentityRef.of(listener));
-//		}
-//
-//		@Override
-//		public void removeListener(@NotNull Listener listener) {
-//			Objects.requireNonNull(listener, "listener is null");
-//			this.listeners.remove(IdentityRef.of(listener));
-//		}
-//	}
 }

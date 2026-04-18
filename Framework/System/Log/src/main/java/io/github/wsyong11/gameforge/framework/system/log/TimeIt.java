@@ -20,6 +20,7 @@ public abstract class TimeIt implements AutoCloseable {
 		return logger.isDebugEnabled() ? new Impl(logger, message, LogLevel.DEBUG) : NOOP_IMPL;
 	}
 
+	@NotNull
 	public static TimeIt begin(@NotNull Logger logger, @NotNull LogLevel level, @NotNull String message) {
 		Objects.requireNonNull(logger, "logger is null");
 		Objects.requireNonNull(level, "level is null");

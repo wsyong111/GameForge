@@ -11,7 +11,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.function.UnaryOperator;
 
-// TODO 2026/04/15: 实现绝对路径，..和.兼容，改成从root逐层排序，getExtension返回不带点
+// TODO 2026/04/15: 实现绝对路径，..和.兼容，改成从root逐层排序
 public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> {
 	public static final String SEPARATOR = "/";
 	public static final char SEPARATOR_CHAR = '/';
@@ -139,7 +139,7 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 		if (begin < 0 || end > this.path.length || begin >= end)
 			throw new ArrayIndexOutOfBoundsException(
 				"Invalid sub path range: " + begin + " to " + end +
-					", length=" + this.path.length
+				", length=" + this.path.length
 			);
 
 		if (begin == 0 && end == this.path.length)
@@ -279,7 +279,7 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 		if (extensionIndex == -1)
 			return "";
 
-		return name.substring(extensionIndex);
+		return name.substring(extensionIndex + 1);
 	}
 
 	@NotNull
@@ -345,7 +345,7 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 
 		ResourcePath other = (ResourcePath) o;
 		return this.directory == other.directory
-			&& Arrays.equals(this.path, other.path);
+		       && Arrays.equals(this.path, other.path);
 	}
 
 	@Override
@@ -359,7 +359,7 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 	public String toString() {
 		if (this.fullPath == null)
 			this.fullPath = String.join(SEPARATOR, this.path)
-				+ (this.directory ? SEPARATOR : "");
+			                + (this.directory ? SEPARATOR : "");
 
 		return this.fullPath;
 	}

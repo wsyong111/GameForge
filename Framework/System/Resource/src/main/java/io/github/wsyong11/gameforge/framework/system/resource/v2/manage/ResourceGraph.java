@@ -31,5 +31,5 @@ public interface ResourceGraph {
 	boolean isFrozen();
 
 	@NotNull
-	ResourceQuery select();
+	ResourceQuery query();
 }
