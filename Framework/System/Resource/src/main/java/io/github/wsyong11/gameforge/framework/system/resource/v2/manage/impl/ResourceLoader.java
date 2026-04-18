@@ -194,6 +194,11 @@ public abstract class ResourceReloader {
 	}
 
 	private static class ReloadStatusImpl2 implements ReloadStatus {
-		private final Map<String, StageImpl> stageMap
+		private final Map<String, StageImpl> stageMap;
+
+		public ReloadStatusImpl2(@NotNull List<String> ids) {
+			Objects.requireNonNull(ids, "ids is null");
+			this.stageMap=ids
+		}
 	}
 }

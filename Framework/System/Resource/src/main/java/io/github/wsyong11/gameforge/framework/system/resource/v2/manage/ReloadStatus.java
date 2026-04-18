@@ -15,6 +15,9 @@ public interface ReloadStatus {
 	@NotNull
 	Stage getCurrentStage();
 
+	@Nullable
+	Stage getStage(@NotNull String id);
+
 	boolean isDone();
 
 	boolean isSuccess();
@@ -22,9 +25,24 @@ public interface ReloadStatus {
 	@Nullable
 	Throwable getException();
 
-	void await();
+	default float getProgress() {
+		List<Stage> stages = this.getStages();
 
-	void await(long timeout, @NotNull TimeUnit unit);
+		float total = 0;
+		float sum = 0;
+
+		for (Stage s : stages) {
+			float weight = s.getWeight();
+			total += weight;
+			sum += weight * s.getProgress();
+		}
+
+		return total == 0 ? 1f : sum / total;
+	}
+
+	void await() throws InterruptedException;
+
+	void await(long timeout, @NotNull TimeUnit unit) throws InterruptedException;
 
 	void addListener(@NotNull Listener listener);
 
@@ -34,6 +52,8 @@ public interface ReloadStatus {
 		@NotNull
 		String getId();
 
+		float getWeight();
+
 		@NotNull
 		State getState();
 
@@ -42,18 +62,15 @@ public interface ReloadStatus {
 		int getCurrent();
 
 		default float getProgress() {
-			return (float) this.getCurrent() / this.getTotal();
+			float current = this.getCurrent();
+			float total = this.getTotal();
+			return total <= 0.0F ? 0.0F : current / total;
 		}
 	}
 
+	@FunctionalInterface
 	interface Listener {
-		void onStageUpdate(@NotNull Stage stage);
-
-		void onStageProgressUpdate(@NotNull Stage stage);
-
-		void onSuccess();
-
-		void onFailed(@NotNull Throwable exception);
+		void onUpdate(@NotNull ReloadStatus status);
 	}
 
 	enum State {
