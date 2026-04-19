@@ -160,11 +160,16 @@ public class DefaultResourceLoader extends ResourceLoader {
 		return Collections.unmodifiableList(result);
 	}
 
-	protected void transformResources(@NotNull ResourceGraph graph, @NotNull List<ResourceTransformer> transformers) {
+	@NotNull
+	protected ResourceGraph transformResources(@NotNull ResourceGraph graph, @NotNull List<ResourceTransformer> transformers) {
 		Objects.requireNonNull(graph, "graph is null");
+		Objects.requireNonNull(transformers, "transformers is null");
 
-		for (ResourceTransformer transformer : transformers) {
-
+		try {
+			return new ResourceGraphTransformer(graph, transformers).transform();
+		} catch (Exception e) {
+			LOGGER.error("Failed to transform resource", e);
+			throw e;
 		}
 	}
 
@@ -202,14 +207,15 @@ public class DefaultResourceLoader extends ResourceLoader {
 		LOGGER.debug("Resolve completed, total {} resources", resources.size());
 
 		LOGGER.debug("Building resource graph...");
-		SimpleResourceGraph graph = new SimpleResourceGraph();
+		ResourceGraph graph = new SimpleResourceGraph();
 		for (Resource resource : resources)
 			graph.put(resource.getPath(), resource);
 
 		LOGGER.debug("Transforming resources...");
-		this.transformResources(graph, this.transformers);
+		ResourceGraph transformedGraph = this.transformResources(graph, this.transformers);
 
-		return graph.freeze();
+		LOGGER.debug("Transform complete, total {} resources", transformedGraph.size());
+
+		return transformedGraph;
 	}
-
 }

@@ -1,4 +1,4 @@
-package io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl;
+package io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl.transform;
 
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
@@ -6,21 +6,27 @@ import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.Resource
 import io.github.wsyong11.gameforge.framework.system.resource.v2.query.ResourceQuery;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.transform.TransformContext;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.UnaryOperator;
 
+/*
+1. 添加或修改的资源不会被重复变换
+2. 移除的资源在未被变换前会被跳过
+3. 替换会在结尾并行运行，若返回空则删除资源并中断变换链
+ */
 public final class GraphTransformContext implements TransformContext {
 	private final ResourceGraph graph;
 
+	private final Set<ResourcePath> removedResources;
 	private final Map<ResourcePath, Operate> operates;
 
 	public GraphTransformContext(@NotNull ResourceGraph graph) {
 		Objects.requireNonNull(graph, "graph is null");
 		this.graph = graph;
 
+		this.removedResources = new HashSet<>();
 		this.operates = new HashMap<>();
 	}
 
@@ -42,6 +48,12 @@ public final class GraphTransformContext implements TransformContext {
 	public void removeResource(@NotNull ResourcePath path) {
 		Objects.requireNonNull(path, "path is null");
 		this.operates.put(path, RemoveOperate.INSTANCE);
+	}
+
+	@Nullable
+	@Override
+	public Resource getResource(@NotNull ResourcePath path) {
+		return null;
 	}
 
 	@NotNull
@@ -74,6 +86,11 @@ public final class GraphTransformContext implements TransformContext {
 			this.resource = resource;
 		}
 
+		@NotNull
+		public Resource getResource() {
+			return this.resource;
+		}
+
 		@Override
 		public void apply(@NotNull ResourcePath path, @NotNull ResourceGraph graph) {
 			Objects.requireNonNull(path, "path is null");
@@ -88,6 +105,11 @@ public final class GraphTransformContext implements TransformContext {
 		public ReplaceOperate(@NotNull UnaryOperator<Resource> transformer) {
 			Objects.requireNonNull(transformer, "transformer is null");
 			this.transformer = transformer;
+		}
+
+		@NotNull
+		public UnaryOperator<Resource> getTransformer() {
+			return this.transformer;
 		}
 
 		@Override

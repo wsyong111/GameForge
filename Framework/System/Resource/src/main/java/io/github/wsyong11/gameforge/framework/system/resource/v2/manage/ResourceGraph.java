@@ -28,8 +28,12 @@ public interface ResourceGraph {
 	@Unmodifiable
 	List<ResourcePath> list(@NotNull ResourcePath path);
 
-	boolean isFrozen();
+//	boolean isFrozen();
+
+	int size();
 
 	@NotNull
-	ResourceQuery query();
+	default ResourceQuery query() {
+		return null; // TODO: 2026/4/19 Impl
+	}
 }

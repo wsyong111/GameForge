@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class FrozenResourceGraph implements ResourceGraph {
+public abstract class FrozenResourceGraph implements ResourceGraph {
 	private final Map<ResourcePath, Resource> resourceMap;
 	private final Map<ResourcePath, List<ResourcePath>> treeMap;
 
@@ -31,10 +31,10 @@ public class FrozenResourceGraph implements ResourceGraph {
 			.collect(StreamUtils.collectUnmodifiableMap()));
 	}
 
-	@Override
-	public boolean isFrozen() {
-		return true;
-	}
+//	@Override
+//	public boolean isFrozen() {
+//		return true;
+//	}
 
 	@Nullable
 	@Override
