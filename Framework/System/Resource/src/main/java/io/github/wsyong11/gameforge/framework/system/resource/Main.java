@@ -134,7 +134,7 @@ public class Main {
 
 			manager.reload();
 
-			Thread.sleep(5000);
+			Thread.sleep(50000);
 
 //			ResourceFileSystem fs = manager.getFileSystem();
 //			try (InputStream stream = fs.openStream(ResourcePath.of("assets/game/shader/config/test.json"))) {

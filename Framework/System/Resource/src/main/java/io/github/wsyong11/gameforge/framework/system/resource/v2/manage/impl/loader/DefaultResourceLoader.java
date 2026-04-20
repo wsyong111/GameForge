@@ -166,7 +166,7 @@ public class DefaultResourceLoader extends ResourceLoader {
 		Objects.requireNonNull(transformers, "transformers is null");
 
 		try {
-			return new ResourceGraphTransformer(graph, transformers).transform();
+			return new ResourceGraphTransformer(graph, transformers, null).transform();
 		} catch (Exception e) {
 			LOGGER.error("Failed to transform resource", e);
 			throw e;
