@@ -1,22 +1,27 @@
 package io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl.loader;
 
+import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceGraph;
-import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl.SimpleResourceGraph;
-import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl.fs.ResourceGraphFileSystem;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl.graph.SimpleResourceGraph;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.query.ResourceQuery;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.transform.ResourceTransformer;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.transform.TransformContext;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.UnaryOperator;
 
 public class ResourceGraphTransformer {
 	private final ResourceGraph graph;
 	private final List<ResourceTransformer> transformers;
 	private final ExecutorService transformExecutor;
 
-	private final ResourceGraphFileSystem graphFS;
+	private final Map<ResourcePath, List<UnaryOperator<Resource>>> replaceTransformers;
 
 	private final AtomicBoolean transformed;
 
@@ -27,15 +32,13 @@ public class ResourceGraphTransformer {
 	) {
 		Objects.requireNonNull(graph, "graph is null");
 		Objects.requireNonNull(transformers, "transformers is null");
-//		Objects.requireNonNull(transformExecutor, "transformExecutor is null");
+		Objects.requireNonNull(transformExecutor, "transformExecutor is null");
 
 		this.graph = graph;
 		this.transformers = transformers;
 		this.transformExecutor = transformExecutor;
 
-		this.graphFS = new ResourceGraphFileSystem(graph);
-
-//		this.replaceTransformers = new LinkedHashMap<>();
+		this.replaceTransformers = new LinkedHashMap<>();
 
 		this.transformed = new AtomicBoolean(false);
 	}
@@ -44,7 +47,7 @@ public class ResourceGraphTransformer {
 		Objects.requireNonNull(resultGraph, "resultGraph is null");
 		Objects.requireNonNull(transformer, "transformer is null");
 
-		transformer.transform();
+		Context context = new Context(this.graph);
 	}
 
 	@NotNull
@@ -86,19 +89,122 @@ public class ResourceGraphTransformer {
 //		}
 	}
 
-//	@Nullable
-//	private Resource replaceAsync(@NotNull ResourcePath path, @NotNull Resource resource, @NotNull List<UnaryOperator<Resource>> transformers) {
-//		Objects.requireNonNull(path, "path is null");
-//		Objects.requireNonNull(resource, "resource is null");
-//		Objects.requireNonNull(transformers, "transformers is null");
-//
-//		Resource currentResource = resource;
-//		for (UnaryOperator<Resource> transformer : transformers) {
-//			currentResource = transformer.apply(currentResource);
-//			if (currentResource == null)
-//				return null;
-//		}
-//
-//		return currentResource;
-//	}
+	@Nullable
+	private Resource replaceAsync(@NotNull ResourcePath path, @NotNull Resource resource, @NotNull List<UnaryOperator<Resource>> transformers) {
+		Objects.requireNonNull(path, "path is null");
+		Objects.requireNonNull(resource, "resource is null");
+		Objects.requireNonNull(transformers, "transformers is null");
+
+		Resource currentResource = resource;
+		for (UnaryOperator<Resource> transformer : transformers) {
+			currentResource = transformer.apply(currentResource);
+			if (currentResource == null)
+				return null;
+		}
+
+		return currentResource;
+	}
+
+	protected static class Context implements TransformContext {
+		private final ResourceGraph currentGraph;
+		private final Map<ResourcePath, ResourceOperate> operateMap;
+
+		private Context(@NotNull ResourceGraph currentGraph) {
+			Objects.requireNonNull(currentGraph, "graph is null");
+
+			this.currentGraph = currentGraph;
+
+			this.operateMap = new HashMap<>();
+		}
+
+		@Override
+		public void replaceResource(@NotNull ResourcePath path, @NotNull UnaryOperator<Resource> transformer) {
+			Objects.requireNonNull(path, "path is null");
+			Objects.requireNonNull(transformer, "transformer is null");
+			this.operateMap.put(path.toFile(), ResourceOperate.replace(transformer));
+		}
+
+		@Override
+		public void addResource(@NotNull ResourcePath path, @NotNull Resource resource) {
+			Objects.requireNonNull(path, "path is null");
+			Objects.requireNonNull(resource, "resource is null");
+			this.operateMap.put(path.toFile(), ResourceOperate.add(resource));
+		}
+
+		@Override
+		public void removeResource(@NotNull ResourcePath path) {
+			Objects.requireNonNull(path, "path is null");
+			this.operateMap.put(path.toFile(), ResourceOperate.remove());
+		}
+
+		@Nullable
+		@Override
+		public Resource getResource(@NotNull ResourcePath path) {
+			Objects.requireNonNull(path, "path is null");
+			return this.graph.get(path);
+		}
+
+		@NotNull
+		@Override
+		public ResourceQuery query() {
+			return this.graph.query();
+		}
+
+		@NotNull
+		@Unmodifiable
+		public Map<ResourcePath, ResourceOperate> getOperateMap() {
+			return Map.copyOf(this.operateMap);
+		}
+	}
+
+	protected interface ResourceOperate {
+		@NotNull
+		static Remove remove() {
+			return Remove.INSTANCE;
+		}
+
+		@NotNull
+		static Add add(@NotNull Resource resource) {
+			Objects.requireNonNull(resource, "resource is null");
+			return new Add(resource);
+		}
+
+		@NotNull
+		static Replace replace(@NotNull UnaryOperator<Resource> replacer) {
+			Objects.requireNonNull(replacer, "replacer is null");
+			return new Replace(replacer);
+		}
+
+		class Remove implements ResourceOperate {
+			public static final Remove INSTANCE = new Remove();
+		}
+
+		class Add implements ResourceOperate {
+			private final Resource resource;
+
+			public Add(@NotNull Resource resource) {
+				Objects.requireNonNull(resource, "resource is null");
+				this.resource = resource;
+			}
+
+			@NotNull
+			public Resource getResource() {
+				return this.resource;
+			}
+		}
+
+		class Replace implements ResourceOperate {
+			private final UnaryOperator<Resource> replacer;
+
+			public Replace(@NotNull UnaryOperator<Resource> replacer) {
+				Objects.requireNonNull(replacer, "replacer is null");
+				this.replacer = replacer;
+			}
+
+			@NotNull
+			public UnaryOperator<Resource> getReplacer() {
+				return this.replacer;
+			}
+		}
+	}
 }

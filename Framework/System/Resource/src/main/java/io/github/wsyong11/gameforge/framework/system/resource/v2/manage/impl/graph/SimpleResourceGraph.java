@@ -1,4 +1,4 @@
-package io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl;
+package io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl.graph;
 
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
@@ -166,7 +166,7 @@ public class SimpleResourceGraph implements ResourceGraph {
 		lock.lock();
 		try {
 			return this.removeEntry(path.toFile())
-			       || this.removeDir(path.toDirectory());
+				|| this.removeDir(path.toDirectory());
 		} finally {
 			lock.unlock();
 		}
@@ -183,7 +183,7 @@ public class SimpleResourceGraph implements ResourceGraph {
 		lock.lock();
 		try {
 			return this.resourceMap.containsKey(path.toFile())
-			       || this.treeMap.containsKey(path.toDirectory());
+				|| this.treeMap.containsKey(path.toDirectory());
 		} finally {
 			lock.unlock();
 		}
@@ -236,6 +236,24 @@ public class SimpleResourceGraph implements ResourceGraph {
 
 	@Override
 	public int size() {
-		return this.resourceMap.size();
+		Lock lock = this.lock.readLock();
+		lock.lock();
+		try {
+			return this.resourceMap.size();
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public void clear() {
+		Lock lock = this.lock.writeLock();
+		lock.lock();
+		try {
+			this.resourceMap.clear();
+			this.treeMap.clear();
+		} finally {
+			lock.unlock();
+		}
 	}
 }
