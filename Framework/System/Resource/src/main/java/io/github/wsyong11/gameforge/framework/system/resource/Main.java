@@ -134,7 +134,10 @@ public class Main {
 
 			manager.reload();
 
-			Thread.sleep(50000);
+			Thread.sleep(5000);
+			System.out.println("GC");
+			System.gc();
+			Thread.sleep(500000);
 
 //			ResourceFileSystem fs = manager.getFileSystem();
 //			try (InputStream stream = fs.openStream(ResourcePath.of("assets/game/shader/config/test.json"))) {
@@ -163,7 +166,7 @@ public class Main {
 		@Override
 		public void transform(@NotNull Resource resource, @NotNull TransformContext context) {
 			ResourcePath path = resource.getPath();
-			if (!"test".equals(path.getExtension()))
+			if (!"json".equals(path.getExtension()))
 				return;
 
 			context.replaceResource(path, res -> new TransformedResource(res) {

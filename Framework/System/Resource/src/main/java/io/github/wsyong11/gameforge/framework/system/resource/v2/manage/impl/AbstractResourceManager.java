@@ -3,10 +3,12 @@ package io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl;
 import com.google.common.util.concurrent.ListenableFuture;
 import io.github.wsyong11.gameforge.framework.spi.ExtensionType;
 import io.github.wsyong11.gameforge.framework.spi.registry.ExtensionRegistry;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.fs.ResourceFileSystem;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ReloadStatus;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceConflictResolver;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceGraph;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceManager;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl.fs.ResourceGraphFileSystem;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl.loader.ResourceLoader;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.pack.ResourcePack;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.transform.ResourceTransformer;
@@ -35,7 +37,7 @@ public abstract class AbstractResourceManager implements ResourceManager {
 	@Nullable
 	private volatile ResourceLoader loader;
 
-	private final AtomicReference<ResourceGraph> graph;
+	private final AtomicReference<ResourceContext> context;
 
 	private final AtomicBoolean closed;
 
@@ -49,7 +51,7 @@ public abstract class AbstractResourceManager implements ResourceManager {
 
 		this.loader = null;
 
-		this.graph = new AtomicReference<>(null);
+		this.context = new AtomicReference<>(null);
 
 		this.closed = new AtomicBoolean(false);
 	}
@@ -64,9 +66,31 @@ public abstract class AbstractResourceManager implements ResourceManager {
 		return this.extensions;
 	}
 
+	@Nullable
+	protected ResourceContext getContext() {
+		return this.context.get();
+	}
+
+	@NotNull
+	protected ResourceContext requireContext() {
+		ResourceContext context = this.getContext();
+		if (context == null)
+			throw new IllegalStateException("Resource not load");
+
+		return context;
+	}
+
 	protected void ensureOpen() {
 		if (this.closed.get())
 			throw new IllegalStateException("Resource manager closed");
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	@NotNull
+	@Override
+	public ResourceFileSystem getFileSystem() {
+		return this.requireContext().getFileSystem();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
@@ -80,11 +104,13 @@ public abstract class AbstractResourceManager implements ResourceManager {
 
 	protected void onLoadComplete(@NotNull ResourceGraph graph) {
 		Objects.requireNonNull(graph, "graph is null");
-		this.graph.set(graph);  // TODO: 2026/4/18 Frozen graph
+		this.context.set(new ResourceContext(graph));  // TODO: 2026/4/18 Frozen graph
 	}
 
 	protected void onLoadFailed(@NotNull Throwable exception) {
 	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
 
 	private void processLoadComplete(@NotNull Future<ResourceGraph> future) {
 		Objects.requireNonNull(future, "future is null");
@@ -243,7 +269,7 @@ public abstract class AbstractResourceManager implements ResourceManager {
 		ResourceLoader loader = this.loader;
 		if (loader != null)
 			FutureUtils.cancelAwait(loader.getFuture(), 10, TimeUnit.SECONDS);
-		this.graph.set(null);
+		this.context.set(null);
 
 		ExceptionHandler handler = new ExceptionHandler();
 		for (ResourcePack pack : this.packRegistry.getPacks())
@@ -253,5 +279,26 @@ public abstract class AbstractResourceManager implements ResourceManager {
 		this.extensions.clear();
 
 		handler.throwException("An error occurred while closing", IOException::new);
+	}
+
+	protected static final class ResourceContext {
+		private final ResourceGraph graph;
+		private final ResourceFileSystem fileSystem;
+
+		public ResourceContext(@NotNull ResourceGraph graph) {
+			Objects.requireNonNull(graph, "graph is null");
+			this.graph = graph;
+			this.fileSystem = new ResourceGraphFileSystem(graph);
+		}
+
+		@NotNull
+		public ResourceGraph getGraph() {
+			return this.graph;
+		}
+
+		@NotNull
+		public ResourceFileSystem getFileSystem() {
+			return this.fileSystem;
+		}
 	}
 }

@@ -26,23 +26,27 @@ public class DefaultResourceLoader extends ResourceLoader {
 	private final List<ResourcePack> packs;
 	private final List<ResourceConflictResolver> conflictResolvers;
 	private final List<ResourceTransformer> transformers;
-	private final ExecutorService packReloadPool;
+	private final ExecutorService packReloadThreadPool;
+	private final ExecutorService transformThreadPool;
 
 	public DefaultResourceLoader(
 		@NotNull List<ResourcePack> packs,
 		@NotNull List<ResourceConflictResolver> conflictResolvers,
 		@NotNull List<ResourceTransformer> transformers,
-		@NotNull ExecutorService packReloadPool
+		@NotNull ExecutorService packReloadThreadPool,
+		@NotNull ExecutorService transformThreadPool
 	) {
 		Objects.requireNonNull(packs, "packs is null");
 		Objects.requireNonNull(conflictResolvers, "conflictResolvers is null");
 		Objects.requireNonNull(transformers, "transformers is null");
-		Objects.requireNonNull(packReloadPool, "packReloadPool is null");
+		Objects.requireNonNull(packReloadThreadPool, "packReloadThreadPool is null");
+		Objects.requireNonNull(transformThreadPool, "transformThreadPool is null");
 
 		this.packs = List.copyOf(packs);
 		this.conflictResolvers = List.copyOf(conflictResolvers);
 		this.transformers = List.copyOf(transformers);
-		this.packReloadPool = packReloadPool;
+		this.packReloadThreadPool = packReloadThreadPool;
+		this.transformThreadPool = transformThreadPool;
 	}
 
 	@NotNull
@@ -86,7 +90,7 @@ public class DefaultResourceLoader extends ResourceLoader {
 		List<Future<List<Resource>>> reloadFutures = packs
 			.stream()
 			.map(pack ->
-				this.packReloadPool.submit(() ->
+				this.packReloadThreadPool.submit(() ->
 					this.reloadResourcePack(pack)))
 			.toList();
 
@@ -166,7 +170,8 @@ public class DefaultResourceLoader extends ResourceLoader {
 		Objects.requireNonNull(transformers, "transformers is null");
 
 		try {
-			return new ResourceGraphTransformer(graph, transformers, null).transform();
+			ResourceGraphTransformer transformer = new ResourceGraphTransformer(transformers, this.transformThreadPool);
+			return transformer.transform(graph);
 		} catch (Exception e) {
 			LOGGER.error("Failed to transform resource", e);
 			throw e;

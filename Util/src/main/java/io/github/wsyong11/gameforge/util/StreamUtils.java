@@ -82,7 +82,7 @@ public class StreamUtils {
 	}
 
 	@NotNull
-	public static <K, V, VR> Function<Map.Entry<K, V>, Map.Entry<K, VR>> entryValueMap(@NotNull Function<V, VR> mapper) {
+	public static <K, V, VR> Function<Map.Entry<K, V>, Map.Entry<K, VR>> entryValueMap(@NotNull Function<? super V, ? extends VR> mapper) {
 		Objects.requireNonNull(mapper, "mapper is null");
 		return value -> Map.entry(value.getKey(), mapper.apply(value.getValue()));
 	}
@@ -98,6 +98,11 @@ public class StreamUtils {
 	@NotNull
 	public static <K, V> Collector<Map.Entry<K, V>, ?, Map<K, V>> collectUnmodifiableMap() {
 		return Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue);
+	}
+
+	@NotNull
+	public static <K, V> Collector<Map.Entry<K, V>, ?, Map<K, V>> collectMap() {
+		return Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue);
 	}
 
 	@NotNull

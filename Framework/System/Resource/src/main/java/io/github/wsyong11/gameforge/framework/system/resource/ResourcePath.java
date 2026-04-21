@@ -3,7 +3,6 @@ package io.github.wsyong11.gameforge.framework.system.resource;
 import io.github.wsyong11.gameforge.util.collection.ArrayIterators;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -66,6 +65,7 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 
 		return Arrays.stream(path.replace('\\', SEPARATOR_CHAR).split(SEPARATOR))
 		             .filter(s -> !s.isEmpty())
+		             .map(String::intern)
 		             .toArray(String[]::new);
 	}
 
@@ -77,8 +77,8 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 	private final String[] path;
 	private final boolean directory;
 
-	@Nullable
-	private volatile String fullPath;
+//	@Nullable
+//	private volatile String fullPath;
 
 	private volatile int hash;
 
@@ -88,7 +88,7 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 		this.path = paths;
 		this.directory = directory;
 
-		this.fullPath = null;
+//		this.fullPath = null;
 		this.hash = Integer.MAX_VALUE;
 	}
 
@@ -357,10 +357,12 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 
 	@Override
 	public String toString() {
-		if (this.fullPath == null)
-			this.fullPath = String.join(SEPARATOR, this.path)
+//		if (this.fullPath == null)
+//			this.fullPath = String.join(SEPARATOR, this.path)
+//			                + (this.directory ? SEPARATOR : "");
+//
+//		return this.fullPath;
+		return String.join(SEPARATOR, this.path)
 			                + (this.directory ? SEPARATOR : "");
-
-		return this.fullPath;
 	}
 }

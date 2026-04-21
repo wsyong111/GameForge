@@ -11,6 +11,7 @@ import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 
 public class SimpleResourceGraph implements ResourceGraph {
 	private final Map<ResourcePath, Resource> resourceMap;
@@ -21,6 +22,22 @@ public class SimpleResourceGraph implements ResourceGraph {
 	public SimpleResourceGraph() {
 		this.resourceMap = new HashMap<>();
 		this.treeMap = new HashMap<>();
+
+		this.lock = new ReentrantReadWriteLock();
+	}
+
+	protected SimpleResourceGraph(@NotNull Map<ResourcePath, Resource> resourceMap, @NotNull Map<ResourcePath, Set<ResourcePath>> treeMap) {
+		Objects.requireNonNull(resourceMap, "resourceMap is null");
+		Objects.requireNonNull(treeMap, "treeMap is null");
+
+		this.resourceMap = new HashMap<>(resourceMap);
+		this.treeMap = treeMap
+			.entrySet()
+			.stream()
+			.collect(Collectors.toMap(
+				Map.Entry::getKey,
+				v -> new LinkedHashSet<>(v.getValue())
+			));
 
 		this.lock = new ReentrantReadWriteLock();
 	}
@@ -166,7 +183,7 @@ public class SimpleResourceGraph implements ResourceGraph {
 		lock.lock();
 		try {
 			return this.removeEntry(path.toFile())
-				|| this.removeDir(path.toDirectory());
+			       || this.removeDir(path.toDirectory());
 		} finally {
 			lock.unlock();
 		}
@@ -183,7 +200,7 @@ public class SimpleResourceGraph implements ResourceGraph {
 		lock.lock();
 		try {
 			return this.resourceMap.containsKey(path.toFile())
-				|| this.treeMap.containsKey(path.toDirectory());
+			       || this.treeMap.containsKey(path.toDirectory());
 		} finally {
 			lock.unlock();
 		}
@@ -243,6 +260,12 @@ public class SimpleResourceGraph implements ResourceGraph {
 		} finally {
 			lock.unlock();
 		}
+	}
+
+	@NotNull
+	@Override
+	public ResourceGraph copy() {
+		return new SimpleResourceGraph(this.resourceMap, this.treeMap);
 	}
 
 	@Override

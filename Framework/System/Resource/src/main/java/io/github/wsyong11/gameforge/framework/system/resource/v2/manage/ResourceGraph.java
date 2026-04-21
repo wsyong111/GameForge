@@ -35,6 +35,9 @@ public interface ResourceGraph {
 	void clear();
 
 	@NotNull
+	ResourceGraph copy();
+
+	@NotNull
 	default ResourceQuery query() {
 		return null; // TODO: 2026/4/19 Impl
 	}
