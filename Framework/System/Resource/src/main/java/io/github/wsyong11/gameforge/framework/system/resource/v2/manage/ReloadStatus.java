@@ -22,6 +22,8 @@ public interface ReloadStatus {
 
 	boolean isSuccess();
 
+	boolean isCancelled();
+
 	@Nullable
 	Throwable getException();
 
@@ -42,7 +44,9 @@ public interface ReloadStatus {
 
 	void await() throws InterruptedException;
 
-	void await(long timeout, @NotNull TimeUnit unit) throws InterruptedException;
+	boolean await(long timeout, @NotNull TimeUnit unit) throws InterruptedException;
+
+	void cancel();
 
 	void addListener(@NotNull Listener listener);
 

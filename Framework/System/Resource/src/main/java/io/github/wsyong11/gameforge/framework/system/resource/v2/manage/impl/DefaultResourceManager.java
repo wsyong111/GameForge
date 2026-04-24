@@ -2,6 +2,8 @@ package io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl;
 
 import io.github.wsyong11.gameforge.framework.Identifier;
 import io.github.wsyong11.gameforge.framework.platform.Platform;
+import io.github.wsyong11.gameforge.framework.system.log.Log;
+import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceConflictResolver;
@@ -25,6 +27,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class DefaultResourceManager extends AbstractResourceManager {
+	private static final Logger LOGGER = Log.getLogger();
+
 	private final ThreadPoolExecutor packLoadThreadPool;
 	private final Scheduler packLoadScheduler;
 
@@ -95,6 +99,12 @@ public class DefaultResourceManager extends AbstractResourceManager {
 			this.transformScheduler,
 			this.transformThreadPool.getCorePoolSize()
 		);
+	}
+
+	@Override
+	protected void onLoadFailed(@NotNull Throwable exception) {
+		super.onLoadFailed(exception);
+		LOGGER.error("Failed to load resources", exception);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //

@@ -237,6 +237,9 @@ public class DefaultResourceLoader extends ResourceLoader {
 		try {
 			ResourceGraphTransformer transformer = new ResourceGraphTransformer(transformers, this.transformScheduler, this.transformConcurrent);
 			return transformer.transform(graph);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new CancellationException();
 		} catch (Exception e) {
 			LOGGER.error("Failed to transform resource", e);
 			throw e;

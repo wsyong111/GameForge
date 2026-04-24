@@ -3,6 +3,7 @@ package io.github.wsyong11.gameforge.framework.system.resource;
 import io.github.wsyong11.gameforge.framework.system.log.core.LogLevel;
 import io.github.wsyong11.gameforge.framework.system.log.core.LogManager;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ReloadStatus;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceGraph;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceManager;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl.DefaultResourceManager;
@@ -14,10 +15,7 @@ import io.github.wsyong11.gameforge.framework.system.resource.v2.transform.Trans
 import io.github.wsyong11.gameforge.util.StreamUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.SequenceInputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -117,28 +115,35 @@ public class Main {
 			manager.registerResourcePack(assetsPack);
 			manager.setPackPriority(assetsPack, -1);
 
-			try (Stream<Path> fileList = Files.list(RESOURCE_PACK_FOLDER)) {
-				for (Path path : StreamUtils.toIterable(fileList)) {
-					System.out.println(path);
-					if (!Files.isRegularFile(path))
-						continue;
-
-					if (!path.getFileName().toString().endsWith(".zip"))
-						continue;
-
-					manager.registerResourcePack(new ZipResourcePack(path));
-				}
-			}
+//			try (Stream<Path> fileList = Files.list(RESOURCE_PACK_FOLDER)) {
+//				for (Path path : StreamUtils.toIterable(fileList)) {
+//					System.out.println(path);
+//					if (!Files.isRegularFile(path))
+//						continue;
+//
+//					if (!path.getFileName().toString().endsWith(".zip"))
+//						continue;
+//
+//					manager.registerResourcePack(new ZipResourcePack(path));
+//				}
+//			}
 
 			manager.addExtension(ResourceTransformer.TYPE, new Transformer());
 
-			manager.reload();
+			ReloadStatus status = manager.reload();
 
-			Thread.sleep(5000);
+			status.await();
 			System.out.println("GC");
 			System.gc();
-			Thread.sleep(500000);
 
+			Thread.sleep(1000);
+
+			try (InputStream stream = manager.getFileSystem().openStream(ResourcePath.of("pack.json.src"))) {
+				BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+				String line;
+				while ((line = reader.readLine()) != null)
+					System.out.println(line);
+			}
 //			ResourceFileSystem fs = manager.getFileSystem();
 //			try (InputStream stream = fs.openStream(ResourcePath.of("assets/game/shader/config/test.json"))) {
 //				BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));

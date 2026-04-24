@@ -30,6 +30,11 @@ public class FutureUtils {
 		return true;
 	}
 
+	public static boolean isDoneNormal(@NotNull Future<?> future) {
+		Objects.requireNonNull(future, "future is null");
+		return future.isDone() && getException(future) == null;
+	}
+
 	@Nullable
 	public static Throwable getException(@NotNull Future<?> future) {
 		Objects.requireNonNull(future, "future is null");

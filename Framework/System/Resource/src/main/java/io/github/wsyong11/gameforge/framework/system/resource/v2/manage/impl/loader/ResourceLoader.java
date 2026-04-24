@@ -8,9 +8,17 @@ import io.github.wsyong11.gameforge.framework.system.log.TimeIt;
 import io.github.wsyong11.gameforge.framework.system.log.core.LogLevel;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ReloadStatus;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceGraph;
+import io.github.wsyong11.gameforge.util.concurrent.FutureUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnmodifiableView;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public abstract class ResourceLoader {
 	private static final Logger LOGGER = Log.getLogger();
@@ -20,12 +28,19 @@ public abstract class ResourceLoader {
 
 	private final ListenableFuture<ResourceGraph> future;
 
-	protected ResourceLoader() {
-		this.future = ListenableFutureTask.create(this::loadAsync);
+	private final ReloadStatus status;
 
-		this.thread = new Thread(this::loadAsync);
+	protected ResourceLoader() {
+		ListenableFutureTask<ResourceGraph> future = ListenableFutureTask.create(this::loadAsync);
+		this.future = future;
+
+		this.thread = new Thread(future);
 		this.thread.setName("ResourceLoaderThread");
 		this.thread.setDaemon(true);
+
+		this.started = false;
+
+		this.status = new StatusImpl();
 	}
 
 	@NotNull
@@ -60,6 +75,86 @@ public abstract class ResourceLoader {
 
 	@NotNull
 	public ReloadStatus getStatus() {
-		return null;
+		return this.status;
+	}
+
+	// TODO 2026/04/25: Impl status
+	private class StatusImpl implements ReloadStatus {
+		@NotNull
+		@UnmodifiableView
+		@Override
+		public List<Stage> getStages() {
+			return List.of();
+		}
+
+		@NotNull
+		@Override
+		public Stage getCurrentStage() {
+			return null;
+		}
+
+		@Nullable
+		@Override
+		public Stage getStage(@NotNull String id) {
+			return null;
+		}
+
+		@Override
+		public boolean isDone() {
+			return future.isDone();
+		}
+
+		@Override
+		public boolean isSuccess() {
+			return FutureUtils.isDoneNormal(future);
+		}
+
+		@Override
+		public boolean isCancelled() {
+			return future.isCancelled();
+		}
+
+		@Nullable
+		@Override
+		public Throwable getException() {
+			return FutureUtils.getException(future);
+		}
+
+		@Override
+		public void await() throws InterruptedException {
+			try {
+				future.get();
+			} catch (ExecutionException ignored) {
+			}
+		}
+
+		@Override
+		public boolean await(long timeout, @NotNull TimeUnit unit) throws InterruptedException {
+			Objects.requireNonNull(unit, "unit is null");
+
+			try {
+				future.get(timeout, unit);
+			} catch (ExecutionException ignored) {
+			} catch (TimeoutException e) {
+				return false;
+			}
+
+			return true;
+		}
+
+		@Override
+		public void cancel() {
+			future.cancel(true);
+		}
+
+		@Override
+		public void addListener(@NotNull Listener listener) {
+
+		}
+
+		@Override
+		public void removeListener(@NotNull Listener listener) {
+
+		}
 	}
 }
