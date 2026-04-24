@@ -2,8 +2,8 @@ package io.github.wsyong11.gameforge.framework.tick;
 
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
-import io.github.wsyong11.gameforge.util.DeferredValue;
 import io.github.wsyong11.gameforge.util.Nameable;
+import io.github.wsyong11.gameforge.util.concurrent.DeferredValue;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;

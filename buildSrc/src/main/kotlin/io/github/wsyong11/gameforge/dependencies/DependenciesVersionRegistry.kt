@@ -109,6 +109,9 @@ val GUAVA     = "com.google.guava" dependsOn "guava"    version "3.4.8-jre"
 val FAST_UTIL = "fastutil"         dependsOn "fastutil" version "5.0.9"
 
 
+// Multi threading
+val RX_JAVA = "io.reactivex.rxjava3" dependsOn "rxjava" version "3.1.12"
+
 // Logging / Console
 val LOG4J2_CORE = "org.apache.logging.log4j" dependsOn "log4j-core" version "2.25.1"
 val JANSI       = "org.fusesource.jansi"     dependsOn "jansi"      version "2.4.2"

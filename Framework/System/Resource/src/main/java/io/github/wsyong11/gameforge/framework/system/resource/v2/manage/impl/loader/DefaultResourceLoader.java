@@ -9,14 +9,16 @@ import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.Resource
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl.graph.SimpleResourceGraph;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.pack.ResourcePack;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.transform.ResourceTransformer;
+import io.github.wsyong11.gameforge.util.concurrent.signal.ThreadSignal;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Scheduler;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 
 import static io.github.wsyong11.gameforge.framework.system.log.LogTemplate.lazy;
 
@@ -26,32 +28,50 @@ public class DefaultResourceLoader extends ResourceLoader {
 	private final List<ResourcePack> packs;
 	private final List<ResourceConflictResolver> conflictResolvers;
 	private final List<ResourceTransformer> transformers;
-	private final ExecutorService packReloadThreadPool;
-	private final ExecutorService transformThreadPool;
+
+	private final Scheduler packReloadScheduler;
+	private final int packLoadConcurrent;
+	private final Scheduler transformScheduler;
+	private final int transformConcurrent;
 
 	public DefaultResourceLoader(
 		@NotNull List<ResourcePack> packs,
 		@NotNull List<ResourceConflictResolver> conflictResolvers,
 		@NotNull List<ResourceTransformer> transformers,
-		@NotNull ExecutorService packReloadThreadPool,
-		@NotNull ExecutorService transformThreadPool
+		@NotNull Scheduler packReloadScheduler,
+		int packLoadConcurrent,
+		@NotNull Scheduler transformScheduler,
+		int transformConcurrent
 	) {
 		Objects.requireNonNull(packs, "packs is null");
 		Objects.requireNonNull(conflictResolvers, "conflictResolvers is null");
 		Objects.requireNonNull(transformers, "transformers is null");
-		Objects.requireNonNull(packReloadThreadPool, "packReloadThreadPool is null");
-		Objects.requireNonNull(transformThreadPool, "transformThreadPool is null");
+		Objects.requireNonNull(packReloadScheduler, "packReloadScheduler is null");
+		Objects.requireNonNull(transformScheduler, "transformScheduler is null");
+
+		if (packLoadConcurrent <= 0)
+			throw new IllegalArgumentException("Pack load concurrent count cannot be less than one");
+
+		if (transformConcurrent <= 0)
+			throw new IllegalArgumentException("Transform concurrent count cannot be less than one");
 
 		this.packs = List.copyOf(packs);
 		this.conflictResolvers = List.copyOf(conflictResolvers);
 		this.transformers = List.copyOf(transformers);
-		this.packReloadThreadPool = packReloadThreadPool;
-		this.transformThreadPool = transformThreadPool;
+
+		this.packReloadScheduler = packReloadScheduler;
+		this.packLoadConcurrent = packLoadConcurrent;
+		this.transformScheduler = transformScheduler;
+		this.transformConcurrent = transformConcurrent;
 	}
 
 	@NotNull
 	protected List<Resource> reloadResourcePack(@NotNull ResourcePack pack) throws IOException {
 		Objects.requireNonNull(pack, "pack is null");
+
+		Thread thread = Thread.currentThread();
+		if (thread.isInterrupted())
+			throw new CancellationException();
 
 		LOGGER.debug("Loading resource pack {}", pack);
 
@@ -78,8 +98,13 @@ public class DefaultResourceLoader extends ResourceLoader {
 		});
 
 		List<Resource> list = new ArrayList<>();
-		for (ResourcePath path : pack.list())
+		for (ResourcePath path : pack.list()) {
+			if (thread.isInterrupted())
+				throw new CancellationException();
+
 			list.add(new PackResource(pack, path));
+		}
+
 		return Collections.unmodifiableList(list);
 	}
 
@@ -87,37 +112,77 @@ public class DefaultResourceLoader extends ResourceLoader {
 	protected Map<ResourcePath, List<Resource>> reloadAndListResources(@NotNull List<ResourcePack> packs) {
 		Objects.requireNonNull(packs, "packs is null");
 
-		List<Future<List<Resource>>> reloadFutures = packs
-			.stream()
-			.map(pack ->
-				this.packReloadThreadPool.submit(() ->
-					this.reloadResourcePack(pack)))
-			.toList();
-
+		ThreadSignal completed = new ThreadSignal();
 		Map<ResourcePath, List<Resource>> result = new HashMap<>();
-		for (Future<List<Resource>> future : reloadFutures) {
-			List<Resource> futureResult;
-			try {
-				futureResult = future.get();
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				for (Future<List<Resource>> f : reloadFutures)
-					f.cancel(true);
 
-				throw new CancellationException();
-			} catch (ExecutionException e) {
-				LOGGER.warn("Resource pack reload fail", e.getCause());
-				continue;
-			}
+		Disposable disposable = Flowable
+			.fromIterable(packs)
+			.flatMap(
+				pack -> Flowable
+					.fromCallable(() -> this.reloadResourcePack(pack))
+					.subscribeOn(this.packReloadScheduler)
+					.onErrorResumeNext(e -> {
+						if (e instanceof CancellationException)
+							return Flowable.error(e);
 
-			for (Resource resource : futureResult) {
-				ResourcePath path = resource.getPath();
-				result.computeIfAbsent(path, k -> new ArrayList<>())
-				      .add(resource);
-			}
+						LOGGER.warn("Resource pack reload fail", e);
+						return Flowable.empty();
+					}),
+				this.packLoadConcurrent
+			)
+			.flatMapIterable(l -> l)
+			.buffer(128)
+			.observeOn(Schedulers.single())
+			.doOnComplete(completed::set)
+			.subscribe(resources -> {
+				for (Resource resource : resources) {
+					ResourcePath path = resource.getPath();
+					result.computeIfAbsent(path, k -> new ArrayList<>())
+					      .add(resource);
+				}
+			});
+
+		try {
+			completed.await();
+		} catch (InterruptedException e) {
+			disposable.dispose();
+			Thread.currentThread().interrupt();
+			throw new CancellationException();
 		}
 
 		return Collections.unmodifiableMap(result);
+
+//		List<Future<List<Resource>>> reloadFutures = packs
+//			.stream()
+//			.map(pack ->
+//				this.packReloadThreadPool.submit(() ->
+//					this.reloadResourcePack(pack)))
+//			.toList();
+//
+//		Map<ResourcePath, List<Resource>> result = new HashMap<>();
+//		for (Future<List<Resource>> future : reloadFutures) {
+//			List<Resource> futureResult;
+//			try {
+//				futureResult = future.get();
+//			} catch (InterruptedException e) {
+//				Thread.currentThread().interrupt();
+//				for (Future<List<Resource>> f : reloadFutures)
+//					f.cancel(true);
+//
+//				throw new CancellationException();
+//			} catch (ExecutionException e) {
+//				LOGGER.warn("Resource pack reload fail", e.getCause());
+//				continue;
+//			}
+//
+//			for (Resource resource : futureResult) {
+//				ResourcePath path = resource.getPath();
+//				result.computeIfAbsent(path, k -> new ArrayList<>())
+//				      .add(resource);
+//			}
+//		}
+//
+//		return Collections.unmodifiableMap(result);
 	}
 
 	@NotNull
@@ -170,7 +235,7 @@ public class DefaultResourceLoader extends ResourceLoader {
 		Objects.requireNonNull(transformers, "transformers is null");
 
 		try {
-			ResourceGraphTransformer transformer = new ResourceGraphTransformer(transformers, this.transformThreadPool);
+			ResourceGraphTransformer transformer = new ResourceGraphTransformer(transformers, this.transformScheduler, this.transformConcurrent);
 			return transformer.transform(graph);
 		} catch (Exception e) {
 			LOGGER.error("Failed to transform resource", e);

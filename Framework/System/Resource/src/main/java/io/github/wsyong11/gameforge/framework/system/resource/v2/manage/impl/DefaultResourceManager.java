@@ -9,53 +9,56 @@ import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl.loa
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl.loader.ResourceLoader;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.pack.ResourcePack;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.transform.ResourceTransformer;
+import io.github.wsyong11.gameforge.util.concurrent.ExecutorServiceUtils;
 import io.github.wsyong11.gameforge.util.concurrent.SimpleThreadFactory;
+import io.reactivex.rxjava3.core.Scheduler;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
+import java.util.Objects;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class DefaultResourceManager extends AbstractResourceManager {
-	private final ExecutorService packReloadThreadPool;
-	private final ExecutorService transformThreadPool;
+	private final ThreadPoolExecutor packLoadThreadPool;
+	private final Scheduler packLoadScheduler;
+
+	private final ThreadPoolExecutor transformThreadPool;
+	private final Scheduler transformScheduler;
 
 	public DefaultResourceManager() {
-		int maxReloadPoolSize = Math.max(2, Math.min(Platform.CPU_COUNT * 2, 8));
-
-		ThreadPoolExecutor packReloadThreadPool = new ThreadPoolExecutor(
-			maxReloadPoolSize,
-			maxReloadPoolSize,
+		int packLoadThreadCount = Math.max(2, Math.min(Platform.CPU_COUNT * 2, 8));
+		this.packLoadThreadPool = new ThreadPoolExecutor(
+			packLoadThreadCount,
+			packLoadThreadCount * 4,
 			10,
 			TimeUnit.SECONDS,
-			new LinkedBlockingDeque<>(),
+			new LinkedBlockingDeque<>(8),
 			SimpleThreadFactory
 				.builder()
-				.name("PackLoadThread")
+				.name("PackLoaderThread")
 				.build()
 		);
-		packReloadThreadPool.allowCoreThreadTimeOut(true);
-		this.packReloadThreadPool = packReloadThreadPool;
+		this.packLoadScheduler = Schedulers.from(this.packLoadThreadPool);
 
-		int maxTransformPoolSize = Math.max(1, Math.min(Platform.CPU_COUNT / 2, 8));
-		ThreadPoolExecutor transformThreadPool = new ThreadPoolExecutor(
-			maxTransformPoolSize,
-			maxTransformPoolSize,
+		int transformThreadCount = Math.max(1, Math.min(Platform.CPU_COUNT - 1, 8));
+		this.transformThreadPool = new ThreadPoolExecutor(
+			transformThreadCount,
+			transformThreadCount * 2,
 			10,
 			TimeUnit.SECONDS,
-			new LinkedBlockingDeque<>(),
+			new LinkedBlockingDeque<>(32),
 			SimpleThreadFactory
 				.builder()
 				.name("TransformThread")
 				.build()
 		);
-		transformThreadPool.allowCoreThreadTimeOut(true);
-		this.transformThreadPool = transformThreadPool;
+		this.transformScheduler = Schedulers.from(this.transformThreadPool);
 	}
 
 	@Nullable
@@ -79,7 +82,19 @@ public class DefaultResourceManager extends AbstractResourceManager {
 		@NotNull List<ResourceConflictResolver> conflictResolvers,
 		@NotNull List<ResourceTransformer> transformers
 	) {
-		return new DefaultResourceLoader(packs, conflictResolvers, transformers, this.packReloadThreadPool, this.transformThreadPool);
+		Objects.requireNonNull(packs, "packs is null");
+		Objects.requireNonNull(conflictResolvers, "conflictResolvers is null");
+		Objects.requireNonNull(transformers, "transformers is null");
+
+		return new DefaultResourceLoader(
+			packs,
+			conflictResolvers,
+			transformers,
+			this.packLoadScheduler,
+			this.packLoadThreadPool.getCorePoolSize(),
+			this.transformScheduler,
+			this.transformThreadPool.getCorePoolSize()
+		);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
@@ -117,21 +132,8 @@ public class DefaultResourceManager extends AbstractResourceManager {
 		try {
 			super.close();
 		} finally {
-			this.packReloadThreadPool.shutdown();
-			try {
-				if (this.packReloadThreadPool.awaitTermination(1, TimeUnit.SECONDS))
-					this.packReloadThreadPool.shutdownNow();
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-			}
-
-			this.transformThreadPool.shutdown();
-			try {
-				if (this.transformThreadPool.awaitTermination(1, TimeUnit.SECONDS))
-					this.transformThreadPool.shutdownNow();
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-			}
+			ExecutorServiceUtils.shutdown(this.packLoadThreadPool, 1, TimeUnit.SECONDS);
+			ExecutorServiceUtils.shutdown(this.transformThreadPool, 1, TimeUnit.SECONDS);
 		}
 	}
 }

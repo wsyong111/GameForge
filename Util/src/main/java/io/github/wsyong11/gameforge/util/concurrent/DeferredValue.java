@@ -1,4 +1,4 @@
-package io.github.wsyong11.gameforge.util;
+package io.github.wsyong11.gameforge.util.concurrent;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

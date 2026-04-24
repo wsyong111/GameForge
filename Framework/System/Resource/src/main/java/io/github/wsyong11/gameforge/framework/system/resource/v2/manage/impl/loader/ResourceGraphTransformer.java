@@ -7,30 +7,41 @@ import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.Resource
 import io.github.wsyong11.gameforge.framework.system.resource.v2.query.ResourceQuery;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.transform.ResourceTransformer;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.transform.TransformContext;
-import io.github.wsyong11.gameforge.util.exception.RuntimeInterruptedException;
+import io.github.wsyong11.gameforge.util.concurrent.signal.ThreadSignal;
+import io.github.wsyong11.gameforge.util.exception.ExceptionUtils;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Scheduler;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
 
 public class ResourceGraphTransformer {
 	private final List<ResourceTransformer> transformers;
-	private final ExecutorService transformExecutor;
+	private final Scheduler scheduler;
+	private final int concurrent;
 
 	public ResourceGraphTransformer(
 		@NotNull List<ResourceTransformer> transformers,
-		@NotNull ExecutorService transformExecutor
+		@NotNull Scheduler scheduler,
+		int concurrent
 	) {
 		Objects.requireNonNull(transformers, "transformers is null");
-		Objects.requireNonNull(transformExecutor, "transformExecutor is null");
+		Objects.requireNonNull(scheduler, "scheduler is null");
+
+		if (concurrent <= 0)
+			throw new IllegalArgumentException("Concurrent count cannot be less than one");
 
 		this.transformers = transformers;
-		this.transformExecutor = transformExecutor;
+		this.scheduler = scheduler;
+		this.concurrent = concurrent;
 	}
 
 	private void transformOne(
@@ -102,7 +113,7 @@ public class ResourceGraphTransformer {
 	}
 
 	@NotNull
-	public ResourceGraph transform(@NotNull ResourceGraph graph) {
+	public ResourceGraph transform(@NotNull ResourceGraph graph) throws InterruptedException {
 		Objects.requireNonNull(graph, "graph is null");
 
 		ResourceGraph transformedGraph = graph.copy();
@@ -116,44 +127,102 @@ public class ResourceGraphTransformer {
 		return transformedGraph;
 	}
 
-	private void transformResource(@NotNull ResourceGraph graph, @NotNull Map<ResourcePath, List<UnaryOperator<Resource>>> resourceTransformers) {
+	private void transformResource(@NotNull ResourceGraph graph, @NotNull Map<ResourcePath, List<UnaryOperator<Resource>>> resourceTransformers) throws InterruptedException {
 		Objects.requireNonNull(graph, "graph is null");
 		Objects.requireNonNull(resourceTransformers, "resourceTransformers is null");
 
-		Map<ResourcePath, Future<Resource>> futures = new HashMap<>();
+		ThreadSignal completed = new ThreadSignal();
+		AtomicReference<Throwable> exception = new AtomicReference<>(null);
 
-		for (Map.Entry<ResourcePath, List<UnaryOperator<Resource>>> entry : resourceTransformers.entrySet()) {
-			ResourcePath path = entry.getKey();
-			List<UnaryOperator<Resource>> transformers = entry.getValue();
+		Disposable disposable = Flowable
+			.fromIterable(resourceTransformers.entrySet())
+			.map(entry -> {
+				ResourcePath path = entry.getKey();
+				return Triple.of(
+					path,
+					entry.getValue(),
+					graph.get(path)
+				);
+			})
+			.filter(item -> item.getRight() != null)
+			.flatMap(
+				item -> Flowable
+					.fromCallable(() -> {
+						Resource result = this.transformResourceAsync(item.getRight(), item.getMiddle());
+						return Pair.of(item.getLeft(), result);
+					})
+					.onErrorResumeNext(e -> Flowable
+						.error(new TransformResourceException("Failed replace resource " + item.getLeft(), e)))
+					.subscribeOn(this.scheduler),
+				this.concurrent
+			)
+			.toList()
+			.observeOn(Schedulers.single())
+			.subscribe(
+				result -> {
+					for (Pair<ResourcePath, Resource> item : result) {
+						ResourcePath path = item.getKey();
+						Resource value = item.getValue();
 
-			Resource resource = graph.get(path);
-			if (resource == null)
-				continue;
+						if (value != null)
+							graph.put(path, value);
+						else
+							graph.remove(path);
+					}
+					completed.set();
+				},
+				e -> {
+					exception.set(e);
+					completed.set();
+				}
+			);
 
-			Future<Resource> future = this.transformExecutor.submit(() -> this.transformResourceAsync(resource, transformers));
-			futures.put(path, future);
+		try {
+			completed.await();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			disposable.dispose();
+			throw e;
 		}
 
-		for (Map.Entry<ResourcePath, Future<Resource>> entry : futures.entrySet()) {
-			ResourcePath path = entry.getKey();
-			Future<Resource> future = entry.getValue();
+		Throwable ex = exception.get();
+		if (ex != null)
+			throw ExceptionUtils.wrap(ex, TransformResourceException.class, TransformResourceException::new);
 
-			Resource transformedResource;
-			try {
-				transformedResource = future.get();
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-
-				for (Future<Resource> resourceFuture : futures.values())
-					resourceFuture.cancel(true);
-
-				throw new RuntimeInterruptedException(e);
-			} catch (ExecutionException e) {
-				throw new TransformResourceException("Failed replace resource " + path, e);
-			}
-
-			graph.put(path, transformedResource);
-		}
+//		Map<ResourcePath, Future<Resource>> futures = new HashMap<>();
+//
+//		for (Map.Entry<ResourcePath, List<UnaryOperator<Resource>>> entry : resourceTransformers.entrySet()) {
+//			ResourcePath path = entry.getKey();
+//			List<UnaryOperator<Resource>> transformers = entry.getValue();
+//
+//			Resource resource = graph.get(path);
+//			if (resource == null)
+//				continue;
+//
+//			Future<Resource> future = this.transformExecutor.submit(() -> this.transformResourceAsync(resource, transformers));
+//			futures.put(path, future);
+//		}
+//
+//		for (Map.Entry<ResourcePath, Future<Resource>> entry : futures.entrySet()) {
+//			ResourcePath path = entry.getKey();
+//			Future<Resource> future = entry.getValue();
+//
+//			Resource transformedResource;
+//			try {
+//				transformedResource = future.get();
+//			} catch (InterruptedException e) {
+//				Thread.currentThread().interrupt();
+//
+//				for (Future<Resource> resourceFuture : futures.values())
+//					resourceFuture.cancel(true);
+//
+//				throw new RuntimeInterruptedException(e);
+//			} catch (ExecutionException e) {
+//				throw new TransformResourceException("Failed replace resource " + path, e);
+//			}
+//
+//			graph.put(path, transformedResource);
+//		}
 	}
 
 	@Nullable
