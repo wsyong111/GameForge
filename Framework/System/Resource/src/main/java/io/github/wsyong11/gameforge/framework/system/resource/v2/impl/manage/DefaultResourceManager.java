@@ -1,14 +1,13 @@
-package io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl;
+package io.github.wsyong11.gameforge.framework.system.resource.v2.impl.manage;
 
 import io.github.wsyong11.gameforge.framework.Identifier;
 import io.github.wsyong11.gameforge.framework.platform.Platform;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
-import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.impl.loader.DefaultResourceLoader;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.impl.loader.ResourceLoader;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceConflictResolver;
-import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl.loader.DefaultResourceLoader;
-import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl.loader.ResourceLoader;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.pack.ResourcePack;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.transform.ResourceTransformer;
 import io.github.wsyong11.gameforge.util.concurrent.ExecutorServiceUtils;
@@ -17,7 +16,6 @@ import io.reactivex.rxjava3.core.Scheduler;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.Unmodifiable;
 
 import java.io.IOException;
 import java.util.List;
@@ -105,33 +103,6 @@ public class DefaultResourceManager extends AbstractResourceManager {
 	protected void onLoadFailed(@NotNull Throwable exception) {
 		super.onLoadFailed(exception);
 		LOGGER.error("Failed to load resources", exception);
-	}
-
-	// -------------------------------------------------------------------------------------------------------------- //
-
-	@Nullable
-	@Override
-	public Resource getResource(@NotNull Identifier location) {
-		return null;
-	}
-
-	@Nullable
-	@Unmodifiable
-	@Override
-	public List<Resource> getAllResources(@NotNull Identifier location) {
-		return List.of();
-	}
-
-	@Nullable
-	@Unmodifiable
-	@Override
-	public List<String> listResources(@NotNull Identifier location) {
-		return List.of();
-	}
-
-	@Override
-	public boolean hasResource(@NotNull Identifier location) {
-		return false;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //

@@ -35,6 +35,13 @@ public abstract class CombinedResource implements MultiSourceResource {
 		return this.sources;
 	}
 
+	@NotNull
+	@UnmodifiableView
+	@Override
+	public List<Resource> getCandidates() {
+		return this.resources;
+	}
+
 	@Nullable
 	@Override
 	public ResourcePack getSource() {

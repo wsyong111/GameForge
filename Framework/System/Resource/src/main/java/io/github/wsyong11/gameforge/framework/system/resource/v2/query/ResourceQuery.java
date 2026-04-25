@@ -18,52 +18,25 @@ import java.util.stream.Stream;
 
 public interface ResourceQuery {
 	@NotNull
-	ResourceQuery ofQuery(@NotNull QuerySnapshot snapshot);
+	ResourceQuery ofStartPath(@NotNull ResourcePath path);
 
 	@NotNull
-	QuerySnapshot toQuery();
+	ResourceQuery ofPath(@NotNull Predicate<ResourcePath> condition);
 
 	@NotNull
-	default ResourceQuery ofStartPath(@NotNull ResourcePath path) {
-		Objects.requireNonNull(path, "path is null");
-		return this.ofPath(path::startsWith);
-	}
+	ResourceQuery ofPack(@NotNull Predicate<ResourcePack> condition);
 
 	@NotNull
-	default ResourceQuery ofPath(@NotNull Predicate<ResourcePath> condition) {
-		Objects.requireNonNull(condition, "condition is null");
-		return this.ofPredicate(res -> condition.test(res.getPath()));
-	}
+	ResourceQuery ofPattern(@Language("RegExp") @NotNull String pattern);
 
 	@NotNull
-	default ResourceQuery ofPack(@NotNull Predicate<ResourcePack> condition) {
-		Objects.requireNonNull(condition, "condition is null");
-		return this.ofPredicate(res -> condition.test(res.getSource()));
-	}
+	ResourceQuery ofPattern(@NotNull Pattern pattern);
 
 	@NotNull
-	default ResourceQuery ofPattern(@Language("RegExp") @NotNull String pattern) {
-		Objects.requireNonNull(pattern, "pattern is null");
-		return this.ofPattern(Pattern.compile(pattern));
-	}
+	ResourceQuery ofNamePattern(@Language("RegExp") @NotNull String pattern);
 
 	@NotNull
-	default ResourceQuery ofPattern(@NotNull Pattern pattern) {
-		Objects.requireNonNull(pattern, "pattern is null");
-		return this.ofPath(path -> pattern.matcher(path.toString()).matches());
-	}
-
-	@NotNull
-	default ResourceQuery ofNamePattern(@Language("RegExp") @NotNull String pattern) {
-		Objects.requireNonNull(pattern, "pattern is null");
-		return this.ofNamePattern(Pattern.compile(pattern));
-	}
-
-	@NotNull
-	default ResourceQuery ofNamePattern(@NotNull Pattern pattern) {
-		Objects.requireNonNull(pattern, "pattern is null");
-		return this.ofPath(path -> pattern.matcher(path.getName()).matches());
-	}
+	ResourceQuery ofNamePattern(@NotNull Pattern pattern);
 
 	@NotNull
 	ResourceQuery ofPredicate(@NotNull Predicate<Resource> condition);

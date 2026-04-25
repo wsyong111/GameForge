@@ -6,7 +6,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 
@@ -22,8 +21,9 @@ public class ByteArrayResource implements Resource {
 		this.path = path;
 	}
 
+	@NotNull
 	@Override
-	public @NotNull InputStream openStream() throws IOException {
+	public InputStream openStream() {
 		return new ByteArrayInputStream(this.data);
 	}
 

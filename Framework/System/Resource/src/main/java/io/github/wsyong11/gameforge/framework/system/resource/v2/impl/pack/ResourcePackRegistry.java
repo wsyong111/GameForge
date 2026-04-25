@@ -1,4 +1,4 @@
-package io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl;
+package io.github.wsyong11.gameforge.framework.system.resource.v2.impl.pack;
 
 import io.github.wsyong11.gameforge.framework.system.resource.v2.pack.ResourcePack;
 import io.github.wsyong11.gameforge.util.IdentityRef;

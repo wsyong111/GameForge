@@ -1,8 +1,10 @@
-package io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl.graph;
+package io.github.wsyong11.gameforge.framework.system.resource.v2.impl.graph;
 
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.impl.query.StreamResourceQuery;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceGraph;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.query.ResourceQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -41,35 +43,6 @@ public class SimpleResourceGraph implements ResourceGraph {
 
 		this.lock = new ReentrantReadWriteLock();
 	}
-
-//	@Override
-//	public boolean isFrozen() {
-//		return false;
-//	}
-//
-//	@NotNull
-//	public ResourceGraph freeze() {
-//		Map<ResourcePath, Resource> resourceMap;
-//		Map<ResourcePath, List<ResourcePath>> treeMap;
-//
-//		Lock lock = this.lock.readLock();
-//		lock.lock();
-//		try {
-//			resourceMap = Map.copyOf(this.resourceMap);
-//			treeMap = this.treeMap
-//				.entrySet()
-//				.stream()
-//				.map(StreamUtils.entryValueMap(List::copyOf))
-//				.collect(StreamUtils.collectUnmodifiableMap());
-//		} finally {
-//			lock.unlock();
-//		}
-//
-//		return new FrozenResourceGraph(
-//			resourceMap,
-//			treeMap
-//		);
-//	}
 
 	@Nullable
 	@Override
@@ -251,6 +224,19 @@ public class SimpleResourceGraph implements ResourceGraph {
 		}
 	}
 
+	@NotNull
+	@Unmodifiable
+	@Override
+	public List<Resource> listAll() {
+		Lock lock = this.lock.readLock();
+		lock.lock();
+		try {
+			return List.copyOf(this.resourceMap.values());
+		} finally {
+			lock.unlock();
+		}
+	}
+
 	@Override
 	public int size() {
 		Lock lock = this.lock.readLock();
@@ -266,6 +252,12 @@ public class SimpleResourceGraph implements ResourceGraph {
 	@Override
 	public ResourceGraph copy() {
 		return new SimpleResourceGraph(this.resourceMap, this.treeMap);
+	}
+
+	@NotNull
+	@Override
+	public ResourceQuery query() {
+		return new StreamResourceQuery(this.listAll());
 	}
 
 	@Override

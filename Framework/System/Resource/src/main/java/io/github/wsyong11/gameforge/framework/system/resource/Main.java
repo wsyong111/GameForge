@@ -3,10 +3,10 @@ package io.github.wsyong11.gameforge.framework.system.resource;
 import io.github.wsyong11.gameforge.framework.system.log.core.LogLevel;
 import io.github.wsyong11.gameforge.framework.system.log.core.LogManager;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.impl.manage.DefaultResourceManager;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ReloadStatus;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceGraph;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceManager;
-import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl.DefaultResourceManager;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.pack.AssetsResourcePack;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.pack.ZipResourcePack;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.transform.ResourceTransformer;
@@ -32,7 +32,7 @@ import java.util.zip.ZipOutputStream;
 public class Main {
 //	private static final Logger LOGGER = Log.getLogger();
 
-	private static final Path RESOURCE_PACK_FOLDER = Path.of("./resource_pack_gen");
+	private static final Path RESOURCE_PACK_FOLDER = Path.of("./resource_pack");
 
 
 	static final int PACK_COUNT = 200;      // 资源包数量
@@ -115,18 +115,18 @@ public class Main {
 			manager.registerResourcePack(assetsPack);
 			manager.setPackPriority(assetsPack, -1);
 
-//			try (Stream<Path> fileList = Files.list(RESOURCE_PACK_FOLDER)) {
-//				for (Path path : StreamUtils.toIterable(fileList)) {
-//					System.out.println(path);
-//					if (!Files.isRegularFile(path))
-//						continue;
-//
-//					if (!path.getFileName().toString().endsWith(".zip"))
-//						continue;
-//
-//					manager.registerResourcePack(new ZipResourcePack(path));
-//				}
-//			}
+			try (Stream<Path> fileList = Files.list(RESOURCE_PACK_FOLDER)) {
+				for (Path path : StreamUtils.toIterable(fileList)) {
+					System.out.println(path);
+					if (!Files.isRegularFile(path))
+						continue;
+
+					if (!path.getFileName().toString().endsWith(".zip"))
+						continue;
+
+					manager.registerResourcePack(new ZipResourcePack(path));
+				}
+			}
 
 			manager.addExtension(ResourceTransformer.TYPE, new Transformer());
 

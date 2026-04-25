@@ -1,15 +1,18 @@
-package io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl;
+package io.github.wsyong11.gameforge.framework.system.resource.v2.impl.manage;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import io.github.wsyong11.gameforge.framework.Identifier;
 import io.github.wsyong11.gameforge.framework.spi.ExtensionType;
 import io.github.wsyong11.gameforge.framework.spi.registry.ExtensionRegistry;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.fs.ResourceFileSystem;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.impl.fs.ResourceGraphFileSystem;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.impl.loader.ResourceLoader;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.impl.pack.ResourcePackRegistry;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ReloadStatus;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceConflictResolver;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceGraph;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceManager;
-import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl.fs.ResourceGraphFileSystem;
-import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl.loader.ResourceLoader;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.pack.ResourcePack;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.transform.ResourceTransformer;
 import io.github.wsyong11.gameforge.util.concurrent.FutureUtils;
@@ -17,6 +20,7 @@ import io.github.wsyong11.gameforge.util.exception.ExceptionHandler;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.io.IOException;
@@ -104,7 +108,7 @@ public abstract class AbstractResourceManager implements ResourceManager {
 
 	protected void onLoadComplete(@NotNull ResourceGraph graph) {
 		Objects.requireNonNull(graph, "graph is null");
-		this.context.set(new ResourceContext(graph));  // TODO: 2026/4/18 Frozen graph
+		this.context.set(new ResourceContext(graph));
 	}
 
 	protected void onLoadFailed(@NotNull Throwable exception) {
@@ -160,6 +164,33 @@ public abstract class AbstractResourceManager implements ResourceManager {
 		newLoader.load();
 
 		return newLoader.getStatus();
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	@Nullable
+	@Override
+	public Resource getResource(@NotNull Identifier location) {
+		return null;
+	}
+
+	@Nullable
+	@Unmodifiable
+	@Override
+	public List<Resource> getAllResources(@NotNull Identifier location) {
+		return List.of();
+	}
+
+	@Nullable
+	@Unmodifiable
+	@Override
+	public List<String> listResources(@NotNull Identifier location) {
+		return List.of();
+	}
+
+	@Override
+	public boolean hasResource(@NotNull Identifier location) {
+		return false;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //

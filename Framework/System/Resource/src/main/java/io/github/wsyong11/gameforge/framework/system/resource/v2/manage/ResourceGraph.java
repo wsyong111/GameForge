@@ -28,6 +28,10 @@ public interface ResourceGraph {
 	@Unmodifiable
 	List<ResourcePath> list(@NotNull ResourcePath path);
 
+	@NotNull
+	@Unmodifiable
+	List<Resource> listAll();
+
 //	boolean isFrozen();
 
 	int size();
@@ -38,7 +42,5 @@ public interface ResourceGraph {
 	ResourceGraph copy();
 
 	@NotNull
-	default ResourceQuery query() {
-		return null; // TODO: 2026/4/19 Impl
-	}
+	ResourceQuery query();
 }

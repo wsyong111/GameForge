@@ -1,12 +1,13 @@
-package io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl.loader;
+package io.github.wsyong11.gameforge.framework.system.resource.v2.impl.loader;
 
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.impl.graph.SimpleResourceGraph;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.impl.transform.ResourceGraphTransformer;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceConflictResolver;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceGraph;
-import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl.graph.SimpleResourceGraph;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.pack.ResourcePack;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.transform.ResourceTransformer;
 import io.github.wsyong11.gameforge.util.concurrent.signal.ThreadSignal;
@@ -66,7 +67,7 @@ public class DefaultResourceLoader extends ResourceLoader {
 	}
 
 	@NotNull
-	protected List<Resource> reloadResourcePack(@NotNull ResourcePack pack) throws IOException {
+	protected List<Resource> loadResourcePack(@NotNull ResourcePack pack) throws IOException {
 		Objects.requireNonNull(pack, "pack is null");
 
 		Thread thread = Thread.currentThread();
@@ -109,7 +110,7 @@ public class DefaultResourceLoader extends ResourceLoader {
 	}
 
 	@NotNull
-	protected Map<ResourcePath, List<Resource>> reloadAndListResources(@NotNull List<ResourcePack> packs) {
+	protected Map<ResourcePath, List<Resource>> loadAndListResources(@NotNull List<ResourcePack> packs) {
 		Objects.requireNonNull(packs, "packs is null");
 
 		ThreadSignal completed = new ThreadSignal();
@@ -119,13 +120,13 @@ public class DefaultResourceLoader extends ResourceLoader {
 			.fromIterable(packs)
 			.flatMap(
 				pack -> Flowable
-					.fromCallable(() -> this.reloadResourcePack(pack))
+					.fromCallable(() -> this.loadResourcePack(pack))
 					.subscribeOn(this.packReloadScheduler)
 					.onErrorResumeNext(e -> {
 						if (e instanceof CancellationException)
 							return Flowable.error(e);
 
-						LOGGER.warn("Resource pack reload fail", e);
+						LOGGER.warn("Resource pack load fail", e);
 						return Flowable.empty();
 					}),
 				this.packLoadConcurrent
@@ -151,38 +152,6 @@ public class DefaultResourceLoader extends ResourceLoader {
 		}
 
 		return Collections.unmodifiableMap(result);
-
-//		List<Future<List<Resource>>> reloadFutures = packs
-//			.stream()
-//			.map(pack ->
-//				this.packReloadThreadPool.submit(() ->
-//					this.reloadResourcePack(pack)))
-//			.toList();
-//
-//		Map<ResourcePath, List<Resource>> result = new HashMap<>();
-//		for (Future<List<Resource>> future : reloadFutures) {
-//			List<Resource> futureResult;
-//			try {
-//				futureResult = future.get();
-//			} catch (InterruptedException e) {
-//				Thread.currentThread().interrupt();
-//				for (Future<List<Resource>> f : reloadFutures)
-//					f.cancel(true);
-//
-//				throw new CancellationException();
-//			} catch (ExecutionException e) {
-//				LOGGER.warn("Resource pack reload fail", e.getCause());
-//				continue;
-//			}
-//
-//			for (Resource resource : futureResult) {
-//				ResourcePath path = resource.getPath();
-//				result.computeIfAbsent(path, k -> new ArrayList<>())
-//				      .add(resource);
-//			}
-//		}
-//
-//		return Collections.unmodifiableMap(result);
 	}
 
 	@NotNull
@@ -263,7 +232,7 @@ public class DefaultResourceLoader extends ResourceLoader {
 		}));
 
 		LOGGER.debug("Reloading resource packs...");
-		Map<ResourcePath, List<Resource>> resourceMap = this.reloadAndListResources(this.packs);
+		Map<ResourcePath, List<Resource>> resourceMap = this.loadAndListResources(this.packs);
 
 		LOGGER.debug("Pack load completed, total {} paths, {} resources in {} packs",
 			resourceMap.size(),

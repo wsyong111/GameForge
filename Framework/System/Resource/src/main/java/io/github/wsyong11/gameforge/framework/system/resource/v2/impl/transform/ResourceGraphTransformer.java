@@ -1,4 +1,4 @@
-package io.github.wsyong11.gameforge.framework.system.resource.v2.manage.impl.loader;
+package io.github.wsyong11.gameforge.framework.system.resource.v2.impl.transform;
 
 import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
@@ -188,41 +188,6 @@ public class ResourceGraphTransformer {
 		Throwable ex = exception.get();
 		if (ex != null)
 			throw ExceptionUtils.wrap(ex, TransformResourceException.class, TransformResourceException::new);
-
-//		Map<ResourcePath, Future<Resource>> futures = new HashMap<>();
-//
-//		for (Map.Entry<ResourcePath, List<UnaryOperator<Resource>>> entry : resourceTransformers.entrySet()) {
-//			ResourcePath path = entry.getKey();
-//			List<UnaryOperator<Resource>> transformers = entry.getValue();
-//
-//			Resource resource = graph.get(path);
-//			if (resource == null)
-//				continue;
-//
-//			Future<Resource> future = this.transformExecutor.submit(() -> this.transformResourceAsync(resource, transformers));
-//			futures.put(path, future);
-//		}
-//
-//		for (Map.Entry<ResourcePath, Future<Resource>> entry : futures.entrySet()) {
-//			ResourcePath path = entry.getKey();
-//			Future<Resource> future = entry.getValue();
-//
-//			Resource transformedResource;
-//			try {
-//				transformedResource = future.get();
-//			} catch (InterruptedException e) {
-//				Thread.currentThread().interrupt();
-//
-//				for (Future<Resource> resourceFuture : futures.values())
-//					resourceFuture.cancel(true);
-//
-//				throw new RuntimeInterruptedException(e);
-//			} catch (ExecutionException e) {
-//				throw new TransformResourceException("Failed replace resource " + path, e);
-//			}
-//
-//			graph.put(path, transformedResource);
-//		}
 	}
 
 	@Nullable

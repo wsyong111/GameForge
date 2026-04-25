@@ -10,4 +10,8 @@ public interface MultiSourceResource extends Resource {
 	@NotNull
 	@UnmodifiableView
 	List<ResourcePack> getSourceList();
+
+	@NotNull
+	@UnmodifiableView
+	List<Resource> getCandidates();
 }
