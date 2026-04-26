@@ -1,5 +1,6 @@
 import io.github.wsyong11.gameforge.dependencies.RX_JAVA
 import io.github.wsyong11.gameforge.dependencies.implementation
+import io.github.wsyong11.gameforge.dependencies.junit
 import io.github.wsyong11.gameforge.project.artifactId
 
 artifactId = "ResourceSystem"
@@ -16,3 +17,5 @@ dependencies {
 
 	implementation(project, RX_JAVA)
 }
+
+junit()

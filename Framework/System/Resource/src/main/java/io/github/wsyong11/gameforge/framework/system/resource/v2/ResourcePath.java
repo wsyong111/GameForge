@@ -188,7 +188,7 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 	@NotNull
 	public ResourcePath parent() {
 		if (this.isEmpty() || this.segments.length == 1)
-			return ROOT;
+			return this.absolute ? ROOT : EMPTY;
 
 		String[] newSegment = Arrays.copyOf(this.segments, this.segments.length - 1);
 		return new ResourcePath(newSegment, true, this.absolute);
