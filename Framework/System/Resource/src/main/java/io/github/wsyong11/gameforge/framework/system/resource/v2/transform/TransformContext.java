@@ -1,7 +1,7 @@
 package io.github.wsyong11.gameforge.framework.system.resource.v2.transform;
 
-import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.query.ResourceQuery;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

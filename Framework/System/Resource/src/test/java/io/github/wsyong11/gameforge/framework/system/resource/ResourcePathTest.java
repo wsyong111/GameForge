@@ -36,9 +36,9 @@ public class ResourcePathTest {
 	}
 
 	@Test
-	void testResolve_string() {
+	void testJoin_string() {
 		ResourcePath base = ResourcePath.of("a/b");
-		ResourcePath r = base.resolve("c/d");
+		ResourcePath r = base.join("c/d");
 
 		assertEquals("a/b/c/d", r.toString().replace("\\", "/"));
 		assertEquals(4, r.length());
@@ -78,11 +78,11 @@ public class ResourcePathTest {
 	}
 
 	@Test
-	void testRelativize() {
+	void testRelativeToPrefix() {
 		ResourcePath p = ResourcePath.of("a/b/c/d");
 		ResourcePath base = ResourcePath.of("a/b");
 
-		ResourcePath rel = p.relativize(base, true);
+		ResourcePath rel = p.relativeToPrefix(base, true);
 		assertEquals("c/d", rel.toString());
 	}
 

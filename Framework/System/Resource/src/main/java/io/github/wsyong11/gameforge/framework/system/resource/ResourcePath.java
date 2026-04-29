@@ -235,7 +235,7 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 	@NotNull
 	public ResourcePath resolve(@NotNull String... path) {
 		Objects.requireNonNull(path, "path is null");
-		// FIX: resolve("path/to", "the", "path")
+		// FIX: join("path/to", "the", "path")
 		return this.resolve(String.join(SEPARATOR, path));
 	}
 

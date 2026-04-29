@@ -1,7 +1,7 @@
 package io.github.wsyong11.gameforge.framework.system.resource.v2.impl.loader;
 
-import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.pack.ResourcePack;
 import org.apache.commons.text.StringEscapeUtils;
 import org.jetbrains.annotations.NotNull;

@@ -16,8 +16,8 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 	public static final String SEPARATOR = "/";
 	public static final char SEPARATOR_CHAR = '/';
 
-	public static final ResourcePath ROOT = new ResourcePath(ArrayUtils.EMPTY_STRING_ARRAY, true, true);
-	public static final ResourcePath EMPTY = new ResourcePath(ArrayUtils.EMPTY_STRING_ARRAY, false, false);
+	public static final ResourcePath ROOT = new ResourcePath(ArrayUtils.EMPTY_STRING_ARRAY, true);
+	public static final ResourcePath EMPTY = new ResourcePath(ArrayUtils.EMPTY_STRING_ARRAY, false);
 
 	@NotNull
 	public static ResourcePath of(@NotNull String path) {
@@ -27,14 +27,13 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 		if (length == 0)
 			return EMPTY;
 
-		boolean absolute = isSeparator(path.charAt(0));
-		if (length == 1 && absolute)
-			return ROOT;
-
 		boolean dir = isSeparator(path.charAt(length - 1));
 
+		if (length == 1 && dir)
+			return ROOT;
+
 		String[] segments = splitPath(path);
-		return new ResourcePath(segments, dir, absolute);
+		return new ResourcePath(segments, dir);
 	}
 
 	@NotNull
@@ -84,47 +83,26 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 			while (i < length && !isSeparator(path.charAt(i)))
 				i++;
 
-			segments[segmentIndex++] = path.substring(start, i);
+			String segment = path.substring(start, i);
+			if ("..".equals(segment) || ".".equals(segment))
+				throw new IllegalArgumentException("Relative segments are not allowed");
+
+			segments[segmentIndex++] = segment;
 		}
 
 		return segments;
-	}
-
-	@NotNull
-	private static String[] normalize(@NotNull String[] segments) {
-		Objects.requireNonNull(segments, "segments is null");
-
-		String[] tmp = new String[segments.length];
-		int size = 0;
-
-		for (String seg : segments) {
-			if (seg.isEmpty() || ".".equals(seg))
-				continue;
-
-			if ("..".equals(seg)) {
-				if (size > 0)
-					size--;
-				continue;
-			}
-
-			tmp[size++] = seg;
-		}
-
-		return Arrays.copyOf(tmp, size);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
 	private final String[] segments;
 	private final boolean dir;
-	private final boolean absolute;
 
-	protected ResourcePath(@NotNull String[] segments, boolean dir, boolean absolute) {
+	protected ResourcePath(@NotNull String[] segments, boolean dir) {
 		Objects.requireNonNull(segments, "segments is null");
 
 		this.segments = segments;
 		this.dir = dir;
-		this.absolute = absolute;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
@@ -133,47 +111,28 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 		return this.dir;
 	}
 
-	public boolean isAbsolute() {
-		return this.absolute;
-	}
-
 	@NotNull
 	public ResourcePath toDirectory() {
-		return this.dir ? this : new ResourcePath(this.segments, true, this.absolute);
-
+		return this.dir ? this : new ResourcePath(this.segments, true);
 	}
 
 	@NotNull
 	public ResourcePath toFile() {
-		return !this.dir ? this : new ResourcePath(this.segments, false, this.absolute);
-	}
-
-	@NotNull
-	public ResourcePath toAbsolute(@NotNull ResourcePath base) {
-		Objects.requireNonNull(base, "base is null");
-
-		if (this.absolute)
-			return this;
-
-		if (base.isEmpty())
-			return new ResourcePath(this.segments, this.dir, true);
-
-		String[] newSegment = ArrayUtils.addAll(base.segments, this.segments);
-		String[] normalized = normalize(newSegment);
-		return new ResourcePath(normalized, this.dir, true);
+		return !this.dir ? this : new ResourcePath(this.segments, false);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
 	public boolean isRoot() {
 		return this == ROOT
-			|| (this.isEmpty() && this.dir && this.absolute);
+			|| (this.isEmpty() && this.dir);
 	}
 
 	public int length() {
 		return this.segments.length;
 	}
 
+	// 目录深度
 	public int depth() {
 		if (!this.dir)
 			return this.segments.length - 1;
@@ -187,17 +146,19 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 
 	@NotNull
 	public ResourcePath parent() {
-		if (this.isEmpty() || this.segments.length == 1)
-			return this.absolute ? ROOT : EMPTY;
+		if (this.isEmpty())
+			return this;
+
+		if (this.segments.length == 1)
+			return ROOT;
 
 		String[] newSegment = Arrays.copyOf(this.segments, this.segments.length - 1);
-		return new ResourcePath(newSegment, true, this.absolute);
+		return new ResourcePath(newSegment, true);
 	}
 
 	@NotNull
 	public String indexOf(int index) {
 		Objects.checkIndex(index, this.segments.length);
-
 		return this.segments[index];
 	}
 
@@ -269,68 +230,53 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 		String[] sub = Arrays.copyOfRange(this.segments, begin, end);
 
 		boolean isDir = this.dir || (end < this.segments.length);
-		return new ResourcePath(sub, isDir, this.absolute);
+		return new ResourcePath(sub, isDir);
 	}
 
 	public boolean isSubPathOf(@NotNull ResourcePath other) {
 		Objects.requireNonNull(other, "other is null");
-		return other.endsWith(this);
-	}
-
-	public boolean isSiblingOf(@NotNull ResourcePath other) {
-		Objects.requireNonNull(other, "other is null");
-		return other.startsWith(this);
+		return this.startsWith(other);
 	}
 
 	@Contract("_, true -> !null")
 	@Nullable
-	public ResourcePath relativize(@NotNull ResourcePath base, boolean strict) {
+	public ResourcePath relativeToPrefix(@NotNull ResourcePath base, boolean strict) {
 		Objects.requireNonNull(base, "base is null");
-
-		if (this.absolute != base.absolute) {
-			if (strict)
-				throw new IllegalArgumentException("Cannot relativize between absolute and relative paths");
-			return null;
-		}
 
 		int max = Math.min(this.segments.length, base.segments.length);
 		int i = 0;
-
 		while (i < max && Objects.equals(this.segments[i], base.segments[i]))
 			i++;
 
-		int upCount = base.segments.length - i;
+		if (i < base.segments.length) {
+			if (strict)
+				throw new IllegalArgumentException("Base path is not a prefix of this path");
 
-		String[] result = new String[upCount + (this.segments.length - i)];
-		int index = 0;
+			return null;
+		}
 
-		for (int j = 0; j < upCount; j++)
-			result[index++] = "..";
-
-		for (int j = i; j < this.segments.length; j++)
-			result[index++] = this.segments[j];
-
-		return new ResourcePath(result, this.dir, false);
+		String[] remaining = Arrays.copyOfRange(this.segments, i, this.segments.length);
+		return new ResourcePath(remaining, this.dir);
 	}
 
 	@NotNull
-	public ResourcePath resolve(@NotNull String path) {
+	public ResourcePath join(@NotNull String path) {
 		Objects.requireNonNull(path, "path is null");
-		return this.resolve(of(path));
+		return this.join(of(path));
 	}
 
 	@NotNull
-	public ResourcePath resolve(@NotNull String... path) {
+	public ResourcePath join(@NotNull String... path) {
 		Objects.requireNonNull(path, "path is null");
-		return this.resolve(of(path));
+		return this.join(of(path));
 	}
 
 	@NotNull
-	public ResourcePath resolve(@NotNull ResourcePath path) {
+	public ResourcePath join(@NotNull ResourcePath path) {
 		Objects.requireNonNull(path, "path is null");
 
 		String[] allSegments = ArrayUtils.addAll(this.segments, path.segments);
-		return new ResourcePath(allSegments, path.dir, this.absolute);
+		return new ResourcePath(allSegments, path.dir);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
@@ -394,7 +340,7 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 		String[] newSegments = this.segments.clone();
 		for (int i = 0; i < newSegments.length; i++)
 			newSegments[i] = newSegments[i].toLowerCase(Locale.ROOT);
-		return new ResourcePath(newSegments, this.dir, this.absolute);
+		return new ResourcePath(newSegments, this.dir);
 	}
 
 	@NotNull
@@ -405,7 +351,7 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 		String[] newSegments = this.segments.clone();
 		for (int i = 0; i < newSegments.length; i++)
 			newSegments[i] = newSegments[i].toUpperCase(Locale.ROOT);
-		return new ResourcePath(newSegments, this.dir, this.absolute);
+		return new ResourcePath(newSegments, this.dir);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
@@ -416,7 +362,7 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 
 		String[] newSegments = this.segments.clone();
 		newSegments[newSegments.length - 1] = name;
-		return new ResourcePath(newSegments, this.dir, this.absolute);
+		return new ResourcePath(newSegments, this.dir);
 	}
 
 	@NotNull
@@ -459,15 +405,15 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
+
 		ResourcePath strings = (ResourcePath) o;
-		return dir == strings.dir
-			&& absolute == strings.absolute
+		return this.dir == strings.dir
 			&& Arrays.equals(this.segments, strings.segments);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(Arrays.hashCode(this.segments), this.dir, this.absolute);
+		return Objects.hash(Arrays.hashCode(this.segments), this.dir);
 	}
 
 	@Override
@@ -476,8 +422,6 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 			return this.dir ? SEPARATOR : "";
 
 		StringBuilder sb = new StringBuilder();
-		if (this.absolute)
-			sb.append(SEPARATOR_CHAR);
 
 		for (String segment : this.segments) {
 			sb.append(segment);

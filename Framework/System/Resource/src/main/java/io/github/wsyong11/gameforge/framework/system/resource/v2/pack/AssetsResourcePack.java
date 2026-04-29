@@ -4,7 +4,7 @@ import io.github.wsyong11.gameforge.assets.Assets;
 import io.github.wsyong11.gameforge.assets.AssetsEntry;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
-import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.ResourcePath;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

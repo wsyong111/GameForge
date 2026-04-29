@@ -4,7 +4,7 @@ import io.github.wsyong11.gameforge.framework.Identifier;
 import io.github.wsyong11.gameforge.framework.platform.Platform;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
-import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.impl.loader.DefaultResourceLoader;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.impl.loader.ResourceLoader;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceConflictResolver;

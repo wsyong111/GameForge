@@ -2,7 +2,7 @@ package io.github.wsyong11.gameforge.framework.system.resource.v2.pack;
 
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
-import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.ResourcePath;
 import io.github.wsyong11.gameforge.util.exception.ExceptionHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

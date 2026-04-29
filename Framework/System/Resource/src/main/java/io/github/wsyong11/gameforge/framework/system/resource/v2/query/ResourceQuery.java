@@ -1,7 +1,7 @@
 package io.github.wsyong11.gameforge.framework.system.resource.v2.query;
 
-import io.github.wsyong11.gameforge.framework.system.resource.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.pack.ResourcePack;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;

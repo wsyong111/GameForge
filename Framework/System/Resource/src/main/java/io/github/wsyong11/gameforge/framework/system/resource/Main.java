@@ -3,6 +3,7 @@ package io.github.wsyong11.gameforge.framework.system.resource;
 import io.github.wsyong11.gameforge.framework.system.log.core.LogLevel;
 import io.github.wsyong11.gameforge.framework.system.log.core.LogManager;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.impl.manage.DefaultResourceManager;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ReloadStatus;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceGraph;
