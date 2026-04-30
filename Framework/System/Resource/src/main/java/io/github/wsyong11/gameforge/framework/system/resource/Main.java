@@ -155,7 +155,7 @@ public class Main {
 	}
 
 	private static void printTree(@NotNull ResourceGraph graph, int tab, @NotNull ResourcePath path) {
-		List<ResourcePath> list = graph.list(path);
+		List<ResourcePath> list = graph.listChildren(path);
 		if (list == null)
 			return;
 

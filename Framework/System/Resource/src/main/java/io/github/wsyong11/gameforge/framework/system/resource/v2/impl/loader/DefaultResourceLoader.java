@@ -251,7 +251,7 @@ public class DefaultResourceLoader extends ResourceLoader {
 		LOGGER.debug("Building resource graph...");
 		ResourceGraph graph = new SimpleResourceGraph();
 		for (Resource resource : resources)
-			graph.put(resource.getPath(), resource);
+			graph.put(resource.getPath(), resource, 0);
 
 		LOGGER.debug("Transforming resources...");
 		ResourceGraph transformedGraph = this.transformResources(graph, this.transformers);

@@ -5,6 +5,7 @@ import io.github.wsyong11.gameforge.framework.Identifier;
 import io.github.wsyong11.gameforge.framework.spi.ExtensionType;
 import io.github.wsyong11.gameforge.framework.spi.registry.ExtensionRegistry;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.fs.ResourceFileSystem;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.impl.fs.ResourceGraphFileSystem;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.impl.loader.ResourceLoader;
@@ -171,14 +172,20 @@ public abstract class AbstractResourceManager implements ResourceManager {
 	@Nullable
 	@Override
 	public Resource getResource(@NotNull Identifier location) {
-		return null;
+		Objects.requireNonNull(location, "location is null");
+
+		ResourceContext context = this.requireContext();
+		ResourcePath path = this.toPath(location);
+		return context.getGraph().get(path);
 	}
 
 	@Nullable
 	@Unmodifiable
 	@Override
 	public List<Resource> getAllResources(@NotNull Identifier location) {
-		return List.of();
+		ResourceContext context = this.requireContext();
+		ResourcePath path = this.toPath(location);
+		return context.getGraph().getAll(path);
 	}
 
 	@Nullable

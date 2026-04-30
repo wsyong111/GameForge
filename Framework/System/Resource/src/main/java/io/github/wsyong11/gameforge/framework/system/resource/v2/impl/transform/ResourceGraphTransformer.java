@@ -64,7 +64,7 @@ public class ResourceGraphTransformer {
 			ResourcePath current = pathStack.pop();
 
 			if (graph.isDir(current)) {
-				List<ResourcePath> paths = graph.list(current);
+				List<ResourcePath> paths = graph.listChildren(current);
 				if (paths == null)
 					continue;
 
@@ -101,7 +101,7 @@ public class ResourceGraphTransformer {
 			if (operate instanceof ResourceOperate.Remove) {
 				graph.remove(path);
 			} else if (operate instanceof ResourceOperate.Add opAdd) {
-				graph.put(path, opAdd.getResource());
+				graph.put(path, opAdd.getResource(), 1);
 			} else if (operate instanceof ResourceOperate.Replace opReplace) {
 				resourceTransformers
 					.computeIfAbsent(path, k -> new ArrayList<>())
@@ -165,7 +165,7 @@ public class ResourceGraphTransformer {
 						Resource value = item.getValue();
 
 						if (value != null)
-							graph.put(path, value);
+							graph.put(path, value, 1);
 						else
 							graph.remove(path);
 					}

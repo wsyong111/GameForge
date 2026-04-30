@@ -1,5 +1,7 @@
 package io.github.wsyong11.gameforge.framework.system.resource.v2.impl.graph;
 
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.MultimapBuilder;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.impl.query.StreamResourceQuery;
@@ -16,23 +18,34 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 public class SimpleResourceGraph implements ResourceGraph {
-	private final Map<ResourcePath, Resource> resourceMap;
+	private final ListMultimap<ResourcePath, Resource> resourcesMap;
 	private final Map<ResourcePath, Set<ResourcePath>> treeMap;
 
 	private final ReadWriteLock lock;
 
 	public SimpleResourceGraph() {
-		this.resourceMap = new HashMap<>();
+		this.resourcesMap = MultimapBuilder
+			.hashKeys()
+			.arrayListValues()
+			.build();
+
 		this.treeMap = new HashMap<>();
 
 		this.lock = new ReentrantReadWriteLock();
 	}
 
-	protected SimpleResourceGraph(@NotNull Map<ResourcePath, Resource> resourceMap, @NotNull Map<ResourcePath, Set<ResourcePath>> treeMap) {
-		Objects.requireNonNull(resourceMap, "resourceMap is null");
+	protected SimpleResourceGraph(@NotNull ListMultimap<ResourcePath, Resource> resourcesMap, @NotNull Map<ResourcePath, Set<ResourcePath>> treeMap) {
+		Objects.requireNonNull(resourcesMap, "resourcesMap is null");
 		Objects.requireNonNull(treeMap, "treeMap is null");
 
-		this.resourceMap = new HashMap<>(resourceMap);
+		this.resourcesMap = MultimapBuilder
+			.hashKeys()
+			.arrayListValues()
+			.build();
+
+		for (Map.Entry<ResourcePath, Resource> entry : resourcesMap.entries())
+			this.resourcesMap.put(entry.getKey(), entry.getValue());
+
 		this.treeMap = treeMap
 			.entrySet()
 			.stream()
@@ -44,19 +57,19 @@ public class SimpleResourceGraph implements ResourceGraph {
 		this.lock = new ReentrantReadWriteLock();
 	}
 
-	@Nullable
 	@Override
-	public Resource put(@NotNull ResourcePath path, @NotNull Resource resource) {
+	public void put(@NotNull ResourcePath path, @NotNull Resource resource, int priority) {
 		Objects.requireNonNull(path, "path is null");
 		Objects.requireNonNull(resource, "resource is null");
 
 		Lock lock = this.lock.writeLock();
 		lock.lock();
 		try {
-			Resource oldResource = this.resourceMap.put(path.toFile(), resource);
+			boolean keyExists = this.resourcesMap.containsKey(path.toFile());
+			this.resourcesMap.put(path.toFile(), resource);
 
-			if (oldResource != null)
-				return oldResource;
+			if (keyExists)
+				return;
 
 			ResourcePath currentPath = path;
 			while (!currentPath.isEmpty()) {
@@ -67,8 +80,6 @@ public class SimpleResourceGraph implements ResourceGraph {
 
 				currentPath = parentPath;
 			}
-
-			return null;
 		} finally {
 			lock.unlock();
 		}
@@ -82,17 +93,60 @@ public class SimpleResourceGraph implements ResourceGraph {
 		Lock lock = this.lock.readLock();
 		lock.lock();
 		try {
-			return this.resourceMap.get(path.toFile());
+			List<Resource> resources = this.resourcesMap.get(path.toFile());
+			if (resources.isEmpty())
+				return null;
+
+			return resources.get(resources.size() - 1);
 		} finally {
 			lock.unlock();
 		}
 	}
 
-	private boolean removeEntry(@NotNull ResourcePath path) {
+	@NotNull
+	@Unmodifiable
+	@Override
+	public List<Resource> getAll(@NotNull ResourcePath path) {
 		Objects.requireNonNull(path, "path is null");
 
-		if (this.resourceMap.remove(path.toFile()) == null)
-			return false;
+		Lock lock = this.lock.readLock();
+		lock.lock();
+		try {
+			List<Resource> resources = this.resourcesMap.get(path.toFile());
+			return List.copyOf(resources);
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public boolean sort(@NotNull ResourcePath path, @NotNull Comparator<Resource> comparator) {
+		Objects.requireNonNull(path, "path is null");
+		Objects.requireNonNull(comparator, "comparator is null");
+
+		Lock lock = this.lock.writeLock();
+		lock.lock();
+		try {
+			if (!this.resourcesMap.containsKey(path.toFile()))
+				return false;
+
+			List<Resource> resources = this.resourcesMap.get(path.toFile());
+			resources.sort(comparator);
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	private boolean removeEntry(@NotNull ResourcePath path, @Nullable Resource targetResource) {
+		Objects.requireNonNull(path, "path is null");
+
+		if (targetResource == null) {
+			if (this.resourcesMap.removeAll(path.toFile()).isEmpty())
+				return false;
+		} else {
+			if (!this.resourcesMap.remove(path.toFile(), targetResource))
+				return false;
+		}
 
 		ResourcePath parentPath = path.parent();
 		Set<ResourcePath> parentChildren = this.treeMap.get(parentPath);
@@ -129,6 +183,8 @@ public class SimpleResourceGraph implements ResourceGraph {
 		while (!stack.isEmpty()) {
 			ResourcePath currentPath = stack.pop();
 			Set<ResourcePath> children = this.treeMap.remove(currentPath);
+			if (children == null)
+				continue;
 
 			for (ResourcePath child : children) {
 				if (child.isDirectory()) {
@@ -136,7 +192,7 @@ public class SimpleResourceGraph implements ResourceGraph {
 					continue;
 				}
 
-				this.resourceMap.remove(child);
+				this.resourcesMap.removeAll(child);
 			}
 		}
 
@@ -155,8 +211,22 @@ public class SimpleResourceGraph implements ResourceGraph {
 		Lock lock = this.lock.writeLock();
 		lock.lock();
 		try {
-			return this.removeEntry(path.toFile())
-			       || this.removeDir(path.toDirectory());
+			return this.removeEntry(path.toFile(), null)
+				|| this.removeDir(path.toDirectory());
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public boolean remove(@NotNull ResourcePath path, @NotNull Resource resource) {
+		Objects.requireNonNull(path, "path is null");
+		Objects.requireNonNull(resource, "resource is null");
+
+		Lock lock = this.lock.writeLock();
+		lock.lock();
+		try {
+			return this.removeEntry(path.toFile(), resource);
 		} finally {
 			lock.unlock();
 		}
@@ -172,8 +242,8 @@ public class SimpleResourceGraph implements ResourceGraph {
 		Lock lock = this.lock.readLock();
 		lock.lock();
 		try {
-			return this.resourceMap.containsKey(path.toFile())
-			       || this.treeMap.containsKey(path.toDirectory());
+			return this.resourcesMap.containsKey(path.toFile())
+				|| this.treeMap.containsKey(path.toDirectory());
 		} finally {
 			lock.unlock();
 		}
@@ -199,7 +269,7 @@ public class SimpleResourceGraph implements ResourceGraph {
 		Lock lock = this.lock.readLock();
 		lock.lock();
 		try {
-			return this.resourceMap.containsKey(path.toFile());
+			return this.resourcesMap.containsKey(path.toFile());
 		} finally {
 			lock.unlock();
 		}
@@ -208,7 +278,7 @@ public class SimpleResourceGraph implements ResourceGraph {
 	@Nullable
 	@Unmodifiable
 	@Override
-	public List<ResourcePath> list(@NotNull ResourcePath path) {
+	public List<ResourcePath> listChildren(@NotNull ResourcePath path) {
 		Objects.requireNonNull(path, "path is null");
 
 		Lock lock = this.lock.readLock();
@@ -227,11 +297,11 @@ public class SimpleResourceGraph implements ResourceGraph {
 	@NotNull
 	@Unmodifiable
 	@Override
-	public List<Resource> listAll() {
+	public List<Resource> listAllFlat() {
 		Lock lock = this.lock.readLock();
 		lock.lock();
 		try {
-			return List.copyOf(this.resourceMap.values());
+			return List.copyOf(this.resourcesMap.values());
 		} finally {
 			lock.unlock();
 		}
@@ -242,7 +312,7 @@ public class SimpleResourceGraph implements ResourceGraph {
 		Lock lock = this.lock.readLock();
 		lock.lock();
 		try {
-			return this.resourceMap.size();
+			return this.resourcesMap.size();
 		} finally {
 			lock.unlock();
 		}
@@ -251,13 +321,19 @@ public class SimpleResourceGraph implements ResourceGraph {
 	@NotNull
 	@Override
 	public ResourceGraph copy() {
-		return new SimpleResourceGraph(this.resourceMap, this.treeMap);
+		Lock lock = this.lock.readLock();
+		lock.lock();
+		try {
+			return new SimpleResourceGraph(this.resourcesMap, this.treeMap);
+		} finally {
+			lock.unlock();
+		}
 	}
 
 	@NotNull
 	@Override
 	public ResourceQuery query() {
-		return new StreamResourceQuery(this.listAll());
+		return new StreamResourceQuery(this.listAllFlat());
 	}
 
 	@Override
@@ -265,7 +341,7 @@ public class SimpleResourceGraph implements ResourceGraph {
 		Lock lock = this.lock.writeLock();
 		lock.lock();
 		try {
-			this.resourceMap.clear();
+			this.resourcesMap.clear();
 			this.treeMap.clear();
 		} finally {
 			lock.unlock();

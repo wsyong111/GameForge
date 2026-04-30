@@ -7,16 +7,24 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
+import java.util.Comparator;
 import java.util.List;
 
 public interface ResourceGraph {
-	@Nullable
-	Resource put(@NotNull ResourcePath path, @NotNull Resource resource);
+	void put(@NotNull ResourcePath path, @NotNull Resource resource, int priority);
 
 	@Nullable
 	Resource get(@NotNull ResourcePath path);
 
+	@NotNull
+	@Unmodifiable
+	List<Resource> getAll(@NotNull ResourcePath path);
+
+	boolean sort(@NotNull ResourcePath path, @NotNull Comparator<Resource> comparator);
+
 	boolean remove(@NotNull ResourcePath path);
+
+	boolean remove(@NotNull ResourcePath path, @NotNull Resource resource);
 
 	boolean exist(@NotNull ResourcePath path);
 
@@ -26,13 +34,11 @@ public interface ResourceGraph {
 
 	@Nullable
 	@Unmodifiable
-	List<ResourcePath> list(@NotNull ResourcePath path);
+	List<ResourcePath> listChildren(@NotNull ResourcePath path);
 
 	@NotNull
 	@Unmodifiable
-	List<Resource> listAll();
-
-//	boolean isFrozen();
+	List<Resource> listAllFlat();
 
 	int size();
 

@@ -27,7 +27,7 @@ public class ResourceGraphFileSystem implements ResourceFileSystem {
 	public List<ResourcePath> list(@NotNull ResourcePath path) throws IOException {
 		Objects.requireNonNull(path, "path is null");
 
-		List<ResourcePath> result = this.graph.list(path);
+		List<ResourcePath> result = this.graph.listChildren(path);
 		if (result == null)
 			throw new FileNotFoundException(path.toString());
 
