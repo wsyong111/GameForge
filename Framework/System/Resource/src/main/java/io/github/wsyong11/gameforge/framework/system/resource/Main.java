@@ -1,10 +1,12 @@
 package io.github.wsyong11.gameforge.framework.system.resource;
 
+import io.github.wsyong11.gameforge.framework.Identifier;
 import io.github.wsyong11.gameforge.framework.system.log.core.LogLevel;
 import io.github.wsyong11.gameforge.framework.system.log.core.LogManager;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.impl.manage.DefaultResourceManager;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.IdentifierPathConverter;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ReloadStatus;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceGraph;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceManager;
@@ -15,16 +17,14 @@ import io.github.wsyong11.gameforge.framework.system.resource.v2.transform.Trans
 import io.github.wsyong11.gameforge.framework.system.resource.v2.transform.TransformedResource;
 import io.github.wsyong11.gameforge.util.StreamUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
@@ -112,6 +112,8 @@ public class Main {
 
 	private static void main() throws Throwable {
 		try (ResourceManager manager = new DefaultResourceManager()) {
+			manager.addExtension(IdentifierPathConverter.TYPE, new IdentityCast());
+
 			AssetsResourcePack assetsPack = new AssetsResourcePack();
 			manager.registerResourcePack(assetsPack);
 			manager.setPackPriority(assetsPack, -1);
@@ -139,7 +141,7 @@ public class Main {
 
 			Thread.sleep(1000);
 
-			try (InputStream stream = manager.getFileSystem().openStream(ResourcePath.of("pack.json.src"))) {
+			try (InputStream stream = manager.getResource(Identifier.of("minecraft", "models/block/stone.json")).openStream()) {
 				BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 				String line;
 				while ((line = reader.readLine()) != null)
@@ -184,6 +186,28 @@ public class Main {
 			});
 
 			context.addResource(path.transformName(n -> n + ".src"), resource);
+		}
+	}
+
+	private static class IdentityCast implements IdentifierPathConverter {
+		@NotNull
+		@Override
+		public ResourcePath toPath(@NotNull Identifier id) {
+			Objects.requireNonNull(id, "id is null");
+			return ResourcePath.of("assets", id.getNamespace(), id.getPath());
+		}
+
+		@Nullable
+		@Override
+		public Identifier toId(@NotNull ResourcePath path) {
+			Objects.requireNonNull(path, "path is null");
+
+			if (path.length() < 2 || !path.startsWith("/assets"))
+				return null;
+
+			String namespace = path.indexOf(1);
+			String idPath = path.subPath(1).toString();
+			return Identifier.of(namespace, idPath);
 		}
 	}
 }

@@ -11,7 +11,7 @@ import java.util.Comparator;
 import java.util.List;
 
 public interface ResourceGraph {
-	void put(@NotNull ResourcePath path, @NotNull Resource resource, int priority);
+	void put(@NotNull ResourcePath path, @NotNull Resource resource);
 
 	@Nullable
 	Resource get(@NotNull ResourcePath path);
@@ -26,11 +26,11 @@ public interface ResourceGraph {
 
 	boolean remove(@NotNull ResourcePath path, @NotNull Resource resource);
 
-	boolean exist(@NotNull ResourcePath path);
+	boolean exists(@NotNull ResourcePath path);
 
 	boolean isDir(@NotNull ResourcePath path);
 
-	boolean isEntry(@NotNull ResourcePath path);
+	boolean isFile(@NotNull ResourcePath path);
 
 	@Nullable
 	@Unmodifiable

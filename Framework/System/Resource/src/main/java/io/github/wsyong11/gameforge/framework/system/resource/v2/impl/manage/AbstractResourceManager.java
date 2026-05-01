@@ -6,14 +6,12 @@ import io.github.wsyong11.gameforge.framework.spi.ExtensionType;
 import io.github.wsyong11.gameforge.framework.spi.registry.ExtensionRegistry;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.Resource;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.ResourcePath;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.ex.IdentifierPathConvertException;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.fs.ResourceFileSystem;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.impl.fs.ResourceGraphFileSystem;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.impl.loader.ResourceLoader;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.impl.pack.ResourcePackRegistry;
-import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ReloadStatus;
-import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceConflictResolver;
-import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceGraph;
-import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceManager;
+import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.*;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.pack.ResourcePack;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.transform.ResourceTransformer;
 import io.github.wsyong11.gameforge.util.concurrent.FutureUtils;
@@ -51,7 +49,8 @@ public abstract class AbstractResourceManager implements ResourceManager {
 
 		this.extensions = ExtensionRegistry.createRestrict(Set.of(
 			ResourceConflictResolver.TYPE,
-			ResourceTransformer.TYPE
+			ResourceTransformer.TYPE,
+			IdentifierPathConverter.TYPE
 		));
 
 		this.loader = null;
@@ -89,6 +88,33 @@ public abstract class AbstractResourceManager implements ResourceManager {
 		if (this.closed.get())
 			throw new IllegalStateException("Resource manager closed");
 	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	@NotNull
+	@Override
+	public ResourcePath toPath(@NotNull Identifier id) {
+		Objects.requireNonNull(id, "id is null");
+
+		List<IdentifierPathConverter> converters = this.extensions.getExtensions(IdentifierPathConverter.TYPE);
+		for (IdentifierPathConverter converter : converters) {
+			ResourcePath result;
+			try {
+				result = converter.toPath(id);
+			} catch (Exception e) {
+
+			}
+		}
+
+		throw new IdentifierPathConvertException("Not available converter can convert " + id + " to path");
+	}
+
+	@Nullable
+	@Override
+	public Identifier toIdentifier(@NotNull ResourcePath path) {
+		return null;
+	}
+
 
 	// -------------------------------------------------------------------------------------------------------------- //
 

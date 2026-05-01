@@ -219,7 +219,7 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 	@NotNull
 	public ResourcePath subPath(int begin, int end) {
 		if (begin < 0 || end > this.segments.length || begin >= end)
-			throw new ArrayIndexOutOfBoundsException(
+			throw new IndexOutOfBoundsException(
 				"Invalid sub path range: " + begin + " to " + end +
 					", length=" + this.segments.length
 			);
@@ -231,6 +231,11 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 
 		boolean isDir = this.dir || (end < this.segments.length);
 		return new ResourcePath(sub, isDir);
+	}
+
+	@NotNull
+	public ResourcePath subPath(int begin) {
+		return this.subPath(begin, this.segments.length);
 	}
 
 	public boolean isSubPathOf(@NotNull ResourcePath other) {

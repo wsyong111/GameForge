@@ -34,7 +34,7 @@ public class ResourceGraphTest {
 		ResourcePath path = ResourcePath.of("/a");
 		Resource resource = mockResource("R1");
 
-		graph.put(path, resource, 1);
+		graph.put(path, resource);
 
 		assertEquals(resource, graph.get(path));
 	}
@@ -46,8 +46,8 @@ public class ResourceGraphTest {
 		Resource r1 = mockResource("R1");
 		Resource r2 = mockResource("R2");
 
-		graph.put(path, r1, 1);
-		graph.put(path, r2, 1);
+		graph.put(path, r1);
+		graph.put(path, r2);
 
 		assertEquals(r2, graph.get(path));
 	}
@@ -59,8 +59,8 @@ public class ResourceGraphTest {
 		Resource r1 = mockResource("R1");
 		Resource r2 = mockResource("R2");
 
-		graph.put(path, r1, 1);
-		graph.put(path, r2, 1);
+		graph.put(path, r1);
+		graph.put(path, r2);
 
 		List<Resource> all = graph.getAll(path);
 
@@ -74,19 +74,19 @@ public class ResourceGraphTest {
 	// ----------------------------
 
 	@Test
-	void testExistAfterPut() {
+	void testExistsAfterPut() {
 		ResourcePath path = ResourcePath.of("/a");
-		graph.put(path, mockResource("R1"), 1);
+		graph.put(path, mockResource("R1"));
 
-		assertTrue(graph.exist(path));
+		assertTrue(graph.exists(path));
 	}
 
 	@Test
-	void testIsEntry() {
+	void testIsFile() {
 		ResourcePath path = ResourcePath.of("/a");
-		graph.put(path, mockResource("R1"), 1);
+		graph.put(path, mockResource("R1"));
 
-		assertTrue(graph.isEntry(path));
+		assertTrue(graph.isFile(path));
 		assertFalse(graph.isDir(path));
 	}
 
@@ -99,7 +99,7 @@ public class ResourceGraphTest {
 		ResourcePath path = ResourcePath.of("/a");
 		Resource r1 = mockResource("R1");
 
-		graph.put(path, r1, 1);
+		graph.put(path, r1);
 
 		boolean removed = graph.remove(path, r1);
 
@@ -111,7 +111,7 @@ public class ResourceGraphTest {
 	void testRemoveWrongResourceFails() {
 		ResourcePath path = ResourcePath.of("/a");
 
-		graph.put(path, mockResource("R1"), 1);
+		graph.put(path, mockResource("R1"));
 
 		boolean removed = graph.remove(path, mockResource("R2"));
 
@@ -126,7 +126,7 @@ public class ResourceGraphTest {
 	void testRemovePath() {
 		ResourcePath path = ResourcePath.of("/a");
 
-		graph.put(path, mockResource("R1"), 1);
+		graph.put(path, mockResource("R1"));
 
 		boolean removed = graph.remove(path);
 
@@ -140,8 +140,8 @@ public class ResourceGraphTest {
 
 	@Test
 	void testClear() {
-		graph.put(ResourcePath.of("/a"), mockResource("R1"), 1);
-		graph.put(ResourcePath.of("/b"), mockResource("R2"), 1);
+		graph.put(ResourcePath.of("/a"), mockResource("R1"));
+		graph.put(ResourcePath.of("/b"), mockResource("R2"));
 
 		graph.clear();
 
@@ -155,8 +155,8 @@ public class ResourceGraphTest {
 
 	@Test
 	void testSize() {
-		graph.put(ResourcePath.of("/a"), mockResource("R1"), 1);
-		graph.put(ResourcePath.of("/a"), mockResource("R2"), 1);
+		graph.put(ResourcePath.of("/a"), mockResource("R1"));
+		graph.put(ResourcePath.of("/a"), mockResource("R2"));
 
 		assertEquals(2, graph.size());
 	}
@@ -169,8 +169,8 @@ public class ResourceGraphTest {
 		ResourcePath a = ResourcePath.of("/a");
 		ResourcePath b = ResourcePath.of("/a/b");
 
-		graph.put(a, mockResource("A"), 1);
-		graph.put(b, mockResource("B"), 1);
+		graph.put(a, mockResource("A"));
+		graph.put(b, mockResource("B"));
 
 		List<ResourcePath> rootChildren = graph.listChildren(root);
 		assertNotNull(rootChildren);
@@ -189,8 +189,8 @@ public class ResourceGraphTest {
 		ResourcePath b = ResourcePath.of("/a/b");
 		ResourcePath c = ResourcePath.of("/a/b/c");
 
-		graph.put(b, mockResource("B"), 1);
-		graph.put(c, mockResource("C"), 1);
+		graph.put(b, mockResource("B"));
+		graph.put(c, mockResource("C"));
 
 		boolean removed = graph.remove(a.toDirectory());
 
@@ -211,8 +211,8 @@ public class ResourceGraphTest {
 
 		ResourcePath a1 = ResourcePath.of("/a/1");
 
-		graph.put(a1, mockResource("A1"), 1);
-		graph.put(b, mockResource("B"), 1);
+		graph.put(a1, mockResource("A1"));
+		graph.put(b, mockResource("B"));
 
 		graph.remove(a.toDirectory());
 
@@ -227,7 +227,7 @@ public class ResourceGraphTest {
 		ResourcePath path = ResourcePath.of("/a");
 		Resource r1 = mockResource("R1");
 
-		original.put(path, r1, 1);
+		original.put(path, r1);
 
 		SimpleResourceGraph copy = (SimpleResourceGraph) original.copy();
 
@@ -245,8 +245,8 @@ public class ResourceGraphTest {
 		ResourcePath a = ResourcePath.of("/a");
 		ResourcePath b = ResourcePath.of("/a/b");
 
-		original.put(a, mockResource("A"), 1);
-		original.put(b, mockResource("B"), 1);
+		original.put(a, mockResource("A"));
+		original.put(b, mockResource("B"));
 
 		SimpleResourceGraph copy = (SimpleResourceGraph) original.copy();
 
@@ -268,8 +268,8 @@ public class ResourceGraphTest {
 		Resource r1 = mockResource("R1");
 		Resource r2 = mockResource("R2");
 
-		original.put(a, r1, 1);
-		original.put(b, r2, 1);
+		original.put(a, r1);
+		original.put(b, r2);
 
 		SimpleResourceGraph copy = (SimpleResourceGraph) original.copy();
 

@@ -64,7 +64,7 @@ public class ResourceGraphFileSystem implements ResourceFileSystem {
 	@Override
 	public boolean exist(@NotNull ResourcePath path) {
 		Objects.requireNonNull(path, "path is null");
-		return this.graph.exist(path);
+		return this.graph.exists(path);
 	}
 
 	@Override
@@ -76,6 +76,6 @@ public class ResourceGraphFileSystem implements ResourceFileSystem {
 	@Override
 	public boolean isFile(@NotNull ResourcePath path) {
 		Objects.requireNonNull(path, "path is null");
-		return this.graph.isEntry(path);
+		return this.graph.isFile(path);
 	}
 }

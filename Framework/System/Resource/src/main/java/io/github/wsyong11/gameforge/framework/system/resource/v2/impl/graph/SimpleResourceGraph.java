@@ -58,7 +58,7 @@ public class SimpleResourceGraph implements ResourceGraph {
 	}
 
 	@Override
-	public void put(@NotNull ResourcePath path, @NotNull Resource resource, int priority) {
+	public void put(@NotNull ResourcePath path, @NotNull Resource resource) {
 		Objects.requireNonNull(path, "path is null");
 		Objects.requireNonNull(resource, "resource is null");
 
@@ -132,6 +132,7 @@ public class SimpleResourceGraph implements ResourceGraph {
 
 			List<Resource> resources = this.resourcesMap.get(path.toFile());
 			resources.sort(comparator);
+			return true;
 		} finally {
 			lock.unlock();
 		}
@@ -233,7 +234,7 @@ public class SimpleResourceGraph implements ResourceGraph {
 	}
 
 	@Override
-	public boolean exist(@NotNull ResourcePath path) {
+	public boolean exists(@NotNull ResourcePath path) {
 		Objects.requireNonNull(path, "path is null");
 
 		if (path.isRoot())
@@ -263,7 +264,7 @@ public class SimpleResourceGraph implements ResourceGraph {
 	}
 
 	@Override
-	public boolean isEntry(@NotNull ResourcePath path) {
+	public boolean isFile(@NotNull ResourcePath path) {
 		Objects.requireNonNull(path, "path is null");
 
 		Lock lock = this.lock.readLock();

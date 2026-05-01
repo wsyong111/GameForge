@@ -1,10 +1,8 @@
 package io.github.wsyong11.gameforge.framework.system.resource.v2.impl.manage;
 
-import io.github.wsyong11.gameforge.framework.Identifier;
 import io.github.wsyong11.gameforge.framework.platform.Platform;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
-import io.github.wsyong11.gameforge.framework.system.resource.v2.ResourcePath;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.impl.loader.DefaultResourceLoader;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.impl.loader.ResourceLoader;
 import io.github.wsyong11.gameforge.framework.system.resource.v2.manage.ResourceConflictResolver;
@@ -15,7 +13,6 @@ import io.github.wsyong11.gameforge.util.concurrent.SimpleThreadFactory;
 import io.reactivex.rxjava3.core.Scheduler;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.List;
@@ -61,18 +58,6 @@ public class DefaultResourceManager extends AbstractResourceManager {
 				.build()
 		);
 		this.transformScheduler = Schedulers.from(this.transformThreadPool);
-	}
-
-	@Nullable
-	@Override
-	public Identifier toIdentifier(@NotNull ResourcePath path) {
-		return null;
-	}
-
-	@NotNull
-	@Override
-	public ResourcePath toPath(@NotNull Identifier id) {
-		return null;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //

@@ -74,7 +74,7 @@ public class ResourceGraphTransformer {
 				continue;
 			}
 
-			assert graph.isEntry(current);
+			assert graph.isFile(current);
 
 			if (operates.containsKey(current))
 				continue;
@@ -101,7 +101,7 @@ public class ResourceGraphTransformer {
 			if (operate instanceof ResourceOperate.Remove) {
 				graph.remove(path);
 			} else if (operate instanceof ResourceOperate.Add opAdd) {
-				graph.put(path, opAdd.getResource(), 1);
+				graph.put(path, opAdd.getResource());
 			} else if (operate instanceof ResourceOperate.Replace opReplace) {
 				resourceTransformers
 					.computeIfAbsent(path, k -> new ArrayList<>())
@@ -165,7 +165,7 @@ public class ResourceGraphTransformer {
 						Resource value = item.getValue();
 
 						if (value != null)
-							graph.put(path, value, 1);
+							graph.put(path, value);
 						else
 							graph.remove(path);
 					}
