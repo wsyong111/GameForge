@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class TreeNode<K, V> {
 	private final K key;
@@ -15,20 +16,18 @@ public class TreeNode<K, V> {
 
 	private final Map<K, TreeNode<K, V>> children;
 
-	public TreeNode(@Nullable K key, @Nullable V value) {
-		this(key, value, null);
-	}
+	protected TreeNode(@NotNull K key, @Nullable V value) {
+		Objects.requireNonNull(key, "key is null");
 
-	protected TreeNode(@Nullable K key, @Nullable V value, @Nullable TreeNode<K, V> parent) {
 		this.key = key;
 		this.value = value;
 
-		this.parent = parent;
+		this.parent = null;
 
 		this.children = new LinkedHashMap<>();
 	}
 
-	@Nullable
+	@NotNull
 	public K getKey() {
 		return this.key;
 	}
@@ -47,14 +46,17 @@ public class TreeNode<K, V> {
 		return this.parent;
 	}
 
-	protected void setParent(@Nullable TreeNode<K, V> parent) {
-		this.parent = parent;
-	}
+	// -------------------------------------------------------------------------------------------------------------- //
 
 	@Nullable
 	public TreeNode<K, V> getChild(@NotNull K key) {
 		Objects.requireNonNull(key, "key is null");
 		return this.children.get(key);
+	}
+
+	public boolean containsChild(@NotNull K key) {
+		Objects.requireNonNull(key, "key is null");
+		return this.children.containsKey(key);
 	}
 
 	@Nullable
@@ -69,69 +71,16 @@ public class TreeNode<K, V> {
 		return null;
 	}
 
-	public boolean containsChild(@NotNull K key) {
-		Objects.requireNonNull(key, "key is null");
-		return this.children.containsKey(key);
-	}
-
 	@NotNull
-	public TreeNode<K, V> addChild(@NotNull TreeNode<K, V> node) {
-		Objects.requireNonNull(node, "node is null");
+	@Unmodifiable
+	public List<TreeNode<K, V>> findChildren(@NotNull Predicate<TreeNode<K, V>> predicate) {
+		Objects.requireNonNull(predicate, "predicate is null");
 
-		K key = node.getKey();
-		if (key == null)
-			throw new IllegalArgumentException("Root node cannot add to children");
-
-		if (this.children.containsValue(node))
-			throw new IllegalStateException("Node " + node + " already in children");
-
-		node.detach();
-		this.children.put(key, node);
-		node.setParent(this);
-
-		return node;
-	}
-
-	@NotNull
-	public TreeNode<K, V> addChild(@NotNull K key, @Nullable V value) {
-		Objects.requireNonNull(key, "key is null");
-
-		if (this.children.containsKey(key))
-			throw new IllegalStateException("Key " + key + " already in children");
-
-		TreeNode<K, V> node = new TreeNode<>(key, value, this);
-		this.children.put(key, node);
-		return node;
-	}
-
-	@Nullable
-	public TreeNode<K, V> removeChild(@NotNull TreeNode<K, V> node) {
-		Objects.requireNonNull(node, "node is null");
-
-		K key = node.getKey();
-		if (key == null || !this.children.remove(key, node))
-			return null;
-
-		node.detach();
-		return node;
-	}
-
-	@Nullable
-	public TreeNode<K, V> removeChild(@NotNull K key) {
-		Objects.requireNonNull(key, "key is null");
-
-		TreeNode<K, V> node = this.children.remove(key);
-		if (node == null)
-			return null;
-
-		node.detach();
-		return node;
-	}
-
-	public void clearChildren() {
-		for (TreeNode<K, V> node : this.children.values())
-			node.detach();
-		this.children.clear();
+		return this.children
+			.values()
+			.stream()
+			.filter(predicate)
+			.toList();
 	}
 
 	@NotNull
@@ -142,6 +91,110 @@ public class TreeNode<K, V> {
 
 	public int childCount() {
 		return this.children.size();
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	private boolean isAncestorOf(@NotNull TreeNode<K, V> node) {
+		Objects.requireNonNull(node, "node is null");
+
+		TreeNode<K, V> current = node;
+		while (current != null) {
+			if (current == this)
+				return true;
+			current = current.parent;
+		}
+
+		return false;
+	}
+
+	private void attachChild(@NotNull TreeNode<K, V> node) {
+		TreeNode<K, V> existing = this.children.get(node.key);
+
+		if (existing != null && existing != node)
+			throw new IllegalStateException("Duplicate key: " + node.key);
+
+		if (existing == node)
+			return;
+
+		this.children.put(node.key, node);
+		node.parent = this;
+	}
+
+	@NotNull
+	public TreeNode<K, V> addChild(@NotNull TreeNode<K, V> node) {
+		Objects.requireNonNull(node, "node is null");
+
+		if (node == this)
+			throw new IllegalStateException("A node cannot be a child of itself");
+
+		if (node.isAncestorOf(this))
+			throw new IllegalStateException("Cannot add an ancestor as a child: " + node.key);
+
+		node.detach();
+		this.attachChild(node);
+
+		return node;
+	}
+
+	@NotNull
+	public TreeNode<K, V> addChild(@NotNull K key, @Nullable V value) {
+		Objects.requireNonNull(key, "key is null");
+
+		TreeNode<K, V> node = new TreeNode<>(key, value);
+		this.attachChild(node);
+		return node;
+	}
+
+	@Nullable
+	public TreeNode<K, V> removeChild(@NotNull TreeNode<K, V> node) {
+		Objects.requireNonNull(node, "node is null");
+
+		TreeNode<K, V> currentNode = this.children.get(node.key);
+		if (currentNode != node)
+			return null;
+
+		this.children.remove(node.key);
+		currentNode.parent = null;
+
+		return currentNode;
+	}
+
+	@Nullable
+	public TreeNode<K, V> removeChild(@NotNull K key) {
+		Objects.requireNonNull(key, "key is null");
+
+		TreeNode<K, V> node = this.children.remove(key);
+		if (node != null)
+			node.parent = null;
+
+		return node;
+	}
+
+	public void clearChildren() {
+		for (TreeNode<K, V> node : this.children.values())
+			node.parent = null;
+
+		this.children.clear();
+	}
+
+	public void detach() {
+		if (this.parent == null)
+			return;
+
+		TreeNode<K, V> parent = this.parent;
+		this.parent = null;
+		parent.children.remove(this.key, this);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	public boolean isLeaf() {
+		return this.children.isEmpty();
+	}
+
+	public boolean isRoot() {
+		return this.parent == null;
 	}
 
 	public int getDepth() {
@@ -177,18 +230,16 @@ public class TreeNode<K, V> {
 		return Collections.unmodifiableList(list);
 	}
 
-	public boolean isLeaf() {
-		return this.children.isEmpty();
-	}
+	// -------------------------------------------------------------------------------------------------------------- //
 
-	public boolean isRoot() {
-		return this.parent == null;
-	}
-
-	public void detach() {
-		if (this.parent != null) {
-			this.parent.removeChild(this);
-			this.parent = null;
-		}
+	@NotNull
+	public Stream<TreeNode<K, V>> stream() {
+		return Stream.concat(
+			Stream.of(this),
+			this.children
+				.values()
+				.stream()
+				.flatMap(TreeNode::stream)
+		);
 	}
 }

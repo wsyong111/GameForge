@@ -28,9 +28,8 @@ public class DFSIterator<N extends TreeNode<?, ?>> implements Iterator<N> {
 		N current = this.stack.pop();
 
 		List<? extends TreeNode<?, ?>> children = new ArrayList<>(current.getChildren());
-		Collections.reverse(children);
 
-		for (int i = children.size() - 1; i > 0; i--) {
+		for (int i = children.size() - 1; i >= 0; i--) {
 			N child = (N) children.get(i);
 			this.stack.push(child);
 		}

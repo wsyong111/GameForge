@@ -6,10 +6,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.UnaryOperator;
 
 public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> {
@@ -38,6 +35,12 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 
 	@NotNull
 	public static ResourcePath of(String... paths) {
+		Objects.requireNonNull(paths, "paths is null");
+		return of(String.join(SEPARATOR, paths));
+	}
+
+	@NotNull
+	public static ResourcePath of(@NotNull Iterable<String> paths) {
 		Objects.requireNonNull(paths, "paths is null");
 		return of(String.join(SEPARATOR, paths));
 	}
@@ -381,6 +384,11 @@ public class ResourcePath implements Iterable<String>, Comparable<ResourcePath> 
 	@NotNull
 	public String[] toArray() {
 		return this.segments.clone();
+	}
+
+	@NotNull
+	public List<String> toList() {
+		return List.of(this.segments);
 	}
 
 	@NotNull
