@@ -16,5 +16,6 @@ dependencies {
 	implementation(project(":Framework:Common"))
 	implementation(project(":Framework:System:Log"))
 	implementation(project(":Util"))
-	implementation(project(":Framework:System:Graphic:Capability"))
+	implementation(project(":Framework:System:Graphic:GraphicCore"))
+//	implementation(project(":Framework:System:Graphic:Core"))
 }

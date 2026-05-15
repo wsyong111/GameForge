@@ -90,6 +90,8 @@ operator fun Dependency.invoke(config: DependencyDSL.() -> Unit): Dependency {
 
 //@formatter:off
 // Annotation / Codegen / Utils
+val SEMVER4J = "org.semver4j" dependsOn "semver4j" version "6.0.0"
+
 val AUTO_SERVICE = "com.google.auto.service" dependsOn "auto-service" version "1.1.1"
 val AUTO_COMMON  = "com.google.auto"         dependsOn "auto-common"  version "1.2.2"
 val JAVA_POET    = "com.palantir.javapoet"   dependsOn "javapoet"     version "0.5.0"
