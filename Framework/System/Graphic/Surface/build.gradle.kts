@@ -9,7 +9,7 @@ dependencies {
 	implementation(project, LWJGL)
 	implementation(project, LWJGL_GLFW)
 	implementation(project, LWJGL_OPENGL)
-	implementation(project, LWJGL_STB)
+	implementation(project, SEMVER4J)
 
 	implementation(project(":Framework:Listener"))
 	implementation(project(":Framework:Annotation"))
