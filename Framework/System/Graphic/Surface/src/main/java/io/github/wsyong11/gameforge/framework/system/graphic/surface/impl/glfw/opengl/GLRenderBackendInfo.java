@@ -13,7 +13,6 @@ import org.lwjgl.opengl.GL30;
 import org.semver4j.Semver;
 
 import java.util.Objects;
-import java.util.Set;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -131,12 +130,6 @@ public class GLRenderBackendInfo implements RenderBackendInfo {
 	@Override
 	public String getDevice() {
 		return this.device;
-	}
-
-	@NotNull
-	@Override
-	public Set<RenderCapacityKey<?>> getAllCapacity() {
-		return Set.of();
 	}
 
 	@Nullable

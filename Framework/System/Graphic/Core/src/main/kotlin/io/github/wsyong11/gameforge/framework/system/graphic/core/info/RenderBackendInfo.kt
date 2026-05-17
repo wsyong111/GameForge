@@ -8,8 +8,6 @@ interface RenderBackendInfo {
 	val vendor: String
 	val device: String?
 
-	val allCapacity: Set<RenderCapacityKey<*>>
-
 	fun <T> getCapacity(key: RenderCapacityKey<T>): T?
 
 	fun hasCapacity(key: RenderCapacityKey<*>): Boolean

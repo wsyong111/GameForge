@@ -2,8 +2,6 @@ package io.github.wsyong11.gameforge.util.concurrent;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
-
 public class ThreadMark {
 	private static final ThreadLocal<ThreadMark> MARK = ThreadLocal.withInitial(ThreadMark::new);
 
@@ -26,7 +24,7 @@ public class ThreadMark {
 	public void checkAssert() {
 		Thread current = Thread.currentThread();
 		if (current != this.thread)
-			throw new IllegalThreadStateException("Check fail, Current: " + current + ", Mark: " + this.thread);
+			throw new IllegalStateException("Check fail, Current: " + current + ", Mark: " + this.thread);
 	}
 
 	public boolean check() {
@@ -38,7 +36,7 @@ public class ThreadMark {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		ThreadMark that = (ThreadMark) o;
-		return Objects.equals(this.thread, that.thread);
+		return this.thread == that.thread;
 	}
 
 	@Override
