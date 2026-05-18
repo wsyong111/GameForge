@@ -1,7 +1,8 @@
 package io.github.wsyong11.gameforge.framework.system.graphic.surface.impl.glfw.opengl;
 
-import io.github.wsyong11.gameforge.framework.system.graphic.core.info.RenderBackendInfo;
-import io.github.wsyong11.gameforge.framework.system.graphic.core.info.RenderCapacityKey;
+import io.github.wsyong11.gameforge.framework.system.graphic.core.info.RenderBackedInfo;
+import io.github.wsyong11.gameforge.framework.system.graphic.core.info.RenderDeviceInfo;
+import io.github.wsyong11.gameforge.framework.system.graphic.core.info.RenderFutureKey;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.util.Lazy;
@@ -12,19 +13,21 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 import org.semver4j.Semver;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
-public class GLRenderBackendInfo implements RenderBackendInfo {
+public class GLRenderBackedInfo implements RenderBackedInfo {
 	private static final Logger LOGGER = Log.getLogger();
 
-	private static final Lazy<RenderBackendInfo> INSTANCE = Lazy.of(GLRenderBackendInfo::detect);
+	private static final Lazy<RenderBackedInfo> INSTANCE = Lazy.of(GLRenderBackedInfo::detect);
 
 	@Nullable
-	private static GLRenderBackendInfo detect() {
+	private static GLRenderBackedInfo detect() {
 		if (!glfwInit())
 			return null;
 
@@ -49,7 +52,7 @@ public class GLRenderBackendInfo implements RenderBackendInfo {
 			if (vendor == null || version == null || renderer == null)
 				return null;
 
-			return new GLRenderBackendInfo(vendor, version, renderer);
+			return new GLRenderBackedInfo(vendor, version, renderer);
 		} catch (Throwable e) {
 			LOGGER.debug("Exception when detecting OpenGL info", e);
 			return null;
@@ -90,22 +93,20 @@ public class GLRenderBackendInfo implements RenderBackendInfo {
 	}
 
 	@Nullable
-	public static RenderBackendInfo getInstance() {
+	public static RenderBackedInfo getInstance() {
 		return INSTANCE.get();
 	}
 
 	private final Semver version;
 	private final String vendor;
-	private final String device;
 
-	protected GLRenderBackendInfo(@NotNull String vendor, @NotNull Semver version, @NotNull String device) {
+	protected GLRenderBackedInfo(@NotNull String vendor, @NotNull Semver version, @NotNull String device) {
 		Objects.requireNonNull(vendor, "vendor is null");
 		Objects.requireNonNull(version, "version is null");
 		Objects.requireNonNull(device, "device is null");
 
 		this.vendor = vendor;
 		this.version = version;
-		this.device = device;
 	}
 
 	@NotNull
@@ -126,25 +127,63 @@ public class GLRenderBackendInfo implements RenderBackendInfo {
 		return this.vendor;
 	}
 
-	@NotNull
-	@Override
-	public String getDevice() {
-		return this.device;
-	}
-
-	@Nullable
-	@Override
-	public <T> T getCapacity(@NotNull RenderCapacityKey<T> key) {
-		return null;
-	}
-
-	@Override
-	public boolean hasCapacity(@NotNull RenderCapacityKey<?> key) {
-		return false;
-	}
-
 	@Override
 	public String toString() {
-		return this.vendor + " OpenGL " + this.version + " " + this.device;
+		return this.vendor + " OpenGL " + this.version;
+	}
+
+	@NotNull
+	@Override
+	public List<RenderDeviceInfo> getDevices() {
+		return List.of();
+	}
+
+	private static class GLDeviceInfo implements RenderDeviceInfo {
+		private final String deviceName;
+		private final String vendorName;
+		private final UUID id;
+		private final long vram;
+
+		private GLDeviceInfo(@NotNull String deviceName, @NotNull String vendorName, @NotNull UUID id, long vram) {
+			Objects.requireNonNull(deviceName, "deviceName is null");
+			this.deviceName = deviceName;
+			this.vendorName = vendorName;
+			this.id = id;
+			this.vram = vram;
+		}
+
+		@NotNull
+		@Override
+		public String getDeviceName() {
+			return this.deviceName;
+		}
+
+		@NotNull
+		@Override
+		public String getVendorName() {
+			return this.vendorName;
+		}
+
+		@NotNull
+		@Override
+		public UUID getId() {
+			return this.id;
+		}
+
+		@Override
+		public long getVram() {
+			return this.vram;
+		}
+
+		@Nullable
+		@Override
+		public <T> T getFuture(@NotNull RenderFutureKey<T> key) {
+			return null;
+		}
+
+		@Override
+		public boolean hasFuture(@NotNull RenderFutureKey<?> key) {
+			return false;
+		}
 	}
 }
