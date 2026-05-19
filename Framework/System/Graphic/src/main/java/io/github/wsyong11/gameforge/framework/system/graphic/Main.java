@@ -5,7 +5,9 @@ import io.github.wsyong11.gameforge.framework.system.graphic.surface.window.Wind
 
 public class Main {
 	public static void main(String[] args) {
-		WindowSurfaceManager manager = new GLFWWindowSurfaceManager();
-		System.out.println(manager.getSupportedRenderInfo());
+		try (WindowSurfaceManager manager = new GLFWWindowSurfaceManager()) {
+			manager.init();
+			System.out.println(manager.getSupportedRenderInfo());
+		}
 	}
 }

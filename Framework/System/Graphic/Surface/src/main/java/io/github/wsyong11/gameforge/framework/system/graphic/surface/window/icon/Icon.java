@@ -1,4 +1,4 @@
-package io.github.wsyong11.gameforge.framework.system.graphic.surface.window;
+package io.github.wsyong11.gameforge.framework.system.graphic.surface.window.icon;
 
 import io.github.wsyong11.gameforge.framework.annotation.nio.DirectBuffer;
 import org.jetbrains.annotations.NotNull;
