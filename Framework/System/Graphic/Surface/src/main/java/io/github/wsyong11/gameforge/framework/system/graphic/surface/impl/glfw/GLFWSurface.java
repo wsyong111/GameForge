@@ -63,20 +63,20 @@ public abstract class GLFWSurface implements WindowSurface {
 	}
 
 	private void initCallbacks() {
-		glfwSetWindowSizeCallback(this.handler, this.addCallback(GLFWWindowSizeCallback
-			.create((window, width, height) -> {
-				this.size.set(width, height);
-				this.fireWindowResized();
-			})));
+//		glfwSetWindowSizeCallback(this.handler, this.addCallback(GLFWWindowSizeCallback
+//			.create((window, width, height) -> {
+//				this.size.set(width, height);
+//				this.fireWindowResized();
+//			})));
 
-		glfwSetWindowPosCallback(this.handler, this.addCallback(GLFWWindowPosCallback
-			.create((window, x, y) -> {
-				this.position.set(x, y);
-				this.fireWindowMoved();
-			})));
+//		glfwSetWindowPosCallback(this.handler, this.addCallback(GLFWWindowPosCallback
+//			.create((window, x, y) -> {
+//				this.position.set(x, y);
+//				this.fireWindowMoved();
+//			})));
 
-		glfwSetWindowCloseCallback(this.handler, this.addCallback(GLFWWindowCloseCallback
-			.create((window) -> this.fireWindowClose())));
+//		glfwSetWindowCloseCallback(this.handler, this.addCallback(GLFWWindowCloseCallback
+//			.create((window) -> this.fireWindowClose())));
 
 //		glfwSetKeyCallback(this.handler, this.addCallback(GLFWKeyCallback
 //			.create((window, keyCode, scanCode, action, mods) ->
@@ -224,7 +224,7 @@ public abstract class GLFWSurface implements WindowSurface {
 
 		this.callbacks.clear();
 
-		this.icon = null;
+//		this.icon = null;
 		glfwSetWindowIcon(handler, null);
 
 		glfwDestroyWindow(handler);

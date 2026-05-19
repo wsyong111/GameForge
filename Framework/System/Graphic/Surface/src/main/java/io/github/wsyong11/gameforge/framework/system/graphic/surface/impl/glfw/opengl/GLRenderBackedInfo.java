@@ -8,17 +8,19 @@ import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.util.Lazy;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.*;
 import org.semver4j.Semver;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
 import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.opengl.ATIMeminfo.GL_TEXTURE_FREE_MEMORY_ATI;
+import static org.lwjgl.opengl.ATIMeminfo.GL_VBO_FREE_MEMORY_ATI;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.NVXGPUMemoryInfo.GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class GLRenderBackedInfo implements RenderBackedInfo {
@@ -27,11 +29,52 @@ public class GLRenderBackedInfo implements RenderBackedInfo {
 	private static final Lazy<RenderBackedInfo> INSTANCE = Lazy.of(GLRenderBackedInfo::detect);
 
 	@Nullable
-	private static GLRenderBackedInfo detect() {
-		if (!glfwInit())
+	private static GLRenderBackedInfo collectInfo() {
+		Semver version = getGLVersion();
+		if (version == null)
 			return null;
 
+		String vendor = Objects.requireNonNullElse(glGetString(GL_VENDOR), "Unknown");
+		String renderer = Objects.requireNonNullElse(glGetString(GL_RENDERER), "Unknown");
+
+		UUID deviceId = UUID.nameUUIDFromBytes((vendor + renderer + version + "OPENGL").getBytes(StandardCharsets.UTF_8));
+		long vram = getDeviceVram();
+
+		return new GLRenderBackedInfo(
+			vendor,
+			version,
+			new GLDeviceInfo(renderer, vendor, deviceId, vram)
+		);
+	}
+
+	private static long getDeviceVram() {
+		GLCapabilities capabilities = GL.getCapabilities();
+
+		// NVIDIA
+		if (capabilities.GL_NVX_gpu_memory_info) {
+			int totalKiB = glGetInteger(GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX);
+			return totalKiB * 1024L;
+		}
+
+		// AMD
+		if (capabilities.GL_ATI_meminfo) {
+			int[] vbo = new int[4];
+
+			glGetIntegerv(GL_VBO_FREE_MEMORY_ATI, vbo);
+
+			int totalKiB = vbo[0] + vbo[1];
+			return totalKiB * 1024L;
+		}
+
+		return -1L;
+	}
+
+	@Nullable
+	private static GLRenderBackedInfo detect() {
 		try {
+			if (glfwGetCurrentContext() != NULL)
+				return collectInfo();
+
 			glfwDefaultWindowHints();
 			glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
@@ -43,26 +86,19 @@ public class GLRenderBackedInfo implements RenderBackedInfo {
 			glfwMakeContextCurrent(window);
 			GL.createCapabilities();
 
-			String vendor = glGetString(GL_VENDOR);
-			Semver version = getOpenGLVersion();
-			String renderer = glGetString(GL_RENDERER);
-
-			glfwDestroyWindow(window);
-
-			if (vendor == null || version == null || renderer == null)
-				return null;
-
-			return new GLRenderBackedInfo(vendor, version, renderer);
+			try {
+				return collectInfo();
+			} finally {
+				glfwDestroyWindow(window);
+			}
 		} catch (Throwable e) {
 			LOGGER.debug("Exception when detecting OpenGL info", e);
 			return null;
-		} finally {
-			glfwTerminate();
 		}
 	}
 
 	@Nullable
-	private static Semver getOpenGLVersion() {
+	private static Semver getGLVersion() {
 		try {
 			int major = glGetInteger(GL30.GL_MAJOR_VERSION);
 			int minor = glGetInteger(GL30.GL_MINOR_VERSION);
@@ -99,14 +135,16 @@ public class GLRenderBackedInfo implements RenderBackedInfo {
 
 	private final Semver version;
 	private final String vendor;
+	private final RenderDeviceInfo device;
 
-	protected GLRenderBackedInfo(@NotNull String vendor, @NotNull Semver version, @NotNull String device) {
+	protected GLRenderBackedInfo(@NotNull String vendor, @NotNull Semver version, @NotNull RenderDeviceInfo device) {
 		Objects.requireNonNull(vendor, "vendor is null");
 		Objects.requireNonNull(version, "version is null");
 		Objects.requireNonNull(device, "device is null");
 
 		this.vendor = vendor;
 		this.version = version;
+		this.device = device;
 	}
 
 	@NotNull
@@ -127,15 +165,15 @@ public class GLRenderBackedInfo implements RenderBackedInfo {
 		return this.vendor;
 	}
 
-	@Override
-	public String toString() {
-		return this.vendor + " OpenGL " + this.version;
-	}
-
 	@NotNull
 	@Override
 	public List<RenderDeviceInfo> getDevices() {
-		return List.of();
+		return List.of(this.device);
+	}
+
+	@Override
+	public String toString() {
+		return this.vendor + " OpenGL " + this.version;
 	}
 
 	private static class GLDeviceInfo implements RenderDeviceInfo {

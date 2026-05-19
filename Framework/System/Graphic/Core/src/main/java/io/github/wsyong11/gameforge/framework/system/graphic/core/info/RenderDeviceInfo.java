@@ -16,6 +16,7 @@ public interface RenderDeviceInfo {
 	@NotNull
 	UUID getId();
 
+	// Bytes, -1 unknown
 	long getVram();
 
 	@Nullable

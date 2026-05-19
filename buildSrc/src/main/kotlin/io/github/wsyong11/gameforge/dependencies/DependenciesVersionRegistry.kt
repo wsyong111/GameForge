@@ -72,6 +72,14 @@ infix fun Dependency.type(type: DependencyType) =
 infix fun Dependency.addImpl(dependency: Dependency) =
 	this.copy(additionDependency = this.additionDependency + (ImportType.IMPLEMENTATION to dependency))
 
+infix fun Dependency.addImpl(dependency: Iterable<Dependency>): Dependency {
+	var current = this
+	dependency.forEach {
+		current = current.addImpl(it)
+	}
+	return current
+}
+
 infix fun Dependency.addRuntime(dependency: Dependency) =
 	this.copy(additionDependency = this.additionDependency + (ImportType.RUNTIME_ONLY to dependency))
 
@@ -127,18 +135,23 @@ val JOML = "org.joml" dependsOn "joml" version "1.10.8"
 // LWJGL (BOM + Natives)
 val LWJGL_BOM = "org.lwjgl" dependsOn "lwjgl-bom" version "3.3.6" type DependencyType.BOM
 
-private const val lwjglNatives = "natives-windows"
-val LWJGL_NATIVE          = "org.lwjgl" dependsOn "lwjgl::${lwjglNatives}"          addImpl LWJGL_BOM
-val LWJGL_ASSIMP_NATIVE   = "org.lwjgl" dependsOn "lwjgl-assimp::${lwjglNatives}"   addImpl LWJGL_BOM
-val LWJGL_GLFW_NATIVE     = "org.lwjgl" dependsOn "lwjgl-glfw::${lwjglNatives}"     addImpl LWJGL_BOM
-val LWJGL_HARFBUZZ_NATIVE = "org.lwjgl" dependsOn "lwjgl-harfbuzz::${lwjglNatives}" addImpl LWJGL_BOM
-val LWJGL_MEOW_NATIVE     = "org.lwjgl" dependsOn "lwjgl-meow::${lwjglNatives}"     addImpl LWJGL_BOM
-val LWJGL_NFD_NATIVE      = "org.lwjgl" dependsOn "lwjgl-nfd::${lwjglNatives}"      addImpl LWJGL_BOM
-val LWJGL_OPENAL_NATIVE   = "org.lwjgl" dependsOn "lwjgl-openal::${lwjglNatives}"   addImpl LWJGL_BOM
-val LWJGL_OPENGL_NATIVE   = "org.lwjgl" dependsOn "lwjgl-opengl::${lwjglNatives}"   addImpl LWJGL_BOM
-val LWJGL_STB_NATIVE      = "org.lwjgl" dependsOn "lwjgl-stb::${lwjglNatives}"      addImpl LWJGL_BOM
+private val lwjglNatives = listOf("natives-windows", "natives-linux", "natives-macos")
+private fun generateLwjglNativeDependences(name: String) =
+	lwjglNatives.map {
+		"org.lwjgl" dependsOn "${name}::${it}" addImpl LWJGL_BOM
+	}
 
-val LWJGL          = "org.lwjgl" dependsOn "lwjgl"          addImpl LWJGL_BOM addImpl LWJGL_NATIVE addImpl LWJGL_NATIVE
+val LWJGL_NATIVE          = generateLwjglNativeDependences("lwjgl");
+val LWJGL_ASSIMP_NATIVE   = generateLwjglNativeDependences("lwjgl-assimp");
+val LWJGL_GLFW_NATIVE     = generateLwjglNativeDependences("lwjgl-glfw");
+val LWJGL_HARFBUZZ_NATIVE = generateLwjglNativeDependences("lwjgl-harfbuzz");
+val LWJGL_MEOW_NATIVE     = generateLwjglNativeDependences("lwjgl-meow");
+val LWJGL_NFD_NATIVE      = generateLwjglNativeDependences("lwjgl-nfd");
+val LWJGL_OPENAL_NATIVE   = generateLwjglNativeDependences("lwjgl-openal");
+val LWJGL_OPENGL_NATIVE   = generateLwjglNativeDependences("lwjgl-opengl");
+val LWJGL_STB_NATIVE      = generateLwjglNativeDependences("lwjgl-stb");
+
+val LWJGL          = "org.lwjgl" dependsOn "lwjgl"          addImpl LWJGL_BOM addImpl LWJGL_NATIVE
 val LWJGL_ASSIMP   = "org.lwjgl" dependsOn "lwjgl-assimp"   addImpl LWJGL_BOM addImpl LWJGL_NATIVE addImpl LWJGL_ASSIMP_NATIVE
 val LWJGL_FMOD     = "org.lwjgl" dependsOn "lwjgl-fmod"     addImpl LWJGL_BOM addImpl LWJGL_NATIVE
 val LWJGL_GLFW     = "org.lwjgl" dependsOn "lwjgl-glfw"     addImpl LWJGL_BOM addImpl LWJGL_NATIVE addImpl LWJGL_GLFW_NATIVE
