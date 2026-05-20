@@ -7,4 +7,6 @@ plugins {
 
 dependencies {
 	implementation(project, SEMVER4J)
+
+	implementation(project(":Framework:Common"))
 }

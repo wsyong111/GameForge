@@ -1,5 +1,6 @@
 package io.github.wsyong11.gameforge.framework.system.graphic.core.info;
 
+import io.github.wsyong11.gameforge.framework.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.semver4j.Semver;
@@ -8,7 +9,7 @@ import java.util.List;
 
 public interface RenderBackedInfo {
 	@NotNull
-	String getDriver();
+	Identifier getDriver();
 
 	@NotNull
 	Semver getVersion();

@@ -10,7 +10,7 @@ import java.util.List;
 public interface SurfaceFactory {
 	@NotNull
 	@ThreadSensitive
-	Surface create() throws SurfaceException;
+	Surface create(@NotNull SurfaceConfig config) throws SurfaceException;
 
 	@NotNull
 	List<RenderBackedInfo> getSupportedRenderInfo();

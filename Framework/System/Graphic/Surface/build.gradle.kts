@@ -10,6 +10,7 @@ dependencies {
 	implementation(project, LWJGL_GLFW)
 	implementation(project, LWJGL_OPENGL)
 	implementation(project, SEMVER4J)
+	implementation(project, JNA)
 
 	implementation(project(":Framework:Listener"))
 	implementation(project(":Framework:Annotation"))

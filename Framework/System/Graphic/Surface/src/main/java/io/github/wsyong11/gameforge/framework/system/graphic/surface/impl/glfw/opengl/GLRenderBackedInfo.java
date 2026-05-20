@@ -1,5 +1,6 @@
 package io.github.wsyong11.gameforge.framework.system.graphic.surface.impl.glfw.opengl;
 
+import io.github.wsyong11.gameforge.framework.Identifier;
 import io.github.wsyong11.gameforge.framework.system.graphic.core.info.RenderBackedInfo;
 import io.github.wsyong11.gameforge.framework.system.graphic.core.info.RenderDeviceInfo;
 import io.github.wsyong11.gameforge.framework.system.graphic.core.info.RenderFutureKey;
@@ -8,7 +9,10 @@ import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.util.Lazy;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.opengl.*;
+import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GLCapabilities;
 import org.semver4j.Semver;
 
 import java.nio.charset.StandardCharsets;
@@ -17,7 +21,6 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.ATIMeminfo.GL_TEXTURE_FREE_MEMORY_ATI;
 import static org.lwjgl.opengl.ATIMeminfo.GL_VBO_FREE_MEMORY_ATI;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.NVXGPUMemoryInfo.GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX;
@@ -27,6 +30,7 @@ public class GLRenderBackedInfo implements RenderBackedInfo {
 	private static final Logger LOGGER = Log.getLogger();
 
 	private static final Lazy<RenderBackedInfo> INSTANCE = Lazy.of(GLRenderBackedInfo::detect);
+	private static final Identifier DRIVER_ID = Identifier.withDefaultNamespace("opengl");
 
 	@Nullable
 	private static GLRenderBackedInfo collectInfo() {
@@ -149,8 +153,8 @@ public class GLRenderBackedInfo implements RenderBackedInfo {
 
 	@NotNull
 	@Override
-	public String getDriver() {
-		return "OpenGL";
+	public Identifier getDriver() {
+		return DRIVER_ID;
 	}
 
 	@NotNull
