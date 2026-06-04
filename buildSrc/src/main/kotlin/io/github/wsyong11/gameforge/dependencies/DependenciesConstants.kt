@@ -39,21 +39,36 @@ val JOML = "org.joml" dependsOn "joml" version "1.10.8"
 // LWJGL (BOM + Natives)
 val LWJGL_BOM = "org.lwjgl" dependsOn "lwjgl-bom" version "3.3.6" type DependencyType.BOM
 
-private val lwjglNatives = listOf("natives-windows", "natives-linux", "natives-macos")
-private fun generateLwjglNativeDependences(name: String) =
-	lwjglNatives.map {
-		"org.lwjgl" dependsOn "${name}::${it}" addImpl LWJGL_BOM
-	}
+//@formatter:on
+private val lwjglNatives = arrayOf(
+	"linux-arm64",
+	"linux-arm32",
+//	"linux-ppc64le",
+//	"linux-riscv64",
+	"linux",
+	"macos",
+	"macos-arm64",
+	"windows",
+	"windows-arm64",
+	"windows-x86"
+)
 
-val LWJGL_NATIVE          = generateLwjglNativeDependences("lwjgl");
-val LWJGL_ASSIMP_NATIVE   = generateLwjglNativeDependences("lwjgl-assimp");
-val LWJGL_GLFW_NATIVE     = generateLwjglNativeDependences("lwjgl-glfw");
-val LWJGL_HARFBUZZ_NATIVE = generateLwjglNativeDependences("lwjgl-harfbuzz");
-val LWJGL_MEOW_NATIVE     = generateLwjglNativeDependences("lwjgl-meow");
-val LWJGL_NFD_NATIVE      = generateLwjglNativeDependences("lwjgl-nfd");
-val LWJGL_OPENAL_NATIVE   = generateLwjglNativeDependences("lwjgl-openal");
-val LWJGL_OPENGL_NATIVE   = generateLwjglNativeDependences("lwjgl-opengl");
-val LWJGL_STB_NATIVE      = generateLwjglNativeDependences("lwjgl-stb");
+private fun generateLwjglNativeDependencies(name: String) =
+	lwjglNatives.map {
+		"org.lwjgl" dependsOn "${name}::natives-${it}" addImpl LWJGL_BOM
+	}
+//@formatter:off
+
+val LWJGL_NATIVE          = generateLwjglNativeDependencies("lwjgl")
+val LWJGL_ASSIMP_NATIVE   = generateLwjglNativeDependencies("lwjgl-assimp")
+val LWJGL_GLFW_NATIVE     = generateLwjglNativeDependencies("lwjgl-glfw")
+val LWJGL_HARFBUZZ_NATIVE = generateLwjglNativeDependencies("lwjgl-harfbuzz")
+val LWJGL_MEOW_NATIVE     = generateLwjglNativeDependencies("lwjgl-meow")
+val LWJGL_NFD_NATIVE      = generateLwjglNativeDependencies("lwjgl-nfd")
+val LWJGL_OPENAL_NATIVE   = generateLwjglNativeDependencies("lwjgl-openal")
+val LWJGL_OPENGL_NATIVE   = generateLwjglNativeDependencies("lwjgl-opengl")
+val LWJGL_STB_NATIVE      = generateLwjglNativeDependencies("lwjgl-stb")
+//val LWJGL_VULKAN_NATIVE   = generateLwjglNativeDependencies("lwjgl-vulkan")
 
 val LWJGL          = "org.lwjgl" dependsOn "lwjgl"          addImpl LWJGL_BOM addImpl LWJGL_NATIVE
 val LWJGL_ASSIMP   = "org.lwjgl" dependsOn "lwjgl-assimp"   addImpl LWJGL_BOM addImpl LWJGL_NATIVE addImpl LWJGL_ASSIMP_NATIVE
@@ -65,6 +80,7 @@ val LWJGL_NFD      = "org.lwjgl" dependsOn "lwjgl-nfd"      addImpl LWJGL_BOM ad
 val LWJGL_OPENAL   = "org.lwjgl" dependsOn "lwjgl-openal"   addImpl LWJGL_BOM addImpl LWJGL_NATIVE addImpl LWJGL_OPENAL_NATIVE
 val LWJGL_OPENGL   = "org.lwjgl" dependsOn "lwjgl-opengl"   addImpl LWJGL_BOM addImpl LWJGL_NATIVE addImpl LWJGL_OPENGL_NATIVE
 val LWJGL_STB      = "org.lwjgl" dependsOn "lwjgl-stb"      addImpl LWJGL_BOM addImpl LWJGL_NATIVE addImpl LWJGL_STB_NATIVE
+val LWJGL_VULKAN   = "org.lwjgl" dependsOn "lwjgl-vulkan"   addImpl LWJGL_BOM addImpl LWJGL_NATIVE
 
 
 // Serialization / JSON / Config

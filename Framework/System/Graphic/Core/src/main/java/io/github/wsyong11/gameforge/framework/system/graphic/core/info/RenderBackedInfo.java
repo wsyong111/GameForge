@@ -9,7 +9,10 @@ import java.util.List;
 
 public interface RenderBackedInfo {
 	@NotNull
-	Identifier getDriver();
+	Identifier getId();
+
+	@NotNull
+	String getDriverName();
 
 	@NotNull
 	Semver getVersion();

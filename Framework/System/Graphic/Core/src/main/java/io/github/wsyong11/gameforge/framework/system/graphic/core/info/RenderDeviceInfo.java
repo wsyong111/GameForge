@@ -19,6 +19,9 @@ public interface RenderDeviceInfo {
 	// Bytes, -1 unknown
 	long getVram();
 
+	@NotNull
+	RenderBackedInfo getBacked();
+
 	@Nullable
 	<T> T getFuture(@NotNull RenderFutureKey<T> key);
 
