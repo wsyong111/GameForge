@@ -1,12 +1,12 @@
 package io.github.wsyong11.gameforge.framework.system.graphic.vulkan.ex;
 
-import io.github.wsyong11.render.vulkan.ex.fatal.VulkanDeviceLostException;
-import io.github.wsyong11.render.vulkan.ex.memory.VulkanDeviceOutOfMemoryException;
-import io.github.wsyong11.render.vulkan.ex.memory.VulkanHostOutOfMemoryException;
-import io.github.wsyong11.render.vulkan.ex.recoverable.VulkanExtensionNotPresentException;
-import io.github.wsyong11.render.vulkan.ex.recoverable.VulkanFeatureNotPresentException;
-import io.github.wsyong11.render.vulkan.ex.recoverable.VulkanLayerNotPresentException;
-import io.github.wsyong11.render.vulkan.ex.recoverable.VulkanSwapchainException;
+import io.github.wsyong11.gameforge.framework.system.graphic.vulkan.ex.fatal.VulkanDeviceLostException;
+import io.github.wsyong11.gameforge.framework.system.graphic.vulkan.ex.memory.VulkanDeviceOutOfMemoryException;
+import io.github.wsyong11.gameforge.framework.system.graphic.vulkan.ex.memory.VulkanHostOutOfMemoryException;
+import io.github.wsyong11.gameforge.framework.system.graphic.vulkan.ex.recoverable.VulkanExtensionNotPresentException;
+import io.github.wsyong11.gameforge.framework.system.graphic.vulkan.ex.recoverable.VulkanFeatureNotPresentException;
+import io.github.wsyong11.gameforge.framework.system.graphic.vulkan.ex.recoverable.VulkanLayerNotPresentException;
+import io.github.wsyong11.gameforge.framework.system.graphic.vulkan.ex.recoverable.VulkanSwapchainException;
 
 import static org.lwjgl.vulkan.KHRSwapchain.VK_ERROR_OUT_OF_DATE_KHR;
 import static org.lwjgl.vulkan.VK10.*;

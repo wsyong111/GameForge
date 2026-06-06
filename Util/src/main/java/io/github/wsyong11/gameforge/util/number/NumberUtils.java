@@ -1,4 +1,4 @@
-package io.github.wsyong11.gameforge.util;
+package io.github.wsyong11.gameforge.util.number;
 
 import lombok.experimental.UtilityClass;
 import org.jetbrains.annotations.NotNull;

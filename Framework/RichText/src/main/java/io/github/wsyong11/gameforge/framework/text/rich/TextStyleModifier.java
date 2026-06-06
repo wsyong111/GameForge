@@ -1,6 +1,6 @@
 package io.github.wsyong11.gameforge.framework.text.rich;
 
-import io.github.wsyong11.gameforge.util.Bit;
+import io.github.wsyong11.gameforge.util.number.Bit;
 import lombok.experimental.UtilityClass;
 import org.intellij.lang.annotations.MagicConstant;
 

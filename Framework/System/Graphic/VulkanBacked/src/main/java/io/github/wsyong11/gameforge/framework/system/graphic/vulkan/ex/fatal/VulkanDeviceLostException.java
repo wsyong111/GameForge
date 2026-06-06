@@ -1,6 +1,6 @@
 package io.github.wsyong11.gameforge.framework.system.graphic.vulkan.ex.fatal;
 
-import io.github.wsyong11.render.vulkan.ex.VulkanFatalException;
+import io.github.wsyong11.gameforge.framework.system.graphic.vulkan.ex.VulkanFatalException;
 import org.jetbrains.annotations.NotNull;
 
 import static org.lwjgl.vulkan.VK10.VK_ERROR_DEVICE_LOST;

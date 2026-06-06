@@ -1,6 +1,7 @@
 package io.github.wsyong11.gameforge.framework.system.graphic.vulkan.ex;
 
 import com.google.common.collect.ImmutableMap;
+import io.github.wsyong11.gameforge.util.number.Hex;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
@@ -175,7 +176,7 @@ public class VkResultUtil {
 	public static String toString(int result) {
 		String name = NAMES.get(result);
 		if (name == null)
-			return "0x" + Integer.toHexString(result).toUpperCase(Locale.ROOT);
+			return Hex.toHex(result, 8);
 
 		return name;
 	}

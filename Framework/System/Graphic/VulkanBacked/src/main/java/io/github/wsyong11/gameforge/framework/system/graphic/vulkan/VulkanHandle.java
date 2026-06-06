@@ -1,6 +1,5 @@
 package io.github.wsyong11.gameforge.framework.system.graphic.vulkan;
 
-import io.github.wsyong11.render.NativeInstance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.vulkan.VkAllocationCallbacks;
@@ -11,7 +10,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.lwjgl.system.MemoryUtil.NULL;
 
-public abstract class VulkanHandle<T> implements NativeInstance<T> {
+public abstract class VulkanHandle<T> {
 	private final AtomicReference<T> instance;
 	@Nullable
 	private final VkAllocationCallbacks allocator;
@@ -85,12 +84,10 @@ public abstract class VulkanHandle<T> implements NativeInstance<T> {
 	}
 
 	@Nullable
-	@Override
 	public T getNative() {
 		return this.instance.get();
 	}
 
-	@Override
 	public long getHandle() {
 		T instance = this.instance.get();
 		return instance == null ? NULL : this.getHandleImpl(instance);

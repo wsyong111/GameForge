@@ -1,6 +1,6 @@
 package io.github.wsyong11.gameforge.framework.system.log.templete;
 
-import io.github.wsyong11.gameforge.util.NumberUtils;
+import io.github.wsyong11.gameforge.util.number.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

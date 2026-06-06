@@ -1,11 +1,20 @@
 package io.github.wsyong11.gameforge.framework.system.graphic;
 
+import io.github.wsyong11.gameforge.framework.system.graphic.vulkan.PhysicalDevice;
 import io.github.wsyong11.gameforge.framework.system.graphic.vulkan.Vulkan;
 
 public class Main {
 	public static void main(String[] args) {
-		Vulkan vulkan = Vulkan
+		try (Vulkan vulkan = Vulkan
 			.builder()
-			.build();
+			.applicationName("Testing")
+			.validation()
+			.debugUtils()
+			.build()
+		) {
+			for (PhysicalDevice device : vulkan.getPhysicalDevices()) {
+				System.out.println(device.getProperties());
+			}
+		}
 	}
 }

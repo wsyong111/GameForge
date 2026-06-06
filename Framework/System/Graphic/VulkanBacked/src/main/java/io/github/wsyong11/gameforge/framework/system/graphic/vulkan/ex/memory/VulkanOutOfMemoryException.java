@@ -1,6 +1,6 @@
 package io.github.wsyong11.gameforge.framework.system.graphic.vulkan.ex.memory;
 
-import io.github.wsyong11.render.vulkan.ex.VulkanException;
+import io.github.wsyong11.gameforge.framework.system.graphic.vulkan.ex.VulkanException;
 import org.jetbrains.annotations.NotNull;
 
 public class VulkanOutOfMemoryException extends VulkanException {
