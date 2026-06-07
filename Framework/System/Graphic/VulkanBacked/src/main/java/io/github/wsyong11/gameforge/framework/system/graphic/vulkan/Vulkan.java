@@ -1,8 +1,13 @@
 package io.github.wsyong11.gameforge.framework.system.graphic.vulkan;
 
 import io.github.wsyong11.gameforge.framework.listener.ListenerList;
+import io.github.wsyong11.gameforge.framework.system.graphic.vulkan.debug.DebugMessageSeverity;
+import io.github.wsyong11.gameforge.framework.system.graphic.vulkan.debug.DebugMessageType;
 import io.github.wsyong11.gameforge.framework.system.graphic.vulkan.listener.VulkanErrorListener;
+import io.github.wsyong11.gameforge.framework.system.log.Log;
+import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.util.Lazy;
+import io.github.wsyong11.gameforge.util.enumerate.BitEnums;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -22,27 +27,43 @@ import static org.lwjgl.vulkan.VK10.*;
 import static org.lwjgl.vulkan.VK13.VK_API_VERSION_1_3;
 
 public class Vulkan extends VulkanObject<VkInstance> {
-	private static final io.github.wsyong11.gameforge.framework.system.log.Logger LOGGER = io.github.wsyong11.gameforge.framework.system.log.Log.getLogger();
+	private static final Logger LOGGER = Log.getLogger();
 
 	@NotNull
 	public static Vulkan.Builder builder() {
 		return new Builder();
 	}
 
+	@Nullable
+	private final DebugUtilsCallback debugUtilsCallback;
+
 	private final Lazy<List<PhysicalDevice>> physicalDevices;
 
 	private final ListenerList listenerList;
 
-	protected Vulkan(@NotNull VkInstance instance, @Nullable VkAllocationCallbacks allocator) {
+	protected Vulkan(@NotNull VkInstance instance, @Nullable VkAllocationCallbacks allocator, @Nullable DebugUtilsCallback debugUtilsCallback) {
 		super(
 			instance,
 			allocator,
 			null
 		);
 
+		this.debugUtilsCallback = debugUtilsCallback;
+
 		this.physicalDevices = Lazy.of(this::enumPhysicalDevices);
 
 		this.listenerList = ListenerList.sync();
+
+		if (debugUtilsCallback != null)
+			debugUtilsCallback.setCallback(this::onDebugUtilsCallbackInvoke);
+	}
+
+	private boolean onDebugUtilsCallbackInvoke(@NotNull DebugMessageSeverity severity, @NotNull DebugMessageType type, @NotNull VkDebugUtilsMessengerCallbackDataEXT data) {
+		Objects.requireNonNull(severity, "severity is null");
+		Objects.requireNonNull(type, "type is null");
+		Objects.requireNonNull(data, "data is null");
+
+		return false;
 	}
 
 	@NotNull
@@ -84,12 +105,58 @@ public class Vulkan extends VulkanObject<VkInstance> {
 	@Override
 	protected void freeImpl(@NotNull VkInstance instance, @Nullable VkAllocationCallbacks allocator) {
 		vkDestroyInstance(instance, allocator);
+		if (this.debugUtilsCallback != null)
+			this.debugUtilsCallback.free();
 	}
 
 	@Override
 	protected long getHandleImpl(@NotNull VkInstance instance) {
 		return instance.address();
 	}
+
+	protected static class DebugUtilsCallback extends VkDebugUtilsMessengerCallbackEXT {
+		private Callback callback;
+
+		public DebugUtilsCallback() {
+			this.callback = null;
+		}
+
+		@Nullable
+		public Callback getCallback() {
+			return this.callback;
+		}
+
+		public void setCallback(Callback callback) {
+			this.callback = callback;
+		}
+
+		@Override
+		public int invoke(int messageSeverity, int messageTypes, long pCallbackData, long pUserData) {
+			if (this.callback == null)
+				return VK_FALSE;
+
+			VkDebugUtilsMessengerCallbackDataEXT callbackData = VkDebugUtilsMessengerCallbackDataEXT.create(pCallbackData);
+			DebugMessageSeverity severity = BitEnums.fromBitFirst(DebugMessageSeverity.class, messageSeverity);
+			DebugMessageType type = BitEnums.fromBitFirst(DebugMessageType.class, messageTypes);
+
+			assert severity != null : "severity is null";
+			assert type != null : "type is null";
+
+			boolean result = this.callback.onInvoke(
+				severity,
+				type,
+				callbackData
+			);
+
+			return result ? VK_TRUE : VK_FALSE;
+		}
+
+		@FunctionalInterface
+		public interface Callback {
+			boolean onInvoke(@NotNull DebugMessageSeverity severity, @NotNull DebugMessageType type, @NotNull VkDebugUtilsMessengerCallbackDataEXT data);
+		}
+	}
+
 
 	public static class Builder {
 		private String applicationName = "Application";
@@ -102,6 +169,14 @@ public class Vulkan extends VulkanObject<VkInstance> {
 
 		private boolean validation = false;
 		private boolean debugUtils = false;
+		private final Set<DebugMessageSeverity> debugMessageSeverities = EnumSet.of(
+			DebugMessageSeverity.WARNING,
+			DebugMessageSeverity.ERROR
+		);
+		private final Set<DebugMessageType> debugMessageTypes = EnumSet.of(
+			DebugMessageType.GENERAL,
+			DebugMessageType.VALIDATION
+		);
 
 		private int flags = 0;
 
@@ -162,6 +237,22 @@ public class Vulkan extends VulkanObject<VkInstance> {
 		@NotNull
 		public Builder debugUtils() {
 			return this.debugUtils(true);
+		}
+
+		@NotNull
+		public Builder debugMessageSeverities(@NotNull Collection<DebugMessageSeverity> severities) {
+			Objects.requireNonNull(severities, "severities is null");
+			this.debugMessageSeverities.clear();
+			this.debugMessageSeverities.addAll(severities);
+			return this;
+		}
+
+		@NotNull
+		public Builder debugMessageTypes(@NotNull Collection<DebugMessageType> types) {
+			Objects.requireNonNull(types, "types is null");
+			this.debugMessageTypes.clear();
+			this.debugMessageTypes.addAll(types);
+			return this;
 		}
 
 		@NotNull
@@ -234,14 +325,24 @@ public class Vulkan extends VulkanObject<VkInstance> {
 
 		@NotNull
 		public Vulkan build() {
-			try (MemoryStack stack = MemoryStack.stackPush()) {
-				Set<String> layers = new LinkedHashSet<>(this.enabledLayers);
-				if (this.validation)
-					layers.add("VK_LAYER_KHRONOS_validation");
+			Set<String> layers = new LinkedHashSet<>(this.enabledLayers);
+			if (this.validation)
+				layers.add("VK_LAYER_KHRONOS_validation");
 
-				Set<String> extensions = new LinkedHashSet<>(this.enabledExtensions);
-				if (this.debugUtils)
-					extensions.add("VK_EXT_debug_utils");
+			Set<String> extensions = new LinkedHashSet<>(this.enabledExtensions);
+			if (this.debugUtils)
+				extensions.add("VK_EXT_debug_utils");
+
+			try (MemoryStack stack = MemoryStack.stackPush()) {
+				PointerBuffer ppLayers = stack.mallocPointer(layers.size());
+				for (String layer : layers)
+					ppLayers.put(stack.UTF8(layer));
+				ppLayers.flip();
+
+				PointerBuffer ppExtensions = stack.mallocPointer(extensions.size());
+				for (String extension : extensions)
+					ppExtensions.put(stack.UTF8(extension));
+				ppExtensions.flip();
 
 				VkApplicationInfo appInfo = VkApplicationInfo
 					.calloc(stack)
@@ -256,26 +357,33 @@ public class Vulkan extends VulkanObject<VkInstance> {
 				VkInstanceCreateInfo info = VkInstanceCreateInfo
 					.calloc(stack)
 					.sType(VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO)
-					.pApplicationInfo(appInfo)
 					.flags(this.flags)
+					.ppEnabledExtensionNames(ppExtensions)
+					.ppEnabledLayerNames(ppLayers)
+					.pApplicationInfo(appInfo)
 					.pNext(NULL);
 
+				DebugUtilsCallback debugUtilsCallback;
 				if (this.debugUtils) {
+					debugUtilsCallback = new DebugUtilsCallback();
+
 					VkDebugUtilsMessengerCreateInfoEXT debugInfo = VkDebugUtilsMessengerCreateInfoEXT
 						.calloc(stack)
 						.sType(VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT)
-						.messageSeverity(
-							0
-						)
-						.messageType(0)
-						.pfnUserCallback((messageSeverity, messageTypes, pCallbackData, pUserData) -> 0);
+						.messageSeverity(BitEnums.toBit(this.debugMessageSeverities))
+						.messageType(BitEnums.toBit(this.debugMessageTypes))
+						.pfnUserCallback(debugUtilsCallback);
+
+					info.pNext(debugInfo);
+				} else {
+					debugUtilsCallback = null;
 				}
 
 				PointerBuffer pInstance = stack.mallocPointer(1);
 				checkVkResult(vkCreateInstance(info, this.allocator, pInstance));
 
 				VkInstance instance = new VkInstance(pInstance.get(0), info);
-				return new Vulkan(instance, this.allocator);
+				return new Vulkan(instance, this.allocator, debugUtilsCallback);
 			}
 		}
 	}
