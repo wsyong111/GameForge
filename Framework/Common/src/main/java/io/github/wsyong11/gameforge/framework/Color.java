@@ -1,14 +1,14 @@
 package io.github.wsyong11.gameforge.framework;
 
+import io.github.wsyong11.gameforge.util.number.Maths;
 import org.jetbrains.annotations.NotNull;
-import org.joml.Vector3f;
-import org.joml.Vector3i;
-import org.joml.Vector4f;
-import org.joml.Vector4i;
+import org.joml.*;
 
+import java.lang.Math;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.IntUnaryOperator;
 
 /**
  * 表示一个不可变的颜色对象，使用默认的 {@code ARGB} 格式存储。
@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * <h3>示例</h3>
  * <pre>{@code
  * Color red = Color.RED;
- * Color custom = Color.ofArgb(128, 255, 200, 100); // 半透明颜色
+ * Color custom = Color.of(128, 255, 200, 100); // 半透明颜色
  * int argb = custom.toArgb(); // 获取 ARGB 整数值
  * Vector4f vec = custom.toNormalizeRgba(); // 转换为归一化的 RGBA 向量 (0.0~1.0)
  * }</pre>
@@ -35,6 +35,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class Color {
 	// Default ARGB
 	// Transparent Alpha = 0
+
+	private static final float INV_255 = 1.0f / 255.0f;
+	private static final int ALPHA_SHIFT = 24;
+	private static final int RED_SHIFT = 16;
+	private static final int GREEN_SHIFT = 8;
+	private static final int BLUE_SHIFT = 0;
 
 	private static final Map<Integer, Color> caches = new ConcurrentHashMap<>();
 
@@ -63,6 +69,13 @@ public final class Color {
 	public static final Color TRANSPARENT = new Color(0x00000000).intern();
 
 	// -------------------------------------------------------------------------------------------------------------- //
+
+	@NotNull
+	private static Color create(int argb) {
+		return caches.computeIfAbsent(argb, Color::new);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
 	// ARGB
 
 	/**
@@ -74,11 +87,7 @@ public final class Color {
 	 */
 	@NotNull
 	public static Color ofArgb(int argb) {
-		Color cachedColor = caches.get(argb);
-		if (cachedColor != null)
-			return cachedColor;
-
-		return new Color(argb);
+		return create(argb);
 	}
 
 	/**
@@ -91,16 +100,35 @@ public final class Color {
 	 * @return 对应的 {@link Color} 实例
 	 */
 	@NotNull
-	public static Color ofArgb(int alpha, int red, int green, int blue) {
+	public static Color of(int alpha, int red, int green, int blue) {
 		return ofArgb(toArgb(alpha, red, green, blue));
+	}
+
+	/**
+	 * 根据分量值创建 ARGB 颜色。
+	 *
+	 * @param alpha 透明度，范围 {@code 0.0~1.0}
+	 * @param red   红色分量，范围 {@code 0.0~1.0}
+	 * @param green 绿色分量，范围 {@code 0.0~1.0}
+	 * @param blue  蓝色分量，范围 {@code 0.0~1.0}
+	 * @return 对应的 {@link Color} 实例
+	 */
+	@NotNull
+	public static Color of(float alpha, float red, float green, float blue) {
+		return ofArgb(toArgb(
+			(int) (alpha / INV_255),
+			(int) (red / INV_255),
+			(int) (green / INV_255),
+			(int) (blue / INV_255)
+		));
 	}
 
 	public static int toArgb(int alpha, int red, int green, int blue) {
 		//@formatter:off
-		return ((alpha & 0xFF) << 24)
-			 | ((red   & 0xFF) << 16)
-			 | ((green & 0xFF) << 8 )
-			 | ((blue  & 0xFF)      );
+		return ((alpha & 0xFF) << ALPHA_SHIFT)
+			 | ((red   & 0xFF) << RED_SHIFT  )
+			 | ((green & 0xFF) << GREEN_SHIFT)
+			 | ((blue  & 0xFF) << BLUE_SHIFT );
 		//@formatter:on
 	}
 
@@ -123,8 +151,50 @@ public final class Color {
 	}
 
 	@NotNull
-	public static Color ofRgb(int red, int green, int blue) {
+	public static Color of(int red, int green, int blue) {
 		return ofArgb(toArgb(red, green, blue));
+	}
+
+	@NotNull
+	public static Color of(float red, float green, float blue) {
+		return ofArgb(toArgb(
+			(int) (red / INV_255),
+			(int) (green / INV_255),
+			(int) (blue / INV_255)
+		));
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+	// Vector
+
+	@NotNull
+	public static Color ofArgb(@NotNull Vector4ic vec) {
+		return of(vec.x(), vec.y(), vec.z(), vec.w());
+	}
+
+	@NotNull
+	public static Color ofArgb(@NotNull Vector4fc vec) {
+		return of(vec.x(), vec.y(), vec.z(), vec.w());
+	}
+
+	@NotNull
+	public static Color ofRgba(@NotNull Vector4ic vec) {
+		return of(vec.w(), vec.x(), vec.y(), vec.z());
+	}
+
+	@NotNull
+	public static Color ofRgba(@NotNull Vector4fc vec) {
+		return of(vec.w(), vec.x(), vec.y(), vec.z());
+	}
+
+	@NotNull
+	public static Color ofRgb(@NotNull Vector3ic vec) {
+		return of(vec.x(), vec.y(), vec.z());
+	}
+
+	@NotNull
+	public static Color ofRgb(@NotNull Vector3fc vec) {
+		return of(vec.x(), vec.y(), vec.z());
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
@@ -135,7 +205,7 @@ public final class Color {
 	 * @return Alpha 分量（0~255）
 	 */
 	public static int getAlpha(int argb) {
-		return (argb >> 24) & 0xFF;
+		return (argb >> ALPHA_SHIFT) & 0xFF;
 	}
 
 	/**
@@ -144,7 +214,7 @@ public final class Color {
 	 * @return Red 分量（0~255）
 	 */
 	public static int getRed(int argb) {
-		return (argb >> 16) & 0xFF;
+		return (argb >> RED_SHIFT) & 0xFF;
 	}
 
 	/**
@@ -153,7 +223,7 @@ public final class Color {
 	 * @return Green 分量（0~255）
 	 */
 	public static int getGreen(int argb) {
-		return (argb >> 8) & 0xFF;
+		return (argb >> GREEN_SHIFT) & 0xFF;
 	}
 
 	/**
@@ -162,7 +232,7 @@ public final class Color {
 	 * @return Blue 分量（0~255）
 	 */
 	public static int getBlue(int argb) {
-		return argb & 0xFF;
+		return (argb >> BLUE_SHIFT) & 0xFF;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
@@ -187,16 +257,60 @@ public final class Color {
 		return getAlpha(this.color);
 	}
 
+	@NotNull
+	public Color withAlpha(int a) {
+		return create(toArgb(a, this.getRed(), this.getGreen(), this.getBlue()));
+	}
+
+	@NotNull
+	public Color transformAlpha(@NotNull IntUnaryOperator operator) {
+		Objects.requireNonNull(operator, "operator is null");
+		return this.withAlpha(operator.applyAsInt(this.getAlpha()));
+	}
+
 	public int getRed() {
 		return getRed(this.color);
+	}
+
+	@NotNull
+	public Color withRed(int r) {
+		return create(toArgb(this.getAlpha(), r, this.getGreen(), this.getBlue()));
+	}
+
+	@NotNull
+	public Color transformRed(@NotNull IntUnaryOperator operator) {
+		Objects.requireNonNull(operator, "operator is null");
+		return this.withRed(operator.applyAsInt(this.getRed()));
 	}
 
 	public int getGreen() {
 		return getGreen(this.color);
 	}
 
+	@NotNull
+	public Color withGreen(int g) {
+		return create(toArgb(this.getAlpha(), this.getRed(), g, this.getBlue()));
+	}
+
+	@NotNull
+	public Color transformGreen(@NotNull IntUnaryOperator operator) {
+		Objects.requireNonNull(operator, "operator is null");
+		return this.withGreen(operator.applyAsInt(this.getGreen()));
+	}
+
 	public int getBlue() {
 		return getBlue(this.color);
+	}
+
+	@NotNull
+	public Color withBlue(int b) {
+		return create(toArgb(this.getAlpha(), this.getRed(), this.getGreen(), b));
+	}
+
+	@NotNull
+	public Color transformBlue(@NotNull IntUnaryOperator operator) {
+		Objects.requireNonNull(operator, "operator is null");
+		return this.withBlue(operator.applyAsInt(this.getBlue()));
 	}
 
 	/**
@@ -206,6 +320,32 @@ public final class Color {
 	 */
 	public int toArgb() {
 		return this.color;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+
+	@NotNull
+	public Color blend(@NotNull Color other, float t) {
+		Objects.requireNonNull(other, "other is null");
+
+		float clampedT = Maths.clamp(0.0F, t, 1.0F);
+
+		int a1 = this.getAlpha();
+		int r1 = this.getRed();
+		int g1 = this.getGreen();
+		int b1 = this.getBlue();
+
+		int a2 = other.getAlpha();
+		int r2 = other.getRed();
+		int g2 = other.getGreen();
+		int b2 = other.getBlue();
+
+		int a = Math.round(Maths.lerp((float) a1, (float) a2, clampedT));
+		int r = Math.round(Maths.lerp((float) r1, (float) r2, clampedT));
+		int g = Math.round(Maths.lerp((float) g1, (float) g2, clampedT));
+		int b = Math.round(Maths.lerp((float) b1, (float) b2, clampedT));
+
+		return of(a, r, g, b);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
@@ -231,7 +371,11 @@ public final class Color {
 	@NotNull
 	public Vector3f toNormalizeRgb(@NotNull Vector3f value) {
 		Objects.requireNonNull(value, "value is null");
-		value.set(this.getRed() / 255.0F, this.getGreen() / 255.0F, this.getBlue() / 255.0F);
+		value.set(
+			this.getRed() * INV_255,
+			this.getGreen() * INV_255,
+			this.getBlue() * INV_255
+		);
 		return value;
 	}
 
@@ -258,7 +402,12 @@ public final class Color {
 	@NotNull
 	public Vector4f toNormalizeRgba(@NotNull Vector4f value) {
 		Objects.requireNonNull(value, "value is null");
-		value.set(this.getRed() / 255.0F, this.getGreen() / 255.0F, this.getBlue() / 255.0F, this.getAlpha() / 255.0F);
+		value.set(
+			this.getRed() * INV_255,
+			this.getGreen() * INV_255,
+			this.getBlue() * INV_255,
+			this.getAlpha() * INV_255
+		);
 		return value;
 	}
 
@@ -285,9 +434,52 @@ public final class Color {
 	@NotNull
 	public Vector4f toNormalizeArgb(@NotNull Vector4f value) {
 		Objects.requireNonNull(value, "value is null");
-		value.set(this.getAlpha() / 255.0F, this.getRed() / 255.0F, this.getGreen() / 255.0F, this.getBlue() / 255.0F);
+		value.set(
+			this.getAlpha() * INV_255,
+			this.getRed() * INV_255,
+			this.getGreen() * INV_255,
+			this.getBlue() * INV_255
+		);
 		return value;
 	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+	// HSV
+
+//	@NotNull
+//	public Vector3f toHsv(@NotNull Vector3f dest) {
+//		Objects.requireNonNull(dest, "dest is null");
+//
+//		float r = this.getRed() * INV_255;
+//		float g = this.getGreen() * INV_255;
+//		float b = this.getBlue() * INV_255;
+//
+//		float max = Math.max(r, Math.max(g, b));
+//		float min = Math.min(r, Math.min(g, b));
+//
+//		float delta = max - min;
+//
+//		float h;
+//		if (delta == 0f) {
+//			h = 0f;
+//		} else if (max == r) {
+//			h = ((g - b) / delta) % 6f;
+//		} else if (max == g) {
+//			h = ((b - r) / delta) + 2f;
+//		} else {
+//			h = ((r - g) / delta) + 4f;
+//		}
+//
+//		h *= 60f;
+//
+//		if (h < 0f)
+//			h += 360f;
+//
+//		float s = max == 0f ? 0f : delta / max;
+//
+//		dest.set(h, s, max);
+//		return dest;
+//	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
 

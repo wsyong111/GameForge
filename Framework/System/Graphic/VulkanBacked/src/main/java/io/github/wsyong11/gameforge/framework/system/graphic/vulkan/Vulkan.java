@@ -1,6 +1,7 @@
 package io.github.wsyong11.gameforge.framework.system.graphic.vulkan;
 
 import io.github.wsyong11.gameforge.framework.listener.ListenerList;
+import io.github.wsyong11.gameforge.framework.system.graphic.vulkan.debug.DebugCallbackInfo;
 import io.github.wsyong11.gameforge.framework.system.graphic.vulkan.debug.DebugMessageSeverity;
 import io.github.wsyong11.gameforge.framework.system.graphic.vulkan.debug.DebugMessageType;
 import io.github.wsyong11.gameforge.framework.system.graphic.vulkan.listener.VulkanErrorListener;
@@ -58,10 +59,27 @@ public class Vulkan extends VulkanObject<VkInstance> {
 			debugUtilsCallback.setCallback(this::onDebugUtilsCallbackInvoke);
 	}
 
-	private boolean onDebugUtilsCallbackInvoke(@NotNull DebugMessageSeverity severity, @NotNull DebugMessageType type, @NotNull VkDebugUtilsMessengerCallbackDataEXT data) {
+	private boolean onDebugUtilsCallbackInvoke(
+		@NotNull DebugMessageSeverity severity,
+		@NotNull Set<DebugMessageType> types,
+		@NotNull VkDebugUtilsMessengerCallbackDataEXT data
+	) {
 		Objects.requireNonNull(severity, "severity is null");
-		Objects.requireNonNull(type, "type is null");
+		Objects.requireNonNull(types, "types is null");
 		Objects.requireNonNull(data, "data is null");
+
+
+
+		DebugCallbackInfo info = new DebugCallbackInfo(
+			severity,
+			Collections.unmodifiableSet(types),
+			data.pMessageString(),
+			data.pMessageIdNameString(),
+			data.messageIdNumber(),
+			Collections.unmodifiableList(queueLabels),
+			commandBufferLabels,
+			objects
+		);
 
 		return false;
 	}
@@ -137,14 +155,13 @@ public class Vulkan extends VulkanObject<VkInstance> {
 
 			VkDebugUtilsMessengerCallbackDataEXT callbackData = VkDebugUtilsMessengerCallbackDataEXT.create(pCallbackData);
 			DebugMessageSeverity severity = BitEnums.fromBitFirst(DebugMessageSeverity.class, messageSeverity);
-			DebugMessageType type = BitEnums.fromBitFirst(DebugMessageType.class, messageTypes);
+			Set<DebugMessageType> types = BitEnums.fromBit(DebugMessageType.class, messageTypes);
 
 			assert severity != null : "severity is null";
-			assert type != null : "type is null";
 
 			boolean result = this.callback.onInvoke(
 				severity,
-				type,
+				types,
 				callbackData
 			);
 
@@ -153,7 +170,11 @@ public class Vulkan extends VulkanObject<VkInstance> {
 
 		@FunctionalInterface
 		public interface Callback {
-			boolean onInvoke(@NotNull DebugMessageSeverity severity, @NotNull DebugMessageType type, @NotNull VkDebugUtilsMessengerCallbackDataEXT data);
+			boolean onInvoke(
+				@NotNull DebugMessageSeverity severity,
+				@NotNull Set<DebugMessageType> types,
+				@NotNull VkDebugUtilsMessengerCallbackDataEXT data
+			);
 		}
 	}
 
