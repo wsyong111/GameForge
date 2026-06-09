@@ -1,6 +1,6 @@
 package io.github.wsyong11.gameforge.framework.ex;
 
-import io.github.wsyong11.gameforge.util.number.NumberUtils;
+import io.github.wsyong11.gameforge.util.number.Maths;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -148,7 +148,7 @@ SyntaxError: ';' expected
 		sb.append('\n');
 
 		if (this.sourceLine != null && this.line != -1) {
-			int lineNumLength = NumberUtils.digitLength(this.line + 1);
+			int lineNumLength = Maths.digitLength(this.line + 1);
 			sb.append(" ".repeat(lineNumLength));
 			sb.append(" |\n");
 			sb.append(this.line + 1);

@@ -100,7 +100,26 @@ public class Hex {
 
 	@NotNull
 	public static String toHex(int v, int digits) {
-		return String.format("%0" + digits + "X", v);
+		char[] out = new char[digits];
+
+		for (int i = digits - 1; i >= 0; i--) {
+			out[i] = HEX[v & 0xF];
+			v >>>= 4;
+		}
+
+		return new String(out);
+	}
+
+	@NotNull
+	public static String toHex(long v, int digits) {
+		char[] out = new char[digits];
+
+		for (int i = digits - 1; i >= 0; i--) {
+			out[i] = HEX[(int) (v & 0xFL)];
+			v >>>= 4;
+		}
+
+		return new String(out);
 	}
 
 	public static int fromHexInt(@NotNull String hex) {
@@ -131,5 +150,32 @@ public class Hex {
 	public static boolean isValidByteHex(@NotNull String hex) {
 		Objects.requireNonNull(hex, "hex is null");
 		return hex.length() % 2 == 0 && isHex(hex);
+	}
+
+	public static int digitLength(long number) {
+		if (number == 0)
+			return 1;
+
+		long n = Math.abs(number);
+
+		int length;
+		if (n < 0x10L) length = 1;
+		else if (n < 0x100L) length = 2;
+		else if (n < 0x1000L) length = 3;
+		else if (n < 0x10000L) length = 4;
+		else if (n < 0x100000L) length = 5;
+		else if (n < 0x1000000L) length = 6;
+		else if (n < 0x10000000L) length = 7;
+		else if (n < 0x100000000L) length = 8;
+		else if (n < 0x1000000000L) length = 9;
+		else if (n < 0x10000000000L) length = 10;
+		else if (n < 0x100000000000L) length = 11;
+		else if (n < 0x1000000000000L) length = 12;
+		else if (n < 0x10000000000000L) length = 13;
+		else if (n < 0x100000000000000L) length = 14;
+		else if (n < 0x1000000000000000L) length = 15;
+		else length = 16;
+
+		return number < 0 ? length + 1 : length;
 	}
 }

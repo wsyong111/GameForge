@@ -1,5 +1,6 @@
 package io.github.wsyong11.gameforge.framework;
 
+import io.github.wsyong11.gameforge.util.number.Hex;
 import io.github.wsyong11.gameforge.util.number.Maths;
 import org.jetbrains.annotations.NotNull;
 import org.joml.*;
@@ -198,6 +199,121 @@ public final class Color {
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
+	// HEX
+
+	@SuppressWarnings("DuplicateExpressions")
+	@NotNull
+	public static Color ofHex(@NotNull String value) {
+		Objects.requireNonNull(value, "value is null");
+
+		if (value.isEmpty())
+			throw new IllegalArgumentException("Empty color hex string");
+
+		int startIndex = value.charAt(0) == '#' ? 1 : 0;
+
+		int length = value.length() - startIndex;
+		try {
+			switch (length) {
+				// #RGB
+				case 3 -> {
+					int r = Integer.parseInt(value, startIndex, startIndex + 1, 16);
+					int g = Integer.parseInt(value, startIndex + 1, startIndex + 2, 16);
+					int b = Integer.parseInt(value, startIndex + 2, startIndex + 3, 16);
+
+					return of(r, g, b);
+				}
+
+				// #RGBA
+				case 4 -> {
+					int r = Integer.parseInt(value, startIndex, startIndex + 1, 16);
+					int g = Integer.parseInt(value, startIndex + 1, startIndex + 2, 16);
+					int b = Integer.parseInt(value, startIndex + 2, startIndex + 3, 16);
+					int a = Integer.parseInt(value, startIndex + 3, startIndex + 4, 16);
+
+					return of(a, r, g, b);
+				}
+
+				// #RRGGBB
+				case 6 -> {
+					int rgb = Integer.parseInt(value, startIndex, startIndex + 6, 16);
+					return ofRgb(rgb);
+				}
+
+				// #RRGGBBAA
+				case 8 -> {
+					long v = Long.parseLong(value, startIndex, startIndex + 8, 16);
+
+					int r = (int) ((v >> 24) & 0xFF);
+					int g = (int) ((v >> 16) & 0xFF);
+					int b = (int) ((v >> 8) & 0xFF);
+					int a = (int) (v & 0xFF);
+
+					return of(a, r, g, b);
+				}
+			}
+		} catch (NumberFormatException e) {
+			throw new IllegalArgumentException("Cannot parse hex color " + value, e);
+		}
+
+		throw new IllegalArgumentException("Cannot parse hex color " + value);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+	// HSV / HSL
+
+	@NotNull
+	public static Color ofHsv(float h, float s, float v) {
+		float c = v * s;
+		float m = v - c;
+		return createWithHue(h, c, m);
+	}
+
+	@NotNull
+	public static Color ofHsl(float h, float s, float l) {
+		float c = (1.0F - Math.abs(2.0F * l - 1.0F)) * s;
+		float m = l - c * 0.5F;
+		return createWithHue(h, c, m);
+	}
+
+	@NotNull
+	private static Color createWithHue(float h, float c, float m) {
+		float x = c * (1.0F - Math.abs((h / 60.0F) % 2.0F - 1.0F));
+
+		float rp, gp, bp;
+		if (h < 60.0F) {
+			rp = c;
+			gp = x;
+			bp = 0;
+		} else if (h < 120.0F) {
+			rp = x;
+			gp = c;
+			bp = 0;
+		} else if (h < 180.0F) {
+			rp = 0;
+			gp = c;
+			bp = x;
+		} else if (h < 240.0F) {
+			rp = 0;
+			gp = x;
+			bp = c;
+		} else if (h < 300.0F) {
+			rp = x;
+			gp = 0;
+			bp = c;
+		} else {
+			rp = c;
+			gp = 0;
+			bp = x;
+		}
+
+		return of(
+			rp + m,
+			gp + m,
+			bp + m
+		);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
 
 	/**
 	 * 获取该颜色的 Alpha 分量。
@@ -257,6 +373,10 @@ public final class Color {
 		return getAlpha(this.color);
 	}
 
+	public float getAlphaNormalize() {
+		return getAlpha(this.color) * INV_255;
+	}
+
 	@NotNull
 	public Color withAlpha(int a) {
 		return create(toArgb(a, this.getRed(), this.getGreen(), this.getBlue()));
@@ -270,6 +390,10 @@ public final class Color {
 
 	public int getRed() {
 		return getRed(this.color);
+	}
+
+	public float getRedNormalize() {
+		return getRed(this.color) * INV_255;
 	}
 
 	@NotNull
@@ -287,6 +411,10 @@ public final class Color {
 		return getGreen(this.color);
 	}
 
+	public float getGreenNormalize() {
+		return getGreen(this.color) * INV_255;
+	}
+
 	@NotNull
 	public Color withGreen(int g) {
 		return create(toArgb(this.getAlpha(), this.getRed(), g, this.getBlue()));
@@ -300,6 +428,10 @@ public final class Color {
 
 	public int getBlue() {
 		return getBlue(this.color);
+	}
+
+	public float getBlueNormalize() {
+		return getBlue(this.color) * INV_255;
 	}
 
 	@NotNull
@@ -320,6 +452,25 @@ public final class Color {
 	 */
 	public int toArgb() {
 		return this.color;
+	}
+
+	/**
+	 * 获取该颜色的 RGB 整数值。
+	 *
+	 * @return {@code 0xRRGGBB} 格式的整数值
+	 */
+	public int toRgb() {
+		return this.color & 0xFFFFFF;
+	}
+
+	/**
+	 * 获取该颜色的 RGBA 整数值。
+	 *
+	 * @return {@code 0xRRGGBBAA} 格式的整数值
+	 */
+	public int toRgba() {
+		return (this.color << 8)
+			| ((this.color >> 24) & 0xFF);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
@@ -371,11 +522,7 @@ public final class Color {
 	@NotNull
 	public Vector3f toNormalizeRgb(@NotNull Vector3f value) {
 		Objects.requireNonNull(value, "value is null");
-		value.set(
-			this.getRed() * INV_255,
-			this.getGreen() * INV_255,
-			this.getBlue() * INV_255
-		);
+		value.set(this.getRedNormalize(), this.getGreenNormalize(), this.getBlueNormalize());
 		return value;
 	}
 
@@ -402,12 +549,7 @@ public final class Color {
 	@NotNull
 	public Vector4f toNormalizeRgba(@NotNull Vector4f value) {
 		Objects.requireNonNull(value, "value is null");
-		value.set(
-			this.getRed() * INV_255,
-			this.getGreen() * INV_255,
-			this.getBlue() * INV_255,
-			this.getAlpha() * INV_255
-		);
+		value.set(this.getRedNormalize(), this.getGreenNormalize(), this.getBlueNormalize(), this.getAlphaNormalize());
 		return value;
 	}
 
@@ -434,52 +576,103 @@ public final class Color {
 	@NotNull
 	public Vector4f toNormalizeArgb(@NotNull Vector4f value) {
 		Objects.requireNonNull(value, "value is null");
-		value.set(
-			this.getAlpha() * INV_255,
-			this.getRed() * INV_255,
-			this.getGreen() * INV_255,
-			this.getBlue() * INV_255
-		);
+		value.set(this.getAlphaNormalize(), this.getRedNormalize(), this.getGreenNormalize(), this.getBlueNormalize());
 		return value;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
+	// HEX
+
+	@NotNull
+	public String toHex() {
+		return Hex.toHex(this.toRgba(), 8);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------- //
+	// HSV / HSL
+
+	private static float calculateHue(float max, float r, float g, float b, float delta) {
+		float h;
+
+		if (max == r)
+			h = (g - b) / delta;
+		else if (max == g)
+			h = 2.0F + (b - r) / delta;
+		else
+			h = 4.0F + (r - g) / delta;
+
+		h *= 60.0F;
+		if (h < 0.0F)
+			return h + 360.0F;
+
+		return h;
+	}
+
 	// HSV
 
-//	@NotNull
-//	public Vector3f toHsv(@NotNull Vector3f dest) {
-//		Objects.requireNonNull(dest, "dest is null");
-//
-//		float r = this.getRed() * INV_255;
-//		float g = this.getGreen() * INV_255;
-//		float b = this.getBlue() * INV_255;
-//
-//		float max = Math.max(r, Math.max(g, b));
-//		float min = Math.min(r, Math.min(g, b));
-//
-//		float delta = max - min;
-//
-//		float h;
-//		if (delta == 0f) {
-//			h = 0f;
-//		} else if (max == r) {
-//			h = ((g - b) / delta) % 6f;
-//		} else if (max == g) {
-//			h = ((b - r) / delta) + 2f;
-//		} else {
-//			h = ((r - g) / delta) + 4f;
-//		}
-//
-//		h *= 60f;
-//
-//		if (h < 0f)
-//			h += 360f;
-//
-//		float s = max == 0f ? 0f : delta / max;
-//
-//		dest.set(h, s, max);
-//		return dest;
-//	}
+	@NotNull
+	public Vector3f toHsv(@NotNull Vector3f dest) {
+		Objects.requireNonNull(dest, "dest is null");
+
+		float r = this.getRedNormalize();
+		float g = this.getGreenNormalize();
+		float b = this.getBlueNormalize();
+
+		float max = Maths.max(r, g, b);
+		float min = Maths.min(r, g, b);
+		float delta = max - min;
+
+		if (delta == 0.0F) {
+			dest.set(0.0F, 0.0F, max);
+			return dest;
+		}
+
+		float h, s, v;
+		h = calculateHue(max, r, g, b, delta);
+		v = max;
+		s = delta / max;
+
+		dest.set(h, s, v);
+		return dest;
+	}
+
+	@NotNull
+	public Vector3f toHsv() {
+		return this.toHsv(new Vector3f());
+	}
+
+	// HSL
+
+	@NotNull
+	public Vector3f toHsl(@NotNull Vector3f dest) {
+		Objects.requireNonNull(dest, "dest is null");
+
+		float r = this.getRedNormalize();
+		float g = this.getGreenNormalize();
+		float b = this.getBlueNormalize();
+
+		float max = Maths.max(r, g, b);
+		float min = Maths.min(r, g, b);
+		float delta = max - min;
+
+		if (delta == 0.0F) {
+			dest.set(0.0F, 0.0F, max);
+			return dest;
+		}
+
+		float h, s, l;
+		h = calculateHue(max, r, g, b, delta);
+		l = (max + min) * 0.5F;
+		s = delta / (1.0F - Math.abs(2.0F * l - 1.0F));
+
+		dest.set(h, s, l);
+		return dest;
+	}
+
+	@NotNull
+	public Vector3f toHsl() {
+		return this.toHsl(new Vector3f());
+	}
 
 	// -------------------------------------------------------------------------------------------------------------- //
 
@@ -499,6 +692,11 @@ public final class Color {
 
 	@Override
 	public String toString() {
-		return "Color[ARGB %08X]".formatted(this.color);
+		return "Color(R=%3d, G=%3d, B=%3d, A=%6.02f%%)".formatted(
+			this.getRed(),
+			this.getGreen(),
+			this.getBlue(),
+			this.getAlpha() * INV_255 * 100.0F
+		);
 	}
 }

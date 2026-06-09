@@ -1,6 +1,6 @@
 package io.github.wsyong11.gameforge.framework.system.log.templete;
 
-import io.github.wsyong11.gameforge.util.number.NumberUtils;
+import io.github.wsyong11.gameforge.util.number.Hex;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -80,7 +80,7 @@ public class HexViewTemplate implements TemplateValueProvider {
 		sb.append(' ');
 
 		for (int i = 0; i < this.offsetColumn; i++) {
-			sb.append(NumberUtils.toHexFast(i, 2));
+			sb.append(Hex.toHex(i, 2));
 			if (i < this.offsetColumn - 1)
 				sb.append(' ');
 		}
@@ -104,7 +104,7 @@ public class HexViewTemplate implements TemplateValueProvider {
 	private void printLine(@NotNull StringBuilder sb, int fromIndex, int toIndex, int addressLineWidth, int @Nullable [] parsedCodePoints) {
 		Objects.requireNonNull(sb, "sb is null");
 
-		sb.append(NumberUtils.toHexFast(fromIndex, addressLineWidth));
+		sb.append(Hex.toHex(fromIndex, addressLineWidth));
 		sb.append(' ');
 		sb.append(BORDER_VERTICAL);
 		sb.append(' ');
@@ -254,7 +254,7 @@ public class HexViewTemplate implements TemplateValueProvider {
 		int dataLength = Math.max(0, Math.min(this.length, dataFullLength - this.offset));
 
 		int toIndexSafe = Math.min(this.toIndex, dataLength);
-		int addressLineWidth = NumberUtils.hexDigitLength(toIndexSafe);
+		int addressLineWidth = Hex.digitLength(toIndexSafe);
 
 		if (this.showInfo)
 			this.printInfo(builder);

@@ -1,6 +1,7 @@
 package io.github.wsyong11.gameforge.framework.system.audio.impl.openal;
 
 import io.github.wsyong11.gameforge.framework.system.audio.AudioListener;
+import io.github.wsyong11.gameforge.util.number.Maths;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
@@ -35,7 +36,7 @@ public class OpenALListener implements AudioListener, Closeable {
 	public void setPosition(@NotNull Vector3fc position) {
 		Objects.requireNonNull(position, "position is null");
 
-		if (this.position.equals(position, 1e-6F))
+		if (this.position.equals(position, Maths.EPSILON_FLOAT))
 			return;
 
 		this.position.set(position);
@@ -54,7 +55,7 @@ public class OpenALListener implements AudioListener, Closeable {
 	public void setVelocity(@NotNull Vector3fc velocity) {
 		Objects.requireNonNull(velocity, "velocity is null");
 
-		if (this.velocity.equals(velocity, 1e-6F))
+		if (this.velocity.equals(velocity, Maths.EPSILON_FLOAT))
 			return;
 
 		this.velocity.set(velocity);
@@ -77,7 +78,7 @@ public class OpenALListener implements AudioListener, Closeable {
 		Objects.requireNonNull(forward, "forward is null");
 		Objects.requireNonNull(up, "up is null");
 
-		if (this.orientationForward.equals(forward, 1e-6F) && this.orientationUp.equals(up, 1e-6F))
+		if (this.orientationForward.equals(forward, Maths.EPSILON_FLOAT) && this.orientationUp.equals(up, Maths.EPSILON_FLOAT))
 			return;
 
 		this.orientationForward.set(forward);
@@ -90,7 +91,7 @@ public class OpenALListener implements AudioListener, Closeable {
 	public void setOrientation(@NotNull Vector3fc forward) {
 		Objects.requireNonNull(forward, "forward is null");
 
-		if (this.orientationForward.equals(forward, 1e-6F))
+		if (this.orientationForward.equals(forward, Maths.EPSILON_FLOAT))
 			return;
 
 		this.orientationForward.set(forward);
@@ -110,7 +111,7 @@ public class OpenALListener implements AudioListener, Closeable {
 	public void setOrientationUp(@NotNull Vector3fc up) {
 		Objects.requireNonNull(up, "up is null");
 
-		if (this.orientationUp.equals(up, 1e-6F))
+		if (this.orientationUp.equals(up, Maths.EPSILON_FLOAT))
 			return;
 
 		this.orientationUp.set(up);

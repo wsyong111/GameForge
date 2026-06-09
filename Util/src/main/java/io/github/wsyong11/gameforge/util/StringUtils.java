@@ -1,5 +1,6 @@
 package io.github.wsyong11.gameforge.util;
 
+import io.github.wsyong11.gameforge.util.number.Maths;
 import lombok.experimental.UtilityClass;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -42,9 +43,9 @@ public class StringUtils {
 
 	@NotNull
 	public static String formatRange(float min, float max) {
-		if (DoubleUtils.equals(min, max))
+		if (Maths.equals(min, max))
 			return String.valueOf(min);
-		else if (DoubleUtils.equals(max, Float.MAX_VALUE))
+		else if (Maths.equals(max, Float.MAX_VALUE))
 			return min + "+";
 		else
 			return min + ".." + max;
@@ -52,9 +53,9 @@ public class StringUtils {
 
 	@NotNull
 	public static String formatRange(double min, double max) {
-		if (DoubleUtils.equals(min, max))
+		if (Maths.equals(min, max))
 			return String.valueOf(min);
-		else if (DoubleUtils.equals(max, Double.MAX_VALUE))
+		else if (Maths.equals(max, Double.MAX_VALUE))
 			return min + "+";
 		else
 			return min + ".." + max;
