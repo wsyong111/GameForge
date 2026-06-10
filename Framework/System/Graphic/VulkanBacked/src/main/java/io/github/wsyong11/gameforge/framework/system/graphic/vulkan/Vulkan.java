@@ -1,10 +1,9 @@
 package io.github.wsyong11.gameforge.framework.system.graphic.vulkan;
 
 import io.github.wsyong11.gameforge.framework.listener.ListenerList;
-import io.github.wsyong11.gameforge.framework.system.graphic.vulkan.debug.DebugCallbackInfo;
-import io.github.wsyong11.gameforge.framework.system.graphic.vulkan.debug.DebugMessageSeverity;
-import io.github.wsyong11.gameforge.framework.system.graphic.vulkan.debug.DebugMessageType;
-import io.github.wsyong11.gameforge.framework.system.graphic.vulkan.listener.VulkanErrorListener;
+import io.github.wsyong11.gameforge.framework.listener.ex.ListenerExceptionCallback;
+import io.github.wsyong11.gameforge.framework.system.graphic.vulkan.debug.*;
+import io.github.wsyong11.gameforge.framework.system.graphic.vulkan.listener.VulkanDebugListener;
 import io.github.wsyong11.gameforge.framework.system.log.Log;
 import io.github.wsyong11.gameforge.framework.system.log.Logger;
 import io.github.wsyong11.gameforge.util.Lazy;
@@ -68,7 +67,23 @@ public class Vulkan extends VulkanObject<VkInstance> {
 		Objects.requireNonNull(types, "types is null");
 		Objects.requireNonNull(data, "data is null");
 
+		List<DebugLabel> queueLabels = data
+			.pQueueLabels()
+			.stream()
+			.map(DebugLabel::copyOf)
+			.toList();
 
+		List<DebugLabel> commandBufferLabels = data
+			.pCmdBufLabels()
+			.stream()
+			.map(DebugLabel::copyOf)
+			.toList();
+
+		List<DebugObjectNameInfo> objects = data
+			.pObjects()
+			.stream()
+			.map(DebugObjectNameInfo::copyOf)
+			.toList();
 
 		DebugCallbackInfo info = new DebugCallbackInfo(
 			severity,
@@ -76,10 +91,15 @@ public class Vulkan extends VulkanObject<VkInstance> {
 			data.pMessageString(),
 			data.pMessageIdNameString(),
 			data.messageIdNumber(),
-			Collections.unmodifiableList(queueLabels),
+			queueLabels,
 			commandBufferLabels,
 			objects
 		);
+
+		this.listenerList.fire(
+			VulkanDebugListener.class,
+			l -> l.onError(info),
+			ListenerExceptionCallback.log(LOGGER));
 
 		return false;
 	}
@@ -110,14 +130,14 @@ public class Vulkan extends VulkanObject<VkInstance> {
 		return this.physicalDevices.get();
 	}
 
-	public void registerErrorListener(@NotNull VulkanErrorListener listener) {
+	public void registerDebugListener(@NotNull VulkanDebugListener listener) {
 		Objects.requireNonNull(listener, "listener is null");
-		this.listenerList.add(VulkanErrorListener.class, listener);
+		this.listenerList.add(VulkanDebugListener.class, listener);
 	}
 
-	public void unregisterErrorListener(@NotNull VulkanErrorListener listener) {
+	public void unregisterDebugListener(@NotNull VulkanDebugListener listener) {
 		Objects.requireNonNull(listener, "listener is null");
-		this.listenerList.remove(VulkanErrorListener.class, listener);
+		this.listenerList.remove(VulkanDebugListener.class, listener);
 	}
 
 	@Override
@@ -269,11 +289,21 @@ public class Vulkan extends VulkanObject<VkInstance> {
 		}
 
 		@NotNull
+		public Builder debugMessageSeverities(@NotNull DebugMessageSeverity... severities) {
+			return this.debugMessageSeverities(Arrays.asList(severities));
+		}
+
+		@NotNull
 		public Builder debugMessageTypes(@NotNull Collection<DebugMessageType> types) {
 			Objects.requireNonNull(types, "types is null");
 			this.debugMessageTypes.clear();
 			this.debugMessageTypes.addAll(types);
 			return this;
+		}
+
+		@NotNull
+		public Builder debugMessageTypes(@NotNull DebugMessageType... types) {
+			return this.debugMessageTypes(Arrays.asList(types));
 		}
 
 		@NotNull
